@@ -15,21 +15,21 @@ La base sera volontairement vide : aucun atelier, utilisateur, créneau, crédit
 
 ## 2. Construire les trois expériences et leurs 16 écrans
 
-### Parcours public
+### Parcours public — accessible sans connexion
 - Accueil découverte `/`
-- Recherche et filtres `/ateliers`
-- Fiche atelier et sélection de créneau `/ateliers/$workshopId`
-- Présentation artisan `/devenir-artisan`
 
 ### Parcours élève
 - Connexion `/connexion`
 - Création de compte en étapes `/inscription`
+- Recherche et filtres `/ateliers`
+- Fiche atelier et sélection de créneau `/ateliers/$workshopId`
 - Accueil membre `/espace-eleve`
 - Réservations `/espace-eleve/reservations`
 - Profil et crédits `/espace-eleve/profil`
 - Confirmation de réservation `/reservation/confirmation`
 
 ### Parcours artisan
+- Présentation artisan `/devenir-artisan`
 - Candidature `/devenir-artisan/candidature`
 - Connexion `/artisan/connexion`
 - Planning `/artisan/planning`
@@ -37,7 +37,7 @@ La base sera volontairement vide : aucun atelier, utilisateur, créneau, crédit
 - Ateliers `/artisan/ateliers`
 - Revenus `/artisan/revenus`
 
-Chaque page aura son propre titre, sa description et ses métadonnées de partage. Les navigations public, élève et artisan seront isolées dans des structures adaptées à leurs usages.
+Chaque page aura son propre titre, sa description et ses métadonnées de partage. Seule la page d’accueil `/` sera consultable sans compte. La recherche, les fiches atelier, la réservation, la présentation/candidature artisan et les espaces membres seront protégés par connexion, avec séparation des accès élève et artisan selon le rôle. Les navigations public, élève et artisan seront isolées dans des structures adaptées à leurs usages.
 
 ## 3. Rendre l’expérience réellement mobile-first
 - Transformer les en-têtes desktop en navigation compacte utilisable au pouce.
