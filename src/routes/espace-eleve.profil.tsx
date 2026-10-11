@@ -1,0 +1,3 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { ProfilePage } from "@/components/creazio/pages";
+export const Route = createFileRoute("/espace-eleve/profil")({ head: () => ({ meta: [{title:"Mon profil et mes crédits — Creazio"},{name:"description",content:"Gérez votre profil et consultez vos crédits."},{property:"og:title",content:"Mon profil et mes crédits — Creazio"},{property:"og:description",content:"Gérez votre profil et consultez vos crédits."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary"}] }), component: ProfilePage });

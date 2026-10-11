@@ -1,0 +1,3 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { StudentLoginPage } from "@/components/creazio/pages";
+export const Route = createFileRoute("/connexion")({ head: () => ({ meta: [{title:"Connexion élève — Creazio"},{name:"description",content:"Connectez-vous à votre espace élève Creazio."},{property:"og:title",content:"Connexion élève — Creazio"},{property:"og:description",content:"Connectez-vous à votre espace élève Creazio."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary"}] }), component: StudentLoginPage });

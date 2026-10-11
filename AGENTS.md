@@ -8,3 +8,6 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Keep backend access behind typed adapters because the user will create and connect the external Supabase schema later.
+- Keep only `/` and `/devenir-artisan` public; all workshop, student, application, and artisan workspace screens are intended for authenticated users.

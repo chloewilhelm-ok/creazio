@@ -1,0 +1,3 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { ReservationsPage } from "@/components/creazio/pages";
+export const Route = createFileRoute("/espace-eleve/reservations")({ head: () => ({ meta: [{title:"Mes réservations — Creazio"},{name:"description",content:"Consultez vos réservations Creazio."},{property:"og:title",content:"Mes réservations — Creazio"},{property:"og:description",content:"Consultez vos réservations Creazio."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary"}] }), component: ReservationsPage });

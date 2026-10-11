@@ -10,33 +10,258 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ArtisanRouteImport } from './routes/artisan'
+import { Route as AteliersRouteImport } from './routes/ateliers'
+import { Route as ConnexionRouteImport } from './routes/connexion'
+import { Route as DevenirArtisanRouteImport } from './routes/devenir-artisan'
+import { Route as EspaceEleveRouteImport } from './routes/espace-eleve'
+import { Route as InscriptionRouteImport } from './routes/inscription'
+import { Route as ArtisanAteliersRouteImport } from './routes/artisan.ateliers'
+import { Route as ArtisanConnexionRouteImport } from './routes/artisan.connexion'
+import { Route as ArtisanPlanningRouteImport } from './routes/artisan.planning'
+import { Route as ArtisanRevenusRouteImport } from './routes/artisan.revenus'
+import { Route as AteliersIndexRouteImport } from './routes/ateliers.index'
+import { Route as AteliersWorkshopIdRouteImport } from './routes/ateliers.$workshopId'
+import { Route as DevenirArtisanCandidatureRouteImport } from './routes/devenir-artisan.candidature'
+import { Route as EspaceEleveIndexRouteImport } from './routes/espace-eleve.index'
+import { Route as EspaceEleveProfilRouteImport } from './routes/espace-eleve.profil'
+import { Route as EspaceEleveReservationsRouteImport } from './routes/espace-eleve.reservations'
+import { Route as ReservationConfirmationRouteImport } from './routes/reservation.confirmation'
+import { Route as ArtisanSessionsSessionIdRouteImport } from './routes/artisan.sessions.$sessionId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ArtisanRoute = ArtisanRouteImport.update({
+  id: '/artisan',
+  path: '/artisan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AteliersRoute = AteliersRouteImport.update({
+  id: '/ateliers',
+  path: '/ateliers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConnexionRoute = ConnexionRouteImport.update({
+  id: '/connexion',
+  path: '/connexion',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DevenirArtisanRoute = DevenirArtisanRouteImport.update({
+  id: '/devenir-artisan',
+  path: '/devenir-artisan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EspaceEleveRoute = EspaceEleveRouteImport.update({
+  id: '/espace-eleve',
+  path: '/espace-eleve',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InscriptionRoute = InscriptionRouteImport.update({
+  id: '/inscription',
+  path: '/inscription',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ArtisanAteliersRoute = ArtisanAteliersRouteImport.update({
+  id: '/ateliers',
+  path: '/ateliers',
+  getParentRoute: () => ArtisanRoute,
+} as any)
+const ArtisanConnexionRoute = ArtisanConnexionRouteImport.update({
+  id: '/connexion',
+  path: '/connexion',
+  getParentRoute: () => ArtisanRoute,
+} as any)
+const ArtisanPlanningRoute = ArtisanPlanningRouteImport.update({
+  id: '/planning',
+  path: '/planning',
+  getParentRoute: () => ArtisanRoute,
+} as any)
+const ArtisanRevenusRoute = ArtisanRevenusRouteImport.update({
+  id: '/revenus',
+  path: '/revenus',
+  getParentRoute: () => ArtisanRoute,
+} as any)
+const AteliersIndexRoute = AteliersIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AteliersRoute,
+} as any)
+const AteliersWorkshopIdRoute = AteliersWorkshopIdRouteImport.update({
+  id: '/$workshopId',
+  path: '/$workshopId',
+  getParentRoute: () => AteliersRoute,
+} as any)
+const DevenirArtisanCandidatureRoute =
+  DevenirArtisanCandidatureRouteImport.update({
+    id: '/candidature',
+    path: '/candidature',
+    getParentRoute: () => DevenirArtisanRoute,
+  } as any)
+const EspaceEleveIndexRoute = EspaceEleveIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => EspaceEleveRoute,
+} as any)
+const EspaceEleveProfilRoute = EspaceEleveProfilRouteImport.update({
+  id: '/profil',
+  path: '/profil',
+  getParentRoute: () => EspaceEleveRoute,
+} as any)
+const EspaceEleveReservationsRoute = EspaceEleveReservationsRouteImport.update({
+  id: '/reservations',
+  path: '/reservations',
+  getParentRoute: () => EspaceEleveRoute,
+} as any)
+const ReservationConfirmationRoute = ReservationConfirmationRouteImport.update({
+  id: '/reservation/confirmation',
+  path: '/reservation/confirmation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ArtisanSessionsSessionIdRoute =
+  ArtisanSessionsSessionIdRouteImport.update({
+    id: '/sessions/$sessionId',
+    path: '/sessions/$sessionId',
+    getParentRoute: () => ArtisanRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/artisan': typeof ArtisanRouteWithChildren
+  '/ateliers': typeof AteliersRouteWithChildren
+  '/connexion': typeof ConnexionRoute
+  '/devenir-artisan': typeof DevenirArtisanRouteWithChildren
+  '/espace-eleve': typeof EspaceEleveRouteWithChildren
+  '/inscription': typeof InscriptionRoute
+  '/artisan/ateliers': typeof ArtisanAteliersRoute
+  '/artisan/connexion': typeof ArtisanConnexionRoute
+  '/artisan/planning': typeof ArtisanPlanningRoute
+  '/artisan/revenus': typeof ArtisanRevenusRoute
+  '/ateliers/$workshopId': typeof AteliersWorkshopIdRoute
+  '/devenir-artisan/candidature': typeof DevenirArtisanCandidatureRoute
+  '/espace-eleve/profil': typeof EspaceEleveProfilRoute
+  '/espace-eleve/reservations': typeof EspaceEleveReservationsRoute
+  '/reservation/confirmation': typeof ReservationConfirmationRoute
+  '/ateliers/': typeof AteliersIndexRoute
+  '/espace-eleve/': typeof EspaceEleveIndexRoute
+  '/artisan/sessions/$sessionId': typeof ArtisanSessionsSessionIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/artisan': typeof ArtisanRouteWithChildren
+  '/connexion': typeof ConnexionRoute
+  '/devenir-artisan': typeof DevenirArtisanRouteWithChildren
+  '/inscription': typeof InscriptionRoute
+  '/artisan/ateliers': typeof ArtisanAteliersRoute
+  '/artisan/connexion': typeof ArtisanConnexionRoute
+  '/artisan/planning': typeof ArtisanPlanningRoute
+  '/artisan/revenus': typeof ArtisanRevenusRoute
+  '/ateliers/$workshopId': typeof AteliersWorkshopIdRoute
+  '/devenir-artisan/candidature': typeof DevenirArtisanCandidatureRoute
+  '/espace-eleve/profil': typeof EspaceEleveProfilRoute
+  '/espace-eleve/reservations': typeof EspaceEleveReservationsRoute
+  '/reservation/confirmation': typeof ReservationConfirmationRoute
+  '/ateliers': typeof AteliersIndexRoute
+  '/espace-eleve': typeof EspaceEleveIndexRoute
+  '/artisan/sessions/$sessionId': typeof ArtisanSessionsSessionIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/artisan': typeof ArtisanRouteWithChildren
+  '/ateliers': typeof AteliersRouteWithChildren
+  '/connexion': typeof ConnexionRoute
+  '/devenir-artisan': typeof DevenirArtisanRouteWithChildren
+  '/espace-eleve': typeof EspaceEleveRouteWithChildren
+  '/inscription': typeof InscriptionRoute
+  '/artisan/ateliers': typeof ArtisanAteliersRoute
+  '/artisan/connexion': typeof ArtisanConnexionRoute
+  '/artisan/planning': typeof ArtisanPlanningRoute
+  '/artisan/revenus': typeof ArtisanRevenusRoute
+  '/ateliers/$workshopId': typeof AteliersWorkshopIdRoute
+  '/devenir-artisan/candidature': typeof DevenirArtisanCandidatureRoute
+  '/espace-eleve/profil': typeof EspaceEleveProfilRoute
+  '/espace-eleve/reservations': typeof EspaceEleveReservationsRoute
+  '/reservation/confirmation': typeof ReservationConfirmationRoute
+  '/ateliers/': typeof AteliersIndexRoute
+  '/espace-eleve/': typeof EspaceEleveIndexRoute
+  '/artisan/sessions/$sessionId': typeof ArtisanSessionsSessionIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/artisan'
+    | '/ateliers'
+    | '/connexion'
+    | '/devenir-artisan'
+    | '/espace-eleve'
+    | '/inscription'
+    | '/artisan/ateliers'
+    | '/artisan/connexion'
+    | '/artisan/planning'
+    | '/artisan/revenus'
+    | '/ateliers/$workshopId'
+    | '/devenir-artisan/candidature'
+    | '/espace-eleve/profil'
+    | '/espace-eleve/reservations'
+    | '/reservation/confirmation'
+    | '/ateliers/'
+    | '/espace-eleve/'
+    | '/artisan/sessions/$sessionId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/artisan'
+    | '/connexion'
+    | '/devenir-artisan'
+    | '/inscription'
+    | '/artisan/ateliers'
+    | '/artisan/connexion'
+    | '/artisan/planning'
+    | '/artisan/revenus'
+    | '/ateliers/$workshopId'
+    | '/devenir-artisan/candidature'
+    | '/espace-eleve/profil'
+    | '/espace-eleve/reservations'
+    | '/reservation/confirmation'
+    | '/ateliers'
+    | '/espace-eleve'
+    | '/artisan/sessions/$sessionId'
+  id:
+    | '__root__'
+    | '/'
+    | '/artisan'
+    | '/ateliers'
+    | '/connexion'
+    | '/devenir-artisan'
+    | '/espace-eleve'
+    | '/inscription'
+    | '/artisan/ateliers'
+    | '/artisan/connexion'
+    | '/artisan/planning'
+    | '/artisan/revenus'
+    | '/ateliers/$workshopId'
+    | '/devenir-artisan/candidature'
+    | '/espace-eleve/profil'
+    | '/espace-eleve/reservations'
+    | '/reservation/confirmation'
+    | '/ateliers/'
+    | '/espace-eleve/'
+    | '/artisan/sessions/$sessionId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ArtisanRoute: typeof ArtisanRouteWithChildren
+  AteliersRoute: typeof AteliersRouteWithChildren
+  ConnexionRoute: typeof ConnexionRoute
+  DevenirArtisanRoute: typeof DevenirArtisanRouteWithChildren
+  EspaceEleveRoute: typeof EspaceEleveRouteWithChildren
+  InscriptionRoute: typeof InscriptionRoute
+  ReservationConfirmationRoute: typeof ReservationConfirmationRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +273,205 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/artisan': {
+      id: '/artisan'
+      path: '/artisan'
+      fullPath: '/artisan'
+      preLoaderRoute: typeof ArtisanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ateliers': {
+      id: '/ateliers'
+      path: '/ateliers'
+      fullPath: '/ateliers'
+      preLoaderRoute: typeof AteliersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/connexion': {
+      id: '/connexion'
+      path: '/connexion'
+      fullPath: '/connexion'
+      preLoaderRoute: typeof ConnexionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/devenir-artisan': {
+      id: '/devenir-artisan'
+      path: '/devenir-artisan'
+      fullPath: '/devenir-artisan'
+      preLoaderRoute: typeof DevenirArtisanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/espace-eleve': {
+      id: '/espace-eleve'
+      path: '/espace-eleve'
+      fullPath: '/espace-eleve'
+      preLoaderRoute: typeof EspaceEleveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inscription': {
+      id: '/inscription'
+      path: '/inscription'
+      fullPath: '/inscription'
+      preLoaderRoute: typeof InscriptionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/artisan/ateliers': {
+      id: '/artisan/ateliers'
+      path: '/ateliers'
+      fullPath: '/artisan/ateliers'
+      preLoaderRoute: typeof ArtisanAteliersRouteImport
+      parentRoute: typeof ArtisanRoute
+    }
+    '/artisan/connexion': {
+      id: '/artisan/connexion'
+      path: '/connexion'
+      fullPath: '/artisan/connexion'
+      preLoaderRoute: typeof ArtisanConnexionRouteImport
+      parentRoute: typeof ArtisanRoute
+    }
+    '/artisan/planning': {
+      id: '/artisan/planning'
+      path: '/planning'
+      fullPath: '/artisan/planning'
+      preLoaderRoute: typeof ArtisanPlanningRouteImport
+      parentRoute: typeof ArtisanRoute
+    }
+    '/artisan/revenus': {
+      id: '/artisan/revenus'
+      path: '/revenus'
+      fullPath: '/artisan/revenus'
+      preLoaderRoute: typeof ArtisanRevenusRouteImport
+      parentRoute: typeof ArtisanRoute
+    }
+    '/ateliers/': {
+      id: '/ateliers/'
+      path: '/'
+      fullPath: '/ateliers/'
+      preLoaderRoute: typeof AteliersIndexRouteImport
+      parentRoute: typeof AteliersRoute
+    }
+    '/ateliers/$workshopId': {
+      id: '/ateliers/$workshopId'
+      path: '/$workshopId'
+      fullPath: '/ateliers/$workshopId'
+      preLoaderRoute: typeof AteliersWorkshopIdRouteImport
+      parentRoute: typeof AteliersRoute
+    }
+    '/devenir-artisan/candidature': {
+      id: '/devenir-artisan/candidature'
+      path: '/candidature'
+      fullPath: '/devenir-artisan/candidature'
+      preLoaderRoute: typeof DevenirArtisanCandidatureRouteImport
+      parentRoute: typeof DevenirArtisanRoute
+    }
+    '/espace-eleve/': {
+      id: '/espace-eleve/'
+      path: '/'
+      fullPath: '/espace-eleve/'
+      preLoaderRoute: typeof EspaceEleveIndexRouteImport
+      parentRoute: typeof EspaceEleveRoute
+    }
+    '/espace-eleve/profil': {
+      id: '/espace-eleve/profil'
+      path: '/profil'
+      fullPath: '/espace-eleve/profil'
+      preLoaderRoute: typeof EspaceEleveProfilRouteImport
+      parentRoute: typeof EspaceEleveRoute
+    }
+    '/espace-eleve/reservations': {
+      id: '/espace-eleve/reservations'
+      path: '/reservations'
+      fullPath: '/espace-eleve/reservations'
+      preLoaderRoute: typeof EspaceEleveReservationsRouteImport
+      parentRoute: typeof EspaceEleveRoute
+    }
+    '/reservation/confirmation': {
+      id: '/reservation/confirmation'
+      path: '/reservation/confirmation'
+      fullPath: '/reservation/confirmation'
+      preLoaderRoute: typeof ReservationConfirmationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/artisan/sessions/$sessionId': {
+      id: '/artisan/sessions/$sessionId'
+      path: '/sessions/$sessionId'
+      fullPath: '/artisan/sessions/$sessionId'
+      preLoaderRoute: typeof ArtisanSessionsSessionIdRouteImport
+      parentRoute: typeof ArtisanRoute
+    }
   }
 }
 
+interface ArtisanRouteChildren {
+  ArtisanAteliersRoute: typeof ArtisanAteliersRoute
+  ArtisanConnexionRoute: typeof ArtisanConnexionRoute
+  ArtisanPlanningRoute: typeof ArtisanPlanningRoute
+  ArtisanRevenusRoute: typeof ArtisanRevenusRoute
+  ArtisanSessionsSessionIdRoute: typeof ArtisanSessionsSessionIdRoute
+}
+
+const ArtisanRouteChildren: ArtisanRouteChildren = {
+  ArtisanAteliersRoute: ArtisanAteliersRoute,
+  ArtisanConnexionRoute: ArtisanConnexionRoute,
+  ArtisanPlanningRoute: ArtisanPlanningRoute,
+  ArtisanRevenusRoute: ArtisanRevenusRoute,
+  ArtisanSessionsSessionIdRoute: ArtisanSessionsSessionIdRoute,
+}
+
+const ArtisanRouteWithChildren =
+  ArtisanRoute._addFileChildren(ArtisanRouteChildren)
+
+interface AteliersRouteChildren {
+  AteliersWorkshopIdRoute: typeof AteliersWorkshopIdRoute
+  AteliersIndexRoute: typeof AteliersIndexRoute
+}
+
+const AteliersRouteChildren: AteliersRouteChildren = {
+  AteliersWorkshopIdRoute: AteliersWorkshopIdRoute,
+  AteliersIndexRoute: AteliersIndexRoute,
+}
+
+const AteliersRouteWithChildren = AteliersRoute._addFileChildren(
+  AteliersRouteChildren,
+)
+
+interface DevenirArtisanRouteChildren {
+  DevenirArtisanCandidatureRoute: typeof DevenirArtisanCandidatureRoute
+}
+
+const DevenirArtisanRouteChildren: DevenirArtisanRouteChildren = {
+  DevenirArtisanCandidatureRoute: DevenirArtisanCandidatureRoute,
+}
+
+const DevenirArtisanRouteWithChildren = DevenirArtisanRoute._addFileChildren(
+  DevenirArtisanRouteChildren,
+)
+
+interface EspaceEleveRouteChildren {
+  EspaceEleveProfilRoute: typeof EspaceEleveProfilRoute
+  EspaceEleveReservationsRoute: typeof EspaceEleveReservationsRoute
+  EspaceEleveIndexRoute: typeof EspaceEleveIndexRoute
+}
+
+const EspaceEleveRouteChildren: EspaceEleveRouteChildren = {
+  EspaceEleveProfilRoute: EspaceEleveProfilRoute,
+  EspaceEleveReservationsRoute: EspaceEleveReservationsRoute,
+  EspaceEleveIndexRoute: EspaceEleveIndexRoute,
+}
+
+const EspaceEleveRouteWithChildren = EspaceEleveRoute._addFileChildren(
+  EspaceEleveRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ArtisanRoute: ArtisanRouteWithChildren,
+  AteliersRoute: AteliersRouteWithChildren,
+  ConnexionRoute: ConnexionRoute,
+  DevenirArtisanRoute: DevenirArtisanRouteWithChildren,
+  EspaceEleveRoute: EspaceEleveRouteWithChildren,
+  InscriptionRoute: InscriptionRoute,
+  ReservationConfirmationRoute: ReservationConfirmationRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

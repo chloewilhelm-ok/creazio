@@ -1,0 +1,3 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { ArtisanSessionPage } from "@/components/creazio/pages";
+export const Route = createFileRoute("/artisan/sessions/$sessionId")({ head: () => ({ meta: [{title:"Détail de la session — Creazio"},{name:"description",content:"Consultez une session d’atelier."},{property:"og:title",content:"Détail de la session — Creazio"},{property:"og:description",content:"Consultez une session d’atelier."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary"}] }), component: ArtisanSessionPage });

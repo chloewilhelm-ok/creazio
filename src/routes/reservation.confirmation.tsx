@@ -1,0 +1,3 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { ConfirmationPage } from "@/components/creazio/pages";
+export const Route = createFileRoute("/reservation/confirmation")({ head: () => ({ meta: [{title:"Confirmation de réservation — Creazio"},{name:"description",content:"Confirmation de votre réservation Creazio."},{property:"og:title",content:"Confirmation de réservation — Creazio"},{property:"og:description",content:"Confirmation de votre réservation Creazio."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary"}] }), component: ConfirmationPage });

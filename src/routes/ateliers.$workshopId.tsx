@@ -1,0 +1,3 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { WorkshopDetailPage } from "@/components/creazio/pages";
+export const Route = createFileRoute("/ateliers/$workshopId")({ head: () => ({ meta: [{title:"Détail de l’atelier — Creazio"},{name:"description",content:"Consultez les détails et choisissez un créneau."},{property:"og:title",content:"Détail de l’atelier — Creazio"},{property:"og:description",content:"Consultez les détails et choisissez un créneau."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary_large_image"}] }), component: WorkshopDetailPage });

@@ -1,0 +1,3 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { ArtisanLoginPage } from "@/components/creazio/pages";
+export const Route = createFileRoute("/artisan/connexion")({ head: () => ({ meta: [{title:"Connexion artisan — Creazio"},{name:"description",content:"Connectez-vous à votre espace artisan Creazio."},{property:"og:title",content:"Connexion artisan — Creazio"},{property:"og:description",content:"Connectez-vous à votre espace artisan Creazio."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary"}] }), component: ArtisanLoginPage });

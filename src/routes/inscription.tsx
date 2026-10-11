@@ -1,0 +1,3 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { SignupPage } from "@/components/creazio/pages";
+export const Route = createFileRoute("/inscription")({ head: () => ({ meta: [{title:"Créer un compte — Creazio"},{name:"description",content:"Créez votre futur compte élève Creazio."},{property:"og:title",content:"Créer un compte — Creazio"},{property:"og:description",content:"Créez votre futur compte élève Creazio."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary"}] }), component: SignupPage });
