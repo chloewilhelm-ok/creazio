@@ -10,7 +10,7 @@ export const craftTechniques: Record<CraftCategory, readonly string[]> = {
   Papier: ["Linogravure", "Sérigraphie", "Reliure", "Origami"],
   "Bien-être": ["Savonnerie", "Parfumerie", "Cosmétiques naturels", "Bougies"],
   Bijouterie: ["Assemblage de bijoux", "Joaillerie", "Travail de l’argent", "Cire perdue"],
-  Métal: ["Forge", "Soudure", "Ciselure", "Dinand erie".replace(" ", "")],
+  Métal: ["Forge", "Soudure", "Ciselure", "Dinanderie"],
   Cuir: ["Maroquinerie", "Couture sellier", "Teinture du cuir", "Repoussage"],
   Verre: ["Vitrail", "Soufflage du verre", "Fusing", "Perles au chalumeau"],
 };
@@ -22,11 +22,11 @@ export interface ArtisanInfo { name: string; address: Address; categories: strin
 export interface WorkshopDraft {
   id: string; title: string; category: string; technique: string; description: string;
   duration: string; capacity: string; price: string; discount: string; materials: string;
-  level: string; address: Address; date: string; time: string; image: string; status: "draft" | "published";
+  level: string; address: Address; date: string; endDate: string; days: string[]; allocation: string; time: string; image: string; status: "draft" | "published";
 }
 export const emptyAddress: Address = { street: "", postcode: "", city: "", access: "" };
 export function newWorkshop(artisan: ArtisanInfo): WorkshopDraft {
-  return { id: "", title: "", category: artisan.categories[0] ?? "", technique: artisan.techniques[0] ?? "", description: "", duration: "", capacity: "", price: "", discount: "", materials: "", level: "Tous niveaux", address: { ...artisan.address }, date: "", time: "", image: "", status: "draft" };
+  return { id: "", title: "", category: artisan.categories[0] ?? "", technique: artisan.techniques[0] ?? "", description: "", duration: "", capacity: "", price: "", discount: "", materials: "", level: "Tous niveaux", address: { ...artisan.address }, date: "", endDate: "", days: [], allocation: "", time: "", image: "", status: "draft" };
 }
 export function upsertWorkshop(workshops: WorkshopDraft[], workshop: WorkshopDraft): WorkshopDraft[] {
   return workshops.some(item => item.id === workshop.id) ? workshops.map(item => item.id === workshop.id ? workshop : item) : [...workshops, workshop];

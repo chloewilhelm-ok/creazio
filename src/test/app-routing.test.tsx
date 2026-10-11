@@ -15,7 +15,7 @@ describe("App routing", () => {
     expect(matches.at(-1)?.routeId).not.toBe(rootRouteId);
   });
 
-  it.each(["/devenir-artisan", "/connexion", "/inscription", "/ateliers", "/espace-eleve", "/artisan/planning", "/artisan/ateliers", "/artisan/revenus"])("matches the Creazio screen %s", (path) => {
+  it.each(["/devenir-artisan", "/devenir-artisan/candidature", "/connexion", "/inscription", "/ateliers", "/espace-eleve", "/artisan/planning", "/artisan/ateliers", "/artisan/revenus", "/artisan/creer-atelier", "/artisan/atelier/atelier-test", "/artisan/modifier-atelier/atelier-test"])("matches the Creazio screen %s", (path) => {
     const router = createRouter({ routeTree, context: { queryClient: new QueryClient() } });
     expect(router.matchRoutes(path).at(-1)?.routeId).not.toBe(rootRouteId);
   });
