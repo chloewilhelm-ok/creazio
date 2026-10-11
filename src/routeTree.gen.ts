@@ -18,6 +18,7 @@ import { Route as EspaceEleveRouteImport } from './routes/espace-eleve'
 import { Route as InscriptionRouteImport } from './routes/inscription'
 import { Route as ArtisanAteliersRouteImport } from './routes/artisan.ateliers'
 import { Route as ArtisanConnexionRouteImport } from './routes/artisan.connexion'
+import { Route as ArtisanInscriptionRouteImport } from './routes/artisan.inscription'
 import { Route as ArtisanPlanningRouteImport } from './routes/artisan.planning'
 import { Route as ArtisanRevenusRouteImport } from './routes/artisan.revenus'
 import { Route as AteliersIndexRouteImport } from './routes/ateliers.index'
@@ -72,6 +73,11 @@ const ArtisanAteliersRoute = ArtisanAteliersRouteImport.update({
 const ArtisanConnexionRoute = ArtisanConnexionRouteImport.update({
   id: '/connexion',
   path: '/connexion',
+  getParentRoute: () => ArtisanRoute,
+} as any)
+const ArtisanInscriptionRoute = ArtisanInscriptionRouteImport.update({
+  id: '/inscription',
+  path: '/inscription',
   getParentRoute: () => ArtisanRoute,
 } as any)
 const ArtisanPlanningRoute = ArtisanPlanningRouteImport.update({
@@ -137,6 +143,7 @@ export interface FileRoutesByFullPath {
   '/inscription': typeof InscriptionRoute
   '/artisan/ateliers': typeof ArtisanAteliersRoute
   '/artisan/connexion': typeof ArtisanConnexionRoute
+  '/artisan/inscription': typeof ArtisanInscriptionRoute
   '/artisan/planning': typeof ArtisanPlanningRoute
   '/artisan/revenus': typeof ArtisanRevenusRoute
   '/ateliers/$workshopId': typeof AteliersWorkshopIdRoute
@@ -156,6 +163,7 @@ export interface FileRoutesByTo {
   '/inscription': typeof InscriptionRoute
   '/artisan/ateliers': typeof ArtisanAteliersRoute
   '/artisan/connexion': typeof ArtisanConnexionRoute
+  '/artisan/inscription': typeof ArtisanInscriptionRoute
   '/artisan/planning': typeof ArtisanPlanningRoute
   '/artisan/revenus': typeof ArtisanRevenusRoute
   '/ateliers/$workshopId': typeof AteliersWorkshopIdRoute
@@ -178,6 +186,7 @@ export interface FileRoutesById {
   '/inscription': typeof InscriptionRoute
   '/artisan/ateliers': typeof ArtisanAteliersRoute
   '/artisan/connexion': typeof ArtisanConnexionRoute
+  '/artisan/inscription': typeof ArtisanInscriptionRoute
   '/artisan/planning': typeof ArtisanPlanningRoute
   '/artisan/revenus': typeof ArtisanRevenusRoute
   '/ateliers/$workshopId': typeof AteliersWorkshopIdRoute
@@ -201,6 +210,7 @@ export interface FileRouteTypes {
     | '/inscription'
     | '/artisan/ateliers'
     | '/artisan/connexion'
+    | '/artisan/inscription'
     | '/artisan/planning'
     | '/artisan/revenus'
     | '/ateliers/$workshopId'
@@ -220,6 +230,7 @@ export interface FileRouteTypes {
     | '/inscription'
     | '/artisan/ateliers'
     | '/artisan/connexion'
+    | '/artisan/inscription'
     | '/artisan/planning'
     | '/artisan/revenus'
     | '/ateliers/$workshopId'
@@ -241,6 +252,7 @@ export interface FileRouteTypes {
     | '/inscription'
     | '/artisan/ateliers'
     | '/artisan/connexion'
+    | '/artisan/inscription'
     | '/artisan/planning'
     | '/artisan/revenus'
     | '/ateliers/$workshopId'
@@ -329,6 +341,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ArtisanConnexionRouteImport
       parentRoute: typeof ArtisanRoute
     }
+    '/artisan/inscription': {
+      id: '/artisan/inscription'
+      path: '/inscription'
+      fullPath: '/artisan/inscription'
+      preLoaderRoute: typeof ArtisanInscriptionRouteImport
+      parentRoute: typeof ArtisanRoute
+    }
     '/artisan/planning': {
       id: '/artisan/planning'
       path: '/planning'
@@ -405,6 +424,7 @@ declare module '@tanstack/react-router' {
 interface ArtisanRouteChildren {
   ArtisanAteliersRoute: typeof ArtisanAteliersRoute
   ArtisanConnexionRoute: typeof ArtisanConnexionRoute
+  ArtisanInscriptionRoute: typeof ArtisanInscriptionRoute
   ArtisanPlanningRoute: typeof ArtisanPlanningRoute
   ArtisanRevenusRoute: typeof ArtisanRevenusRoute
   ArtisanSessionsSessionIdRoute: typeof ArtisanSessionsSessionIdRoute
@@ -413,6 +433,7 @@ interface ArtisanRouteChildren {
 const ArtisanRouteChildren: ArtisanRouteChildren = {
   ArtisanAteliersRoute: ArtisanAteliersRoute,
   ArtisanConnexionRoute: ArtisanConnexionRoute,
+  ArtisanInscriptionRoute: ArtisanInscriptionRoute,
   ArtisanPlanningRoute: ArtisanPlanningRoute,
   ArtisanRevenusRoute: ArtisanRevenusRoute,
   ArtisanSessionsSessionIdRoute: ArtisanSessionsSessionIdRoute,
