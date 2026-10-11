@@ -24,6 +24,7 @@ import { Route as ArtisanPlanningRouteImport } from './routes/artisan.planning'
 import { Route as ArtisanRevenusRouteImport } from './routes/artisan.revenus'
 import { Route as AteliersIndexRouteImport } from './routes/ateliers.index'
 import { Route as AteliersWorkshopIdRouteImport } from './routes/ateliers.$workshopId'
+import { Route as DevenirArtisanIndexRouteImport } from './routes/devenir-artisan.index'
 import { Route as DevenirArtisanCandidatureRouteImport } from './routes/devenir-artisan.candidature'
 import { Route as EspaceEleveIndexRouteImport } from './routes/espace-eleve.index'
 import { Route as EspaceEleveProfilRouteImport } from './routes/espace-eleve.profil'
@@ -108,6 +109,11 @@ const AteliersWorkshopIdRoute = AteliersWorkshopIdRouteImport.update({
   path: '/$workshopId',
   getParentRoute: () => AteliersRoute,
 } as any)
+const DevenirArtisanIndexRoute = DevenirArtisanIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DevenirArtisanRoute,
+} as any)
 const DevenirArtisanCandidatureRoute =
   DevenirArtisanCandidatureRouteImport.update({
     id: '/candidature',
@@ -173,6 +179,7 @@ export interface FileRoutesByFullPath {
   '/espace-eleve/reservations': typeof EspaceEleveReservationsRoute
   '/reservation/confirmation': typeof ReservationConfirmationRoute
   '/ateliers/': typeof AteliersIndexRoute
+  '/devenir-artisan/': typeof DevenirArtisanIndexRoute
   '/espace-eleve/': typeof EspaceEleveIndexRoute
   '/artisan/atelier/$workshopId': typeof ArtisanAtelierWorkshopIdRoute
   '/artisan/modifier-atelier/$workshopId': typeof ArtisanModifierAtelierWorkshopIdRoute
@@ -182,7 +189,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/artisan': typeof ArtisanRouteWithChildren
   '/connexion': typeof ConnexionRoute
-  '/devenir-artisan': typeof DevenirArtisanRouteWithChildren
   '/inscription': typeof InscriptionRoute
   '/artisan/ateliers': typeof ArtisanAteliersRoute
   '/artisan/connexion': typeof ArtisanConnexionRoute
@@ -196,6 +202,7 @@ export interface FileRoutesByTo {
   '/espace-eleve/reservations': typeof EspaceEleveReservationsRoute
   '/reservation/confirmation': typeof ReservationConfirmationRoute
   '/ateliers': typeof AteliersIndexRoute
+  '/devenir-artisan': typeof DevenirArtisanIndexRoute
   '/espace-eleve': typeof EspaceEleveIndexRoute
   '/artisan/atelier/$workshopId': typeof ArtisanAtelierWorkshopIdRoute
   '/artisan/modifier-atelier/$workshopId': typeof ArtisanModifierAtelierWorkshopIdRoute
@@ -222,6 +229,7 @@ export interface FileRoutesById {
   '/espace-eleve/reservations': typeof EspaceEleveReservationsRoute
   '/reservation/confirmation': typeof ReservationConfirmationRoute
   '/ateliers/': typeof AteliersIndexRoute
+  '/devenir-artisan/': typeof DevenirArtisanIndexRoute
   '/espace-eleve/': typeof EspaceEleveIndexRoute
   '/artisan/atelier/$workshopId': typeof ArtisanAtelierWorkshopIdRoute
   '/artisan/modifier-atelier/$workshopId': typeof ArtisanModifierAtelierWorkshopIdRoute
@@ -249,6 +257,7 @@ export interface FileRouteTypes {
     | '/espace-eleve/reservations'
     | '/reservation/confirmation'
     | '/ateliers/'
+    | '/devenir-artisan/'
     | '/espace-eleve/'
     | '/artisan/atelier/$workshopId'
     | '/artisan/modifier-atelier/$workshopId'
@@ -258,7 +267,6 @@ export interface FileRouteTypes {
     | '/'
     | '/artisan'
     | '/connexion'
-    | '/devenir-artisan'
     | '/inscription'
     | '/artisan/ateliers'
     | '/artisan/connexion'
@@ -272,6 +280,7 @@ export interface FileRouteTypes {
     | '/espace-eleve/reservations'
     | '/reservation/confirmation'
     | '/ateliers'
+    | '/devenir-artisan'
     | '/espace-eleve'
     | '/artisan/atelier/$workshopId'
     | '/artisan/modifier-atelier/$workshopId'
@@ -297,6 +306,7 @@ export interface FileRouteTypes {
     | '/espace-eleve/reservations'
     | '/reservation/confirmation'
     | '/ateliers/'
+    | '/devenir-artisan/'
     | '/espace-eleve/'
     | '/artisan/atelier/$workshopId'
     | '/artisan/modifier-atelier/$workshopId'
@@ -421,6 +431,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AteliersWorkshopIdRouteImport
       parentRoute: typeof AteliersRoute
     }
+    '/devenir-artisan/': {
+      id: '/devenir-artisan/'
+      path: '/'
+      fullPath: '/devenir-artisan/'
+      preLoaderRoute: typeof DevenirArtisanIndexRouteImport
+      parentRoute: typeof DevenirArtisanRoute
+    }
     '/devenir-artisan/candidature': {
       id: '/devenir-artisan/candidature'
       path: '/candidature'
@@ -523,10 +540,12 @@ const AteliersRouteWithChildren = AteliersRoute._addFileChildren(
 
 interface DevenirArtisanRouteChildren {
   DevenirArtisanCandidatureRoute: typeof DevenirArtisanCandidatureRoute
+  DevenirArtisanIndexRoute: typeof DevenirArtisanIndexRoute
 }
 
 const DevenirArtisanRouteChildren: DevenirArtisanRouteChildren = {
   DevenirArtisanCandidatureRoute: DevenirArtisanCandidatureRoute,
+  DevenirArtisanIndexRoute: DevenirArtisanIndexRoute,
 }
 
 const DevenirArtisanRouteWithChildren = DevenirArtisanRoute._addFileChildren(
