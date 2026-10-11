@@ -9,8 +9,8 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 
-- Keep backend access behind typed adapters because the user will create and connect the external Supabase schema later.
-- Share one typed craft catalog across student interests, search, artisan expertise, and workshop forms to avoid category drift.
-- Keep user-entered preview data in a root React context only until the external backend is connected; do not imply previews are persisted or authenticated.
+- Keep backend access behind typed adapters: generated `@/integrations/supabase/client` for reads/writes under RLS, `ensureProfile` in `src/lib/auth.ts` for post-signup profile creation (the user's Supabase schema has no signup trigger; pending data falls back to `user_metadata` on first sign-in).
+- Share one typed craft catalog across student interests, search, artisan expertise, and workshop forms to avoid category drift; `savoirFaireByCategory` maps catalog categories to the Postgres `savoir_faire` enum.
+- Keep user-entered onboarding data (inspirations, addresses, artisan info, workshop drafts) in the `CreazioSessionProvider` context; persisted account data (profiles, packs, wallet) is read from Supabase.
 - Keep artisan creation/editing and operational workshop details in dedicated routes and reuse the same form for both modes to preserve field consistency.
-- Keep only `/` and `/devenir-artisan` public; all workshop, student, application, and artisan workspace screens are intended for authenticated users.
+- Keep only `/` and `/devenir-artisan` public; guard protected routes with `requireSession` in `beforeLoad` (layouts `ateliers`, `espace-eleve`, `artisan` — the latter skips `/artisan/connexion` and `/artisan/inscription` — plus reservation confirmation and the artisan application).
