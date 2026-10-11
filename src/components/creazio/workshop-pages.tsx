@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, CalendarDays, Check, Clock3, Coins, ImagePlus, MapPin, Pencil, Plus, Save, Trash2, Users, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,6 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { ArtisanShell, EmptyState, PageTitle } from "./pages";
 import { AddressFields, useCreazioSession } from "./session-state";
 import { craftCategories, craftTechniques, newWorkshop, toggleSelection, type WorkshopDraft } from "./catalog";
-import { cn } from "@/lib/utils";
 
 const weekdays = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
 function FormField({ label, children }: { label: string; children: React.ReactNode }) { return <label className="grid min-w-0 gap-2 text-sm font-semibold">{label}{children}</label>; }
@@ -22,7 +21,6 @@ export function ArtisanWorkshopFormPage({ workshopId }: { workshopId?: string })
   const [notice, setNotice] = useState("");
   const navigate = useNavigate();
   const update = <K extends keyof WorkshopDraft>(key: K, value: WorkshopDraft[K]) => setDraft(current => ({ ...current, [key]: value }));
-  useEffect(() => () => { if (draft.image.startsWith("blob:")) URL.revokeObjectURL(draft.image); }, [draft.image]);
   function submit(event: FormEvent) {
     event.preventDefault();
     if (!draft.category) { setNotice("Choisissez un savoir-faire."); return; }

@@ -21,6 +21,6 @@ describe("Creazio shared interests and artisan details", () => {
     const workshop = { ...newWorkshop({ name: "", address: emptyAddress, categories: [], techniques: [], expertise: "" }), id: "atelier-1", title: "Original" };
     const updated = upsertWorkshop([workshop], { ...workshop, title: "Modifié" });
     expect(updated).toHaveLength(1);
-    expect(updated[0].title).toBe("Modifié");
+    expect(updated[0]?.title).toBe("Modifié");
   });
 });
