@@ -1,6 +1,12 @@
-# Welcome to your Lovable project
+# Creazio
 
-This project was built with [Lovable](https://lovable.dev).
+Application React/TanStack Start mobile-first pour découvrir et réserver des ateliers créatifs en Île-de-France.
+
+## Backend externe
+
+Le schéma, les tables, l’authentification et les règles RLS seront créés ultérieurement dans un projet Supabase externe. L’interface actuelle n’insère aucune donnée de démonstration et n’utilise pas de stockage local persistant.
+
+Lors du raccordement, prévoir sur Vercel les variables publiques `VITE_SUPABASE_URL` et `VITE_SUPABASE_PUBLISHABLE_KEY`, ainsi que leurs équivalents serveur si des fonctions serveur sont ajoutées. Une clé privilégiée ne doit jamais porter le préfixe `VITE_`.
 
 ## Build with Lovable
 

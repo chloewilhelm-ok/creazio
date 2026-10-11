@@ -1,0 +1,3 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { ArtisanWorkshopsPage } from "@/components/creazio/pages";
+export const Route = createFileRoute("/artisan/ateliers")({ head: () => ({ meta: [{title:"Mes ateliers artisan — Creazio"},{name:"description",content:"Gérez vos formats d’ateliers."},{property:"og:title",content:"Mes ateliers artisan — Creazio"},{property:"og:description",content:"Gérez vos formats d’ateliers."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary"}] }), component: ArtisanWorkshopsPage });

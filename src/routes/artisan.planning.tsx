@@ -1,0 +1,3 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { ArtisanPlanningPage } from "@/components/creazio/pages";
+export const Route = createFileRoute("/artisan/planning")({ head: () => ({ meta: [{title:"Mon planning artisan — Creazio"},{name:"description",content:"Consultez vos sessions Creazio."},{property:"og:title",content:"Mon planning artisan — Creazio"},{property:"og:description",content:"Consultez vos sessions Creazio."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary"}] }), component: ArtisanPlanningPage });
