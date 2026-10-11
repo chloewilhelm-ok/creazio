@@ -1,4 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ArtisanApplicationPage } from "@/components/creazio/pages";
 import { requireSession } from "@/lib/auth";
-export const Route = createFileRoute("/devenir-artisan/candidature")({ beforeLoad: () => requireSession("any"), head: () => ({ meta: [{title:"Candidature artisan — Creazio"},{name:"description",content:"Présentez votre atelier à Creazio."},{property:"og:title",content:"Candidature artisan — Creazio"},{property:"og:description",content:"Présentez votre atelier à Creazio."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary"}] }), component: ArtisanApplicationPage });
+export const Route = createFileRoute("/devenir-artisan/candidature")({ ssr: false, beforeLoad: () => requireSession("any"), head: () => ({ meta: [{title:"Candidature artisan — Creazio"},{name:"description",content:"Présentez votre atelier à Creazio."},{property:"og:title",content:"Candidature artisan — Creazio"},{property:"og:description",content:"Présentez votre atelier à Creazio."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary"}] }), component: ArtisanApplicationPage });
