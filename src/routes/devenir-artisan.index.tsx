@@ -1,0 +1,3 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { ArtisanLandingPage } from "@/components/creazio/pages";
+export const Route = createFileRoute("/devenir-artisan/")({ head: () => ({ meta: [{ title: "Devenir artisan partenaire — Creazio" },{ name:"description",content:"Rejoignez Creazio et remplissez vos créneaux d’atelier."},{ property:"og:title",content:"Devenir artisan partenaire — Creazio"},{ property:"og:description",content:"Rejoignez Creazio et remplissez vos créneaux d’atelier."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary_large_image"}] }), component: ArtisanLandingPage });
