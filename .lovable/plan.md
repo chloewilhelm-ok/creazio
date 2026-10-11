@@ -17,6 +17,7 @@ La base sera volontairement vide : aucun atelier, utilisateur, créneau, crédit
 
 ### Parcours public — accessible sans connexion
 - Accueil découverte `/`
+- Présentation artisan `/devenir-artisan`
 
 ### Parcours élève
 - Connexion `/connexion`
@@ -29,7 +30,6 @@ La base sera volontairement vide : aucun atelier, utilisateur, créneau, crédit
 - Confirmation de réservation `/reservation/confirmation`
 
 ### Parcours artisan
-- Présentation artisan `/devenir-artisan`
 - Candidature `/devenir-artisan/candidature`
 - Connexion `/artisan/connexion`
 - Planning `/artisan/planning`
@@ -37,7 +37,7 @@ La base sera volontairement vide : aucun atelier, utilisateur, créneau, crédit
 - Ateliers `/artisan/ateliers`
 - Revenus `/artisan/revenus`
 
-Chaque page aura son propre titre, sa description et ses métadonnées de partage. Seule la page d’accueil `/` sera consultable sans compte. La recherche, les fiches atelier, la réservation, la présentation/candidature artisan et les espaces membres seront protégés par connexion, avec séparation des accès élève et artisan selon le rôle. Les navigations public, élève et artisan seront isolées dans des structures adaptées à leurs usages.
+Chaque page aura son propre titre, sa description et ses métadonnées de partage. Seules la page d’accueil `/` et la présentation artisan `/devenir-artisan` seront consultables sans compte. La recherche, les fiches atelier, la réservation, la candidature artisan et les espaces membres seront protégés par connexion, avec séparation des accès élève et artisan selon le rôle. Les navigations public, élève et artisan seront isolées dans des structures adaptées à leurs usages.
 
 ## 3. Rendre l’expérience réellement mobile-first
 - Transformer les en-têtes desktop en navigation compacte utilisable au pouce.
