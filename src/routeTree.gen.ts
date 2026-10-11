@@ -18,6 +18,7 @@ import { Route as EspaceEleveRouteImport } from './routes/espace-eleve'
 import { Route as InscriptionRouteImport } from './routes/inscription'
 import { Route as ArtisanAteliersRouteImport } from './routes/artisan.ateliers'
 import { Route as ArtisanConnexionRouteImport } from './routes/artisan.connexion'
+import { Route as ArtisanCreerAtelierRouteImport } from './routes/artisan.creer-atelier'
 import { Route as ArtisanInscriptionRouteImport } from './routes/artisan.inscription'
 import { Route as ArtisanPlanningRouteImport } from './routes/artisan.planning'
 import { Route as ArtisanRevenusRouteImport } from './routes/artisan.revenus'
@@ -28,6 +29,8 @@ import { Route as EspaceEleveIndexRouteImport } from './routes/espace-eleve.inde
 import { Route as EspaceEleveProfilRouteImport } from './routes/espace-eleve.profil'
 import { Route as EspaceEleveReservationsRouteImport } from './routes/espace-eleve.reservations'
 import { Route as ReservationConfirmationRouteImport } from './routes/reservation.confirmation'
+import { Route as ArtisanAtelierWorkshopIdRouteImport } from './routes/artisan.atelier.$workshopId'
+import { Route as ArtisanModifierAtelierWorkshopIdRouteImport } from './routes/artisan.modifier-atelier.$workshopId'
 import { Route as ArtisanSessionsSessionIdRouteImport } from './routes/artisan.sessions.$sessionId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -73,6 +76,11 @@ const ArtisanAteliersRoute = ArtisanAteliersRouteImport.update({
 const ArtisanConnexionRoute = ArtisanConnexionRouteImport.update({
   id: '/connexion',
   path: '/connexion',
+  getParentRoute: () => ArtisanRoute,
+} as any)
+const ArtisanCreerAtelierRoute = ArtisanCreerAtelierRouteImport.update({
+  id: '/creer-atelier',
+  path: '/creer-atelier',
   getParentRoute: () => ArtisanRoute,
 } as any)
 const ArtisanInscriptionRoute = ArtisanInscriptionRouteImport.update({
@@ -126,6 +134,18 @@ const ReservationConfirmationRoute = ReservationConfirmationRouteImport.update({
   path: '/reservation/confirmation',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ArtisanAtelierWorkshopIdRoute =
+  ArtisanAtelierWorkshopIdRouteImport.update({
+    id: '/atelier/$workshopId',
+    path: '/atelier/$workshopId',
+    getParentRoute: () => ArtisanRoute,
+  } as any)
+const ArtisanModifierAtelierWorkshopIdRoute =
+  ArtisanModifierAtelierWorkshopIdRouteImport.update({
+    id: '/modifier-atelier/$workshopId',
+    path: '/modifier-atelier/$workshopId',
+    getParentRoute: () => ArtisanRoute,
+  } as any)
 const ArtisanSessionsSessionIdRoute =
   ArtisanSessionsSessionIdRouteImport.update({
     id: '/sessions/$sessionId',
@@ -143,6 +163,7 @@ export interface FileRoutesByFullPath {
   '/inscription': typeof InscriptionRoute
   '/artisan/ateliers': typeof ArtisanAteliersRoute
   '/artisan/connexion': typeof ArtisanConnexionRoute
+  '/artisan/creer-atelier': typeof ArtisanCreerAtelierRoute
   '/artisan/inscription': typeof ArtisanInscriptionRoute
   '/artisan/planning': typeof ArtisanPlanningRoute
   '/artisan/revenus': typeof ArtisanRevenusRoute
@@ -153,6 +174,8 @@ export interface FileRoutesByFullPath {
   '/reservation/confirmation': typeof ReservationConfirmationRoute
   '/ateliers/': typeof AteliersIndexRoute
   '/espace-eleve/': typeof EspaceEleveIndexRoute
+  '/artisan/atelier/$workshopId': typeof ArtisanAtelierWorkshopIdRoute
+  '/artisan/modifier-atelier/$workshopId': typeof ArtisanModifierAtelierWorkshopIdRoute
   '/artisan/sessions/$sessionId': typeof ArtisanSessionsSessionIdRoute
 }
 export interface FileRoutesByTo {
@@ -163,6 +186,7 @@ export interface FileRoutesByTo {
   '/inscription': typeof InscriptionRoute
   '/artisan/ateliers': typeof ArtisanAteliersRoute
   '/artisan/connexion': typeof ArtisanConnexionRoute
+  '/artisan/creer-atelier': typeof ArtisanCreerAtelierRoute
   '/artisan/inscription': typeof ArtisanInscriptionRoute
   '/artisan/planning': typeof ArtisanPlanningRoute
   '/artisan/revenus': typeof ArtisanRevenusRoute
@@ -173,6 +197,8 @@ export interface FileRoutesByTo {
   '/reservation/confirmation': typeof ReservationConfirmationRoute
   '/ateliers': typeof AteliersIndexRoute
   '/espace-eleve': typeof EspaceEleveIndexRoute
+  '/artisan/atelier/$workshopId': typeof ArtisanAtelierWorkshopIdRoute
+  '/artisan/modifier-atelier/$workshopId': typeof ArtisanModifierAtelierWorkshopIdRoute
   '/artisan/sessions/$sessionId': typeof ArtisanSessionsSessionIdRoute
 }
 export interface FileRoutesById {
@@ -186,6 +212,7 @@ export interface FileRoutesById {
   '/inscription': typeof InscriptionRoute
   '/artisan/ateliers': typeof ArtisanAteliersRoute
   '/artisan/connexion': typeof ArtisanConnexionRoute
+  '/artisan/creer-atelier': typeof ArtisanCreerAtelierRoute
   '/artisan/inscription': typeof ArtisanInscriptionRoute
   '/artisan/planning': typeof ArtisanPlanningRoute
   '/artisan/revenus': typeof ArtisanRevenusRoute
@@ -196,6 +223,8 @@ export interface FileRoutesById {
   '/reservation/confirmation': typeof ReservationConfirmationRoute
   '/ateliers/': typeof AteliersIndexRoute
   '/espace-eleve/': typeof EspaceEleveIndexRoute
+  '/artisan/atelier/$workshopId': typeof ArtisanAtelierWorkshopIdRoute
+  '/artisan/modifier-atelier/$workshopId': typeof ArtisanModifierAtelierWorkshopIdRoute
   '/artisan/sessions/$sessionId': typeof ArtisanSessionsSessionIdRoute
 }
 export interface FileRouteTypes {
@@ -210,6 +239,7 @@ export interface FileRouteTypes {
     | '/inscription'
     | '/artisan/ateliers'
     | '/artisan/connexion'
+    | '/artisan/creer-atelier'
     | '/artisan/inscription'
     | '/artisan/planning'
     | '/artisan/revenus'
@@ -220,6 +250,8 @@ export interface FileRouteTypes {
     | '/reservation/confirmation'
     | '/ateliers/'
     | '/espace-eleve/'
+    | '/artisan/atelier/$workshopId'
+    | '/artisan/modifier-atelier/$workshopId'
     | '/artisan/sessions/$sessionId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -230,6 +262,7 @@ export interface FileRouteTypes {
     | '/inscription'
     | '/artisan/ateliers'
     | '/artisan/connexion'
+    | '/artisan/creer-atelier'
     | '/artisan/inscription'
     | '/artisan/planning'
     | '/artisan/revenus'
@@ -240,6 +273,8 @@ export interface FileRouteTypes {
     | '/reservation/confirmation'
     | '/ateliers'
     | '/espace-eleve'
+    | '/artisan/atelier/$workshopId'
+    | '/artisan/modifier-atelier/$workshopId'
     | '/artisan/sessions/$sessionId'
   id:
     | '__root__'
@@ -252,6 +287,7 @@ export interface FileRouteTypes {
     | '/inscription'
     | '/artisan/ateliers'
     | '/artisan/connexion'
+    | '/artisan/creer-atelier'
     | '/artisan/inscription'
     | '/artisan/planning'
     | '/artisan/revenus'
@@ -262,6 +298,8 @@ export interface FileRouteTypes {
     | '/reservation/confirmation'
     | '/ateliers/'
     | '/espace-eleve/'
+    | '/artisan/atelier/$workshopId'
+    | '/artisan/modifier-atelier/$workshopId'
     | '/artisan/sessions/$sessionId'
   fileRoutesById: FileRoutesById
 }
@@ -341,6 +379,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ArtisanConnexionRouteImport
       parentRoute: typeof ArtisanRoute
     }
+    '/artisan/creer-atelier': {
+      id: '/artisan/creer-atelier'
+      path: '/creer-atelier'
+      fullPath: '/artisan/creer-atelier'
+      preLoaderRoute: typeof ArtisanCreerAtelierRouteImport
+      parentRoute: typeof ArtisanRoute
+    }
     '/artisan/inscription': {
       id: '/artisan/inscription'
       path: '/inscription'
@@ -411,6 +456,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReservationConfirmationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/artisan/atelier/$workshopId': {
+      id: '/artisan/atelier/$workshopId'
+      path: '/atelier/$workshopId'
+      fullPath: '/artisan/atelier/$workshopId'
+      preLoaderRoute: typeof ArtisanAtelierWorkshopIdRouteImport
+      parentRoute: typeof ArtisanRoute
+    }
+    '/artisan/modifier-atelier/$workshopId': {
+      id: '/artisan/modifier-atelier/$workshopId'
+      path: '/modifier-atelier/$workshopId'
+      fullPath: '/artisan/modifier-atelier/$workshopId'
+      preLoaderRoute: typeof ArtisanModifierAtelierWorkshopIdRouteImport
+      parentRoute: typeof ArtisanRoute
+    }
     '/artisan/sessions/$sessionId': {
       id: '/artisan/sessions/$sessionId'
       path: '/sessions/$sessionId'
@@ -424,18 +483,24 @@ declare module '@tanstack/react-router' {
 interface ArtisanRouteChildren {
   ArtisanAteliersRoute: typeof ArtisanAteliersRoute
   ArtisanConnexionRoute: typeof ArtisanConnexionRoute
+  ArtisanCreerAtelierRoute: typeof ArtisanCreerAtelierRoute
   ArtisanInscriptionRoute: typeof ArtisanInscriptionRoute
   ArtisanPlanningRoute: typeof ArtisanPlanningRoute
   ArtisanRevenusRoute: typeof ArtisanRevenusRoute
+  ArtisanAtelierWorkshopIdRoute: typeof ArtisanAtelierWorkshopIdRoute
+  ArtisanModifierAtelierWorkshopIdRoute: typeof ArtisanModifierAtelierWorkshopIdRoute
   ArtisanSessionsSessionIdRoute: typeof ArtisanSessionsSessionIdRoute
 }
 
 const ArtisanRouteChildren: ArtisanRouteChildren = {
   ArtisanAteliersRoute: ArtisanAteliersRoute,
   ArtisanConnexionRoute: ArtisanConnexionRoute,
+  ArtisanCreerAtelierRoute: ArtisanCreerAtelierRoute,
   ArtisanInscriptionRoute: ArtisanInscriptionRoute,
   ArtisanPlanningRoute: ArtisanPlanningRoute,
   ArtisanRevenusRoute: ArtisanRevenusRoute,
+  ArtisanAtelierWorkshopIdRoute: ArtisanAtelierWorkshopIdRoute,
+  ArtisanModifierAtelierWorkshopIdRoute: ArtisanModifierAtelierWorkshopIdRoute,
   ArtisanSessionsSessionIdRoute: ArtisanSessionsSessionIdRoute,
 }
 
