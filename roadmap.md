@@ -9,4 +9,4 @@
 - [x] Lire le schéma Supabase existant et générer les types — 15 tables et les énumères sont déjà couverts par `src/integrations/supabase/types.ts`.
 - [x] Brancher connexion / inscription élève et artisan sur Supabase Auth — création du profil via `ensureProfile`, données en attente dans `user_metadata` si confirmation d'email requise.
 - [x] Remplacer les packs de crédits codés en dur par la lecture de packs_credits (packs actifs seulement) — la liste codée en dur sert de repli si la table est vide.
-- [ ] RLS : votre base a le RLS activé mais aucune règle (policy) — chaque lecture/écriture applicative renvoie donc vide ou une erreur. En attente de votre décision (ajouter les règles minimales ou les écrire vous-même).
+- [ ] RLS : votre base a le RLS activé mais aucune règle (policy) — vous avez choisi de les écrire vous-même. La liste des accès minimaux attendus par l'app vous a été fournie (profiles, packs_credits, portefeuilles, artisans, profil_savoirs_faire).
