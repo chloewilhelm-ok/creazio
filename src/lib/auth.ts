@@ -32,8 +32,8 @@ export interface PendingProfile {
   adresse_ligne?: string | null;
   code_postal?: string | null;
   ville?: string | null;
-  atelier?: string;
-  categories?: string[];
+  atelier?: string | undefined;
+  categories?: string[] | undefined;
 }
 
 // Creates the public profile (and the artisan record for artisans) right after
