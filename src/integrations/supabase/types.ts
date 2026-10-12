@@ -720,7 +720,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      participants_session: {
+        Args: { p_session_id: string }
+        Returns: {
+          code_creazio: string
+          prenom: string
+        }[]
+      }
     }
     Enums: {
       jour_semaine:
