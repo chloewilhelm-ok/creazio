@@ -40,7 +40,8 @@ export interface PendingProfile {
 // sign-up or first sign-in, when the database has no trigger for it.
 export async function ensureProfile(userId: string, data: PendingProfile): Promise<void> {
   const now = new Date().toISOString();
-  const { error } = await supabase.from("profiles").insert({
+  // The auth.users trigger usually creates the row already; upsert completes it.
+  const { error } = await supabase.from("profiles").upsert({
     id: userId,
     role: data.role,
     prenom: data.prenom,
@@ -51,7 +52,7 @@ export async function ensureProfile(userId: string, data: PendingProfile): Promi
     ville: data.ville ?? null,
     cgu_acceptees_le: now,
     confidentialite_acceptee_le: now,
-  });
+  }, { onConflict: "id" });
   if (error) throw error;
   if (data.role === "artisan") {
     const principal = data.categories && data.categories.length > 0
