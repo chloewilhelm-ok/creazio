@@ -36,7 +36,21 @@ export function ArtisanWorkshopFormPage({ workshopId }: { workshopId?: string })
     if (!user) { setNotice("Votre session a expiré, reconnectez-vous."); return; }
     const fields = { titre: draft.title, description: draft.description, savoir_faire: savoirFaireByCategory[draft.category as CraftCategory], duree_minutes: parseDuration(draft.duration), taille_groupe_max: Number(draft.capacity), materiel_inclus: draft.materials || null, adresse_ligne: draft.address.street, code_postal: draft.address.postcode, ville: draft.address.city, informations_pratiques: draft.address.access || null };
     const res = draft.id ? await supabase.from("ateliers").update(fields).eq("id", draft.id).select("id").single() : await supabase.from("ateliers").insert({ ...fields, artisan_id: user.id, statut: "en_verification" }).select("id").single();
-    if (res.error) { setNotice(res.error.message.includes("row-level security") ? "Votre compte artisan doit être validé par Creazio avant de pouvoir créer un atelier. Complétez votre profil artisan si ce n’est pas fait." : `Enregistrement impossible : ${res.error.message}`); return; }
+    if (res.error) {
+      if (res.error.message.includes("row-level security")) {
+        const { data: fiche } = await supabase.from("artisans").select("statut_candidature, contrat_signe_le").eq("profile_id", user.id).maybeSingle();
+        setNotice(!fiche
+          ? "Complétez d’abord votre profil artisan (page « Mon profil ») pour créer votre fiche."
+          : fiche.statut_candidature !== "validee"
+            ? "Votre candidature artisan est en cours d’examen par Creazio. Vous pourrez créer un atelier une fois qu’elle sera validée."
+            : !fiche.contrat_signe_le
+              ? "Votre candidature est validée, mais votre contrat partenaire n’est pas encore signé. Contactez Creazio pour finaliser votre inscription."
+              : "La base a refusé l’enregistrement. Réessayez ou contactez Creazio.");
+      } else {
+        setNotice(`Enregistrement impossible : ${res.error.message}`);
+      }
+      return;
+    }
     const id = res.data.id;
     if (!draft.id) {
       const rec = await supabase.from("recurrences_sessions").insert(draft.days.map(day => ({ atelier_id: id, jour_semaine: day.toLowerCase() as JourSemaine, heure_debut: draft.time, places_totales: Number(draft.capacity), places_ouvertes_creazio: Number(draft.allocation), remise_pct: Number(draft.discount || 0), date_debut: draft.date, date_fin: draft.endDate })));
