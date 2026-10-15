@@ -135,7 +135,7 @@ export type Database = {
           longitude: number | null
           materiel_inclus: string | null
           photo_url: string | null
-          prix_public_eur: number
+          prix_public_eur: number | null
           prix_public_verifie_le: string | null
           quartier: string | null
           savoir_faire: Database["public"]["Enums"]["savoir_faire"]
@@ -160,7 +160,7 @@ export type Database = {
           longitude?: number | null
           materiel_inclus?: string | null
           photo_url?: string | null
-          prix_public_eur: number
+          prix_public_eur?: number | null
           prix_public_verifie_le?: string | null
           quartier?: string | null
           savoir_faire: Database["public"]["Enums"]["savoir_faire"]
@@ -185,7 +185,7 @@ export type Database = {
           longitude?: number | null
           materiel_inclus?: string | null
           photo_url?: string | null
-          prix_public_eur?: number
+          prix_public_eur?: number | null
           prix_public_verifie_le?: string | null
           quartier?: string | null
           savoir_faire?: Database["public"]["Enums"]["savoir_faire"]
