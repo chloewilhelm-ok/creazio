@@ -21,6 +21,7 @@ import { Route as ArtisanConnexionRouteImport } from './routes/artisan.connexion
 import { Route as ArtisanCreerAtelierRouteImport } from './routes/artisan.creer-atelier'
 import { Route as ArtisanInscriptionRouteImport } from './routes/artisan.inscription'
 import { Route as ArtisanPlanningRouteImport } from './routes/artisan.planning'
+import { Route as ArtisanProfilRouteImport } from './routes/artisan.profil'
 import { Route as ArtisanRevenusRouteImport } from './routes/artisan.revenus'
 import { Route as AteliersIndexRouteImport } from './routes/ateliers.index'
 import { Route as AteliersWorkshopIdRouteImport } from './routes/ateliers.$workshopId'
@@ -92,6 +93,11 @@ const ArtisanInscriptionRoute = ArtisanInscriptionRouteImport.update({
 const ArtisanPlanningRoute = ArtisanPlanningRouteImport.update({
   id: '/planning',
   path: '/planning',
+  getParentRoute: () => ArtisanRoute,
+} as any)
+const ArtisanProfilRoute = ArtisanProfilRouteImport.update({
+  id: '/profil',
+  path: '/profil',
   getParentRoute: () => ArtisanRoute,
 } as any)
 const ArtisanRevenusRoute = ArtisanRevenusRouteImport.update({
@@ -172,6 +178,7 @@ export interface FileRoutesByFullPath {
   '/artisan/creer-atelier': typeof ArtisanCreerAtelierRoute
   '/artisan/inscription': typeof ArtisanInscriptionRoute
   '/artisan/planning': typeof ArtisanPlanningRoute
+  '/artisan/profil': typeof ArtisanProfilRoute
   '/artisan/revenus': typeof ArtisanRevenusRoute
   '/ateliers/$workshopId': typeof AteliersWorkshopIdRoute
   '/devenir-artisan/candidature': typeof DevenirArtisanCandidatureRoute
@@ -195,6 +202,7 @@ export interface FileRoutesByTo {
   '/artisan/creer-atelier': typeof ArtisanCreerAtelierRoute
   '/artisan/inscription': typeof ArtisanInscriptionRoute
   '/artisan/planning': typeof ArtisanPlanningRoute
+  '/artisan/profil': typeof ArtisanProfilRoute
   '/artisan/revenus': typeof ArtisanRevenusRoute
   '/ateliers/$workshopId': typeof AteliersWorkshopIdRoute
   '/devenir-artisan/candidature': typeof DevenirArtisanCandidatureRoute
@@ -222,6 +230,7 @@ export interface FileRoutesById {
   '/artisan/creer-atelier': typeof ArtisanCreerAtelierRoute
   '/artisan/inscription': typeof ArtisanInscriptionRoute
   '/artisan/planning': typeof ArtisanPlanningRoute
+  '/artisan/profil': typeof ArtisanProfilRoute
   '/artisan/revenus': typeof ArtisanRevenusRoute
   '/ateliers/$workshopId': typeof AteliersWorkshopIdRoute
   '/devenir-artisan/candidature': typeof DevenirArtisanCandidatureRoute
@@ -250,6 +259,7 @@ export interface FileRouteTypes {
     | '/artisan/creer-atelier'
     | '/artisan/inscription'
     | '/artisan/planning'
+    | '/artisan/profil'
     | '/artisan/revenus'
     | '/ateliers/$workshopId'
     | '/devenir-artisan/candidature'
@@ -273,6 +283,7 @@ export interface FileRouteTypes {
     | '/artisan/creer-atelier'
     | '/artisan/inscription'
     | '/artisan/planning'
+    | '/artisan/profil'
     | '/artisan/revenus'
     | '/ateliers/$workshopId'
     | '/devenir-artisan/candidature'
@@ -299,6 +310,7 @@ export interface FileRouteTypes {
     | '/artisan/creer-atelier'
     | '/artisan/inscription'
     | '/artisan/planning'
+    | '/artisan/profil'
     | '/artisan/revenus'
     | '/ateliers/$workshopId'
     | '/devenir-artisan/candidature'
@@ -410,6 +422,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ArtisanPlanningRouteImport
       parentRoute: typeof ArtisanRoute
     }
+    '/artisan/profil': {
+      id: '/artisan/profil'
+      path: '/profil'
+      fullPath: '/artisan/profil'
+      preLoaderRoute: typeof ArtisanProfilRouteImport
+      parentRoute: typeof ArtisanRoute
+    }
     '/artisan/revenus': {
       id: '/artisan/revenus'
       path: '/revenus'
@@ -503,6 +522,7 @@ interface ArtisanRouteChildren {
   ArtisanCreerAtelierRoute: typeof ArtisanCreerAtelierRoute
   ArtisanInscriptionRoute: typeof ArtisanInscriptionRoute
   ArtisanPlanningRoute: typeof ArtisanPlanningRoute
+  ArtisanProfilRoute: typeof ArtisanProfilRoute
   ArtisanRevenusRoute: typeof ArtisanRevenusRoute
   ArtisanAtelierWorkshopIdRoute: typeof ArtisanAtelierWorkshopIdRoute
   ArtisanModifierAtelierWorkshopIdRoute: typeof ArtisanModifierAtelierWorkshopIdRoute
@@ -515,6 +535,7 @@ const ArtisanRouteChildren: ArtisanRouteChildren = {
   ArtisanCreerAtelierRoute: ArtisanCreerAtelierRoute,
   ArtisanInscriptionRoute: ArtisanInscriptionRoute,
   ArtisanPlanningRoute: ArtisanPlanningRoute,
+  ArtisanProfilRoute: ArtisanProfilRoute,
   ArtisanRevenusRoute: ArtisanRevenusRoute,
   ArtisanAtelierWorkshopIdRoute: ArtisanAtelierWorkshopIdRoute,
   ArtisanModifierAtelierWorkshopIdRoute: ArtisanModifierAtelierWorkshopIdRoute,
