@@ -720,6 +720,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      ateliers_recommandes: {
+        Args: { rayon_km?: number }
+        Returns: {
+          distance_km: number
+          duree_minutes: number
+          id: string
+          nom_commercial: string
+          photo_url: string
+          quartier: string
+          savoir_faire: Database["public"]["Enums"]["savoir_faire"]
+          titre: string
+          ville: string
+        }[]
+      }
       participants_session: {
         Args: { p_session_id: string }
         Returns: {
