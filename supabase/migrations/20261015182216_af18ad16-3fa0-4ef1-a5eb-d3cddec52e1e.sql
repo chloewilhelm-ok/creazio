@@ -1,0 +1,1 @@
+ALTER FUNCTION public.ateliers_recommandes(numeric) SECURITY INVOKER;
