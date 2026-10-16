@@ -34,7 +34,8 @@ export function ArtisanWorkshopFormPage({ workshopId }: { workshopId?: string })
     setNotice("");
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setNotice("Votre session a expiré, reconnectez-vous."); return; }
-    const fields = { titre: draft.title, description: draft.description, savoir_faire: savoirFaireByCategory[draft.category as CraftCategory], duree_minutes: parseDuration(draft.duration), taille_groupe_max: Number(draft.capacity), materiel_inclus: draft.materials || null, adresse_ligne: draft.address.street, code_postal: draft.address.postcode, ville: draft.address.city, informations_pratiques: draft.address.access || null };
+    const geo = await geocodeAddress(draft.address.street, draft.address.postcode, draft.address.city);
+    const fields = { titre: draft.title, description: draft.description, savoir_faire: savoirFaireByCategory[draft.category as CraftCategory], duree_minutes: parseDuration(draft.duration), taille_groupe_max: Number(draft.capacity), materiel_inclus: draft.materials || null, adresse_ligne: draft.address.street, code_postal: draft.address.postcode, ville: draft.address.city, informations_pratiques: draft.address.access || null, latitude: geo?.latitude ?? null, longitude: geo?.longitude ?? null };
     const res = draft.id ? await supabase.from("ateliers").update(fields).eq("id", draft.id).select("id").single() : await supabase.from("ateliers").insert({ ...fields, artisan_id: user.id, statut: "en_verification" }).select("id").single();
     if (res.error) {
       if (res.error.message.includes("row-level security")) {
