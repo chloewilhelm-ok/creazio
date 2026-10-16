@@ -143,7 +143,10 @@ export function ProfilePage(){
   const walletQuery=useQuery({queryKey:["portefeuille"],queryFn:async()=>{const {data:{user}}=await supabase.auth.getUser();if(!user)return null;const {data}=await supabase.from("portefeuilles").select("solde_credits").eq("eleve_id",user.id).maybeSingle();return data;}});
   const packsQuery=useQuery({queryKey:["packs_credits"],queryFn:async()=>{const {data,error}=await supabase.from("packs_credits").select("id,prix_eur,nombre_credits").eq("actif",true).order("prix_eur");if(error)throw error;return data;}});
   const profile=profileQuery.data;
-  useEffect(()=>{if(profile){setPrenom(profile.prenom);setNom(profile.nom);}},[profile]);
+  useEffect(()=>{if(profile){setPrenom(profile.prenom);setNom(profile.nom);
+    if(!studentAddress.street&&profile.adresse_ligne)setStudentAddress({...studentAddress,street:profile.adresse_ligne??"",postcode:profile.code_postal??"",city:profile.ville??""});
+    supabase.from("profil_savoirs_faire").select("savoir_faire").eq("profile_id",profile.id).then(({data})=>{if(data?.length)setInspirations(data.map(r=>labelSavoirFaire(r.savoir_faire)));});
+  }},[profile]);// eslint-disable-line react-hooks/exhaustive-deps
   const availablePacks=useMemo(()=>{
     const rows=packsQuery.data;
     if(!rows||rows.length===0)return packs;
