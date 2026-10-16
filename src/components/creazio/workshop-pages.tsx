@@ -1,3 +1,4 @@
+import { geocodeAddress } from "@/lib/workshops";
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, CalendarDays, Check, Clock3, Coins, ImagePlus, MapPin, Pencil, Plus, Save, Trash2, Users, X } from "lucide-react";
