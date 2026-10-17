@@ -50,7 +50,7 @@ export const publishedWorkshopsQuery = queryOptions({
   queryKey: ["ateliers", "publies"],
   queryFn: async () => {
     const { data, error } = await supabase.from("ateliers")
-      .select("id,titre,description,savoir_faire,ville,quartier,code_postal,duree_minutes,photo_url,cree_le")
+      .select("id,titre,description,savoir_faire,ville,quartier,code_postal,duree_minutes,photo_url,cree_le,latitude,longitude,sessions(prix_credits)")
       .eq("statut", "publie").order("cree_le", { ascending: false });
     if (error) throw error;
     return data;
