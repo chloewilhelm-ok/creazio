@@ -1,4 +1,6 @@
-import { createContext, useContext, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { labelSavoirFaire } from "@/lib/workshops";
 import { craftCategories, craftTechniques, emptyAddress, toggleSelection, upsertWorkshop, type Address, type ArtisanInfo, type WorkshopDraft } from "./catalog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
