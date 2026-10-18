@@ -1,5 +1,7 @@
 # Modifications Creazio
 
+- [ ] Générer les sessions datées à partir des horaires artisan et afficher les créneaux disponibles aux élèves.
+
 - [x] Harmoniser les catégories actuelles entre inspirations élève, profil, recherche et savoir-faire artisan.
 - [ ] Remplacer par la nouvelle liste d’inspirations : bloqué, liste absente du message et du ZIP ; question ignorée.
 - [x] Afficher quatre étoiles et demie et ajouter l’achat de crédits dans « Comment ça marche ».
