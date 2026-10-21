@@ -720,6 +720,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      acheter_pack_demo: { Args: { p_pack_id: string }; Returns: number }
+      annuler_reservation: {
+        Args: { p_reservation_id: string }
+        Returns: number
+      }
       ateliers_recommandes: {
         Args: { rayon_km?: number }
         Returns: {
@@ -739,6 +744,14 @@ export type Database = {
         Returns: {
           code_creazio: string
           prenom: string
+        }[]
+      }
+      reserver_session: {
+        Args: { p_session_id: string }
+        Returns: {
+          code_creazio: string
+          nouveau_solde: number
+          reservation_id: string
         }[]
       }
     }
