@@ -1,5 +1,5 @@
 -- Test de bout en bout des fonctions acheter_pack_demo, reserver_session et annuler_reservation.
--- À coller dans Supabase > SQL Editor APRÈS la migration 20261021190000.
+-- À coller dans Supabase > SQL Editor APRÈS la migration 20261022192123.
 -- Optionnel : remplace NULL par l'email d'un élève à la dernière ligne (sinon le premier élève trouvé est utilisé).
 --
 -- Ce qui reste en base après le test : un achat DEMO du pack de 100 € (l'élève garde ces crédits pour la démo)

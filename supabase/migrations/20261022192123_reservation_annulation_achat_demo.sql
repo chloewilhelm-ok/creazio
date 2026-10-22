@@ -267,8 +267,9 @@ GRANT EXECUTE ON FUNCTION public.acheter_pack_demo(uuid), public.reserver_sessio
   TO authenticated;
 
 -- ---------------------------------------------------------------------------
--- RLS : l'élève relit uniquement ses propres crédits et réservations.
--- Les écritures passent uniquement par les fonctions ci-dessus.
+-- Droits : les écritures sur les crédits et les réservations passent uniquement par les fonctions ci-dessus.
+-- La lecture reste couverte par les règles RLS existantes (« Je vois mon portefeuille », « Je vois mes réservations »…).
+-- TRUNCATE est aussi retiré, car il n'est pas soumis à la RLS.
 -- ---------------------------------------------------------------------------
 ALTER TABLE public.portefeuilles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.lots_credits ENABLE ROW LEVEL SECURITY;
@@ -276,27 +277,7 @@ ALTER TABLE public.mouvements_credits ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.achats_credits ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.reservations ENABLE ROW LEVEL SECURITY;
 
-REVOKE INSERT, UPDATE, DELETE ON public.portefeuilles, public.lots_credits, public.mouvements_credits,
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON public.portefeuilles, public.lots_credits, public.mouvements_credits,
   public.achats_credits, public.reservations FROM anon, authenticated;
 GRANT SELECT ON public.portefeuilles, public.lots_credits, public.mouvements_credits,
   public.achats_credits, public.reservations TO authenticated;
-
-DROP POLICY IF EXISTS "eleve_lit_son_portefeuille" ON public.portefeuilles;
-CREATE POLICY "eleve_lit_son_portefeuille" ON public.portefeuilles FOR SELECT TO authenticated
-  USING (eleve_id = (SELECT auth.uid()));
-
-DROP POLICY IF EXISTS "eleve_lit_ses_lots" ON public.lots_credits;
-CREATE POLICY "eleve_lit_ses_lots" ON public.lots_credits FOR SELECT TO authenticated
-  USING (eleve_id = (SELECT auth.uid()));
-
-DROP POLICY IF EXISTS "eleve_lit_ses_mouvements" ON public.mouvements_credits;
-CREATE POLICY "eleve_lit_ses_mouvements" ON public.mouvements_credits FOR SELECT TO authenticated
-  USING (EXISTS (SELECT 1 FROM public.lots_credits l WHERE l.id = lot_id AND l.eleve_id = (SELECT auth.uid())));
-
-DROP POLICY IF EXISTS "eleve_lit_ses_achats" ON public.achats_credits;
-CREATE POLICY "eleve_lit_ses_achats" ON public.achats_credits FOR SELECT TO authenticated
-  USING (eleve_id = (SELECT auth.uid()));
-
-DROP POLICY IF EXISTS "eleve_lit_ses_reservations" ON public.reservations;
-CREATE POLICY "eleve_lit_ses_reservations" ON public.reservations FOR SELECT TO authenticated
-  USING (eleve_id = (SELECT auth.uid()));
