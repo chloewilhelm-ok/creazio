@@ -22,6 +22,7 @@ DECLARE
   v_res record;
   v_msg text;
   v_n integer;
+  v_taux numeric;
 BEGIN
   -- Préparation (en tant qu'administrateur)
   SELECT p.id INTO v_eleve FROM public.profiles p
@@ -47,6 +48,9 @@ BEGIN
     etape := '0 préparation'; attendu := 'une session réservable dans plus de 3 jours avec un prix > 0'; obtenu := 'aucune session trouvée'; ok := false; RETURN NEXT; RETURN;
   END IF;
 
+  SELECT CASE WHEN p.taux_commission > 1 THEN p.taux_commission / 100 ELSE p.taux_commission END INTO v_taux
+  FROM public.parametres_plateforme p ORDER BY p.id LIMIT 1;
+
   etape := '0 préparation'; attendu := 'élève, pack et session trouvés';
   obtenu := 'élève ' || v_eleve || ' / session ' || v_session || ' à ' || v_prix || ' crédits'; ok := true; RETURN NEXT;
 
@@ -59,6 +63,14 @@ BEGIN
   v_solde := public.acheter_pack_demo(v_pack);
   etape := 'a achat pack 100 €'; attendu := 'solde ' || v_solde_avant || ' + ' || v_pack_credits;
   obtenu := 'solde ' || v_solde; ok := v_solde = v_solde_avant + v_pack_credits; RETURN NEXT;
+
+  etape := 'a règle 1 crédit = 1 €'; attendu := 'pack 100 € = 100 crédits';
+  obtenu := 'pack 100 € = ' || v_pack_credits || ' crédits'; ok := v_pack_credits = 100; RETURN NEXT;
+
+  SELECT k.commission_eur INTO v_msg FROM public.achats_credits k
+  WHERE k.eleve_id = v_eleve ORDER BY k.achete_le DESC LIMIT 1;
+  etape := 'a pas de commission à l''achat'; attendu := 'commission_eur = 0';
+  obtenu := 'commission_eur = ' || v_msg; ok := v_msg::numeric = 0; RETURN NEXT;
 
   -- (b) Réservation
   RESET ROLE;
@@ -74,6 +86,11 @@ BEGIN
   ok := v_res.nouveau_solde = v_solde_avant - v_prix AND v_places = v_places_avant - 1
         AND v_res.code_creazio ~ '^CRZ-[A-Z0-9]{6}$';
   RETURN NEXT;
+
+  SELECT r.montant_artisan_eur::text INTO v_msg FROM public.reservations r WHERE r.id = v_res.reservation_id;
+  etape := 'b part artisan (commission sur crédits dépensés)';
+  attendu := round(v_prix * (1 - v_taux), 2) || ' € (' || v_prix || ' × ' || (1 - v_taux) || ')';
+  obtenu := v_msg || ' €'; ok := v_msg::numeric = round(v_prix * (1 - v_taux), 2); RETURN NEXT;
 
   -- (c) Deuxième réservation de la même session
   BEGIN

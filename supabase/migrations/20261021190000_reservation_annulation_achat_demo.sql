@@ -4,6 +4,10 @@
 
 CREATE SCHEMA IF NOT EXISTS prive;
 
+-- Règle 1 crédit = 1 € : un pack de 50 € donne 50 crédits.
+UPDATE public.packs_credits SET nombre_credits = round(prix_eur)::integer
+WHERE nombre_credits <> round(prix_eur)::integer;
+
 -- ---------------------------------------------------------------------------
 -- Outils internes (non appelables depuis l'API)
 -- ---------------------------------------------------------------------------
@@ -93,6 +97,8 @@ REVOKE ALL ON FUNCTION prive.eleve_connecte(), prive.parametres(), prive.taux_fr
 
 -- ---------------------------------------------------------------------------
 -- 1. Achat d'un pack de crédits (mode démo, sans Stripe)
+-- La commission n'est pas prise à l'achat (commission_eur = 0) : elle est prise sur les crédits dépensés,
+-- à la réservation. taux_commission garde le taux en vigueur, pour la traçabilité.
 -- ---------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.acheter_pack_demo(p_pack_id uuid)
 RETURNS integer LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
@@ -113,8 +119,7 @@ BEGIN
 
   INSERT INTO public.achats_credits (eleve_id, pack_id, nombre_credits, montant_paye_eur, taux_commission,
     commission_eur, statut_paiement, reference_paiement, conserver_jusqu_au)
-  VALUES (v_eleve, v_pack.id, v_pack.nombre_credits, v_pack.prix_eur, v_param.taux_commission,
-    round(v_pack.prix_eur * prive.taux_fraction(v_param.taux_commission), 2), 'reussi',
+  VALUES (v_eleve, v_pack.id, v_pack.nombre_credits, v_pack.prix_eur, v_param.taux_commission, 0, 'reussi',
     'DEMO-' || upper(substr(replace(gen_random_uuid()::text, '-', ''), 1, 12)),
     now() + make_interval(years => v_param.duree_conservation_traces_achat_annees))
   RETURNING id, achete_le INTO v_achat_id, v_achete_le;
