@@ -1,11 +1,12 @@
 import { FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "@tanstack/react-router";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link, useNavigate, useParams, useSearch } from "@tanstack/react-router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ensureProfile, friendlyAuthError, type ProfileRole } from "@/lib/auth";
 import { ArrowLeft, ArrowRight, CalendarDays, Check, ChevronRight, CircleUserRound, Clock3, Coins, Euro, Eye, Filter, Heart, LogOut, MapPin, Menu, Palette, Search, Sparkles, Star, Users, WalletCards, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import hero from "@/assets/creazio-hero.jpg";
 import pottery from "@/assets/creazio-pottery.jpg";
 import leather from "@/assets/creazio-leather.jpg";
@@ -15,6 +16,7 @@ import { RAYON_RECOMMANDATION_KM, distanceKm, formatDuree, geocodeAddress, label
 import { craftCategories, savoirFaireByCategory, type CraftCategory } from "./catalog";
 import { AddressFields, ArtisanOnboardingFields, CategoryPicker, useCreazioSession } from "./session-state";
 import { WorkshopSlots } from "./workshop-slots";
+import { annulerReservation, delaiAnnulationQuery, formatCredits, formatHeure, formatJour, messageErreur, peutAnnuler, reservationQuery, upcomingReservationsQuery, walletQuery, type UpcomingReservation } from "@/lib/reservations";
 
 const workshops = [
   { id: "tour-de-potier", category: "Céramique", title: "Initiation au tour de potier", artisan: "Michel, céramiste", place: "Paris 11e", duration: "2h30", credits: 32, old: 36, image: pottery },
@@ -33,10 +35,12 @@ function PublicHeader() {
 }
 
 function MemberHeader() {
- return <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur"><div className="mx-auto flex h-16 max-w-[1360px] items-center justify-between px-5 md:h-20 md:px-12"><Logo/><nav className="hidden gap-2 md:flex"><NavLink to="/espace-eleve">Accueil</NavLink><NavLink to="/ateliers">Rechercher</NavLink><NavLink to="/espace-eleve/reservations">Mes réservations</NavLink></nav><div className="flex items-center gap-2"><span className="inline-flex items-center gap-1 rounded-full bg-accent px-3 py-2 text-xs font-semibold"><Coins className="size-4 text-primary"/>0 crédit</span><Button asChild variant="ghost" size="icon"><Link to="/espace-eleve/profil" aria-label="Mon profil"><CircleUserRound/></Link></Button></div></div><nav className="grid grid-cols-3 border-t bg-card md:hidden"><MobileTab to="/espace-eleve" icon={<Sparkles/>}>Accueil</MobileTab><MobileTab to="/ateliers" icon={<Search/>}>Rechercher</MobileTab><MobileTab to="/espace-eleve/reservations" icon={<CalendarDays/>}>Réservations</MobileTab></nav></header>;
+ return <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur"><div className="mx-auto flex h-16 max-w-[1360px] items-center justify-between px-5 md:h-20 md:px-12"><Logo/><nav className="hidden gap-2 md:flex"><NavLink to="/espace-eleve">Accueil</NavLink><NavLink to="/ateliers">Rechercher</NavLink><NavLink to="/espace-eleve/reservations">Mes réservations</NavLink></nav><div className="flex items-center gap-2"><HeaderBalance/><Button asChild variant="ghost" size="icon"><Link to="/espace-eleve/profil" aria-label="Mon profil"><CircleUserRound/></Link></Button></div></div><nav className="grid grid-cols-3 border-t bg-card md:hidden"><MobileTab to="/espace-eleve" icon={<Sparkles/>}>Accueil</MobileTab><MobileTab to="/ateliers" icon={<Search/>}>Rechercher</MobileTab><MobileTab to="/espace-eleve/reservations" icon={<CalendarDays/>}>Réservations</MobileTab></nav></header>;
 }
-function NavLink({to,children}:{to:string;children:ReactNode}) { return <Link to={to} className="rounded-lg px-4 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{className:"bg-muted text-primary font-semibold"}}>{children}</Link> }
-function MobileTab({to,icon,children}:{to:string;icon:ReactNode;children:ReactNode}) { return <Link to={to} className="flex min-h-14 flex-col items-center justify-center gap-1 text-[11px] text-muted-foreground [&_svg]:size-4" activeProps={{className:"text-primary font-semibold"}}>{icon}{children}</Link> }
+function HeaderBalance(){const {data,isPending,error}=useQuery(walletQuery);const label=isPending?"…":error?"Solde indisponible":formatCredits(data?.solde_credits??0);
+ return <Link to="/espace-eleve/profil" aria-live="polite" aria-label={`Mon solde : ${label}`} className="inline-flex items-center gap-1 rounded-full bg-accent px-3 py-2 text-xs font-semibold"><Coins className="size-4 text-primary"/>{label}</Link>}
+function NavLink({to,children}:{to:string;children:ReactNode}) { return <Link to={to} activeOptions={{exact:to==="/espace-eleve"}} className="rounded-lg px-4 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{className:"bg-muted text-primary font-semibold"}}>{children}</Link> }
+function MobileTab({to,icon,children}:{to:string;icon:ReactNode;children:ReactNode}) { return <Link to={to} activeOptions={{exact:to==="/espace-eleve"}} className="flex min-h-14 flex-col items-center justify-center gap-1 text-[11px] text-muted-foreground [&_svg]:size-4" activeProps={{className:"text-primary font-semibold"}}>{icon}{children}</Link> }
 
 export function ArtisanShell({active,children}:{active:"planning"|"ateliers"|"revenus"|"profil";children:ReactNode}) {
   const navigate=useNavigate();const queryClient=useQueryClient();
@@ -137,7 +141,45 @@ export function StudentHomePage(){const {data,isLoading}=useQuery(recommendation
   const profile=profileQuery.data;
   const adresseEleve=profile?.adresse_ligne?`${profile.adresse_ligne}, ${profile.code_postal} ${profile.ville}`:"";
   return <><MemberHeader/><main className="mx-auto max-w-[1360px] px-5 py-8 md:px-12"><PageTitle title={profile?.prenom?`Bonjour ${profile.prenom}`:"Bonjour"} body="Prêt·e pour une nouvelle découverte créative ?" action={adresseEleve?<span className="rounded-full bg-muted px-4 py-2 text-xs">{adresseEleve}</span>:null}/><section><div className="mb-4 flex items-center justify-between"><div><h2 className="text-xl font-semibold">Vos ateliers recommandés</h2><p className="text-sm text-muted-foreground">À moins de {RAYON_RECOMMANDATION_KM} km de chez vous, selon vos envies.</p></div><Link to="/ateliers" className="text-sm font-semibold text-primary">Tout explorer</Link></div>{isLoading?<p className="text-sm text-muted-foreground">Recherche d’ateliers près de chez vous…</p>:data?.status==="incomplet"?<EmptyState icon={<MapPin/>} title="Complétez votre profil" body="Renseignez votre adresse et ce qui vous inspire pour recevoir des ateliers près de chez vous." action={<Button asChild><Link to="/espace-eleve/profil">Compléter mon profil</Link></Button>}/>:data?.items.length?<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{data.items.map(w=><DbWorkshopCard key={w.id} w={w}/>)}</div>:<EmptyState icon={<Sparkles/>} title="Pas encore d’atelier près de chez vous" body={`Aucun atelier de vos savoir-faire préférés à moins de ${RAYON_RECOMMANDATION_KM} km pour le moment.`} action={<Button asChild><Link to="/ateliers">Tout explorer</Link></Button>}/>}</section></main></>}
-export function ReservationsPage(){return <><MemberHeader/><main className="mx-auto max-w-[1100px] px-5 py-8 md:px-12"><PageTitle title="Mes réservations" body="Retrouvez vos ateliers à venir et votre historique."/><div className="flex gap-2 border-b"><button className="border-b-2 border-primary px-4 py-3 text-sm font-semibold">À venir</button><button className="px-4 py-3 text-sm text-muted-foreground">Passées</button></div><EmptyState icon={<CalendarDays/>} title="Aucune réservation à venir" body="Vos prochains rendez-vous créatifs apparaîtront ici." action={<Button asChild><Link to="/ateliers">Découvrir les ateliers</Link></Button>}/></main></>}
+export function ReservationsPage(){
+  const {data,isPending,error,refetch}=useQuery(upcomingReservationsQuery);
+  const {data:delai=48}=useQuery(delaiAnnulationQuery);
+  const [annonce,setAnnonce]=useState("");
+  return <><MemberHeader/><main className="mx-auto max-w-[1100px] px-5 py-8 md:px-12"><PageTitle title="Mes réservations" body="Retrouvez vos prochains ateliers et le code à présenter à l’artisan."/>
+    {annonce&&<p role="status" className="mb-5 rounded-xl bg-secondary p-4 text-sm text-secondary-foreground">{annonce}</p>}
+    {isPending?<p role="status" className="text-sm text-muted-foreground">Chargement de vos réservations…</p>
+    :error?<div><p role="alert" className="text-sm">{messageErreur(error)}</p><Button variant="outline" className="mt-3" onClick={()=>refetch()}>Réessayer</Button></div>
+    :!data.length?<EmptyState icon={<CalendarDays/>} title="Aucune réservation à venir" body="Vos prochains rendez-vous créatifs apparaîtront ici." action={<Button asChild><Link to="/ateliers">Découvrir les ateliers</Link></Button>}/>
+    :<ul className="grid gap-4">{data.map(r=><ReservationCard key={r.id} r={r} delai={delai} onCancelled={setAnnonce}/>)}</ul>}
+  </main></>}
+function ReservationCard({r,delai,onCancelled}:{r:UpcomingReservation;delai:number;onCancelled:(message:string)=>void}){
+  const queryClient=useQueryClient();
+  const [open,setOpen]=useState(false);
+  const atelier=r.sessions.ateliers;
+  const annulable=peutAnnuler(r.sessions.debut_le,delai);
+  const annulation=useMutation({mutationFn:()=>annulerReservation(r.id),onSuccess:async solde=>{
+    queryClient.setQueryData(walletQuery.queryKey,()=>({solde_credits:solde}));
+    setOpen(false);
+    onCancelled(`Réservation annulée : ${formatCredits(r.credits_debites)} recrédités. Nouveau solde : ${formatCredits(solde)}.`);
+    await queryClient.invalidateQueries({queryKey:["reservations"]});
+    if(atelier)await queryClient.invalidateQueries({queryKey:["ateliers",atelier.id,"sessions-disponibles"]});
+  }});
+  const aideId=`annulation-aide-${r.id}`;
+  return <li className="rounded-2xl border bg-card p-5 md:flex md:items-start md:justify-between md:gap-6">
+    <div><h2 className="text-lg font-semibold">{atelier?.titre??"Atelier"}</h2>{atelier?.artisans?.nom_commercial&&<p className="text-sm text-muted-foreground">avec {atelier.artisans.nom_commercial}</p>}
+      <p className="mt-3 flex items-center gap-2 text-sm"><CalendarDays className="size-4 text-primary"/>{formatJour(r.sessions.debut_le)} · {formatHeure(r.sessions.debut_le)} – {formatHeure(r.sessions.fin_le)}</p>
+      {atelier&&<p className="mt-1 flex items-center gap-2 text-sm text-muted-foreground"><MapPin className="size-4"/>{atelier.adresse_ligne}, {atelier.code_postal} {atelier.ville}</p>}
+      <p className="mt-1 flex items-center gap-2 text-sm text-muted-foreground"><Coins className="size-4"/>{formatCredits(r.credits_debites)}</p></div>
+    <div className="mt-4 flex flex-col gap-3 md:mt-0 md:items-end"><div className="rounded-xl bg-muted px-4 py-2 md:text-right"><p className="text-xs text-muted-foreground">Code à présenter à l’artisan</p><p className="font-mono text-lg font-bold tracking-wider">{r.code_creazio}</p></div>
+      <AlertDialog open={open} onOpenChange={o=>{if(!annulation.isPending){setOpen(o);annulation.reset();}}}>
+        <AlertDialogTrigger asChild><Button variant="outline" disabled={!annulable} aria-describedby={annulable?undefined:aideId}>Annuler</Button></AlertDialogTrigger>
+        <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Annuler cette réservation ?</AlertDialogTitle><AlertDialogDescription>{atelier?.titre??"Atelier"}, le {formatJour(r.sessions.debut_le).toLowerCase()} à {formatHeure(r.sessions.debut_le)}. Vos {formatCredits(r.credits_debites)} seront recrédités sur votre solde.</AlertDialogDescription></AlertDialogHeader>
+          {annulation.error&&<p role="alert" className="rounded-lg bg-muted p-3 text-sm">{messageErreur(annulation.error)}</p>}
+          <AlertDialogFooter><AlertDialogCancel disabled={annulation.isPending}>Garder ma réservation</AlertDialogCancel><Button variant="destructive" disabled={annulation.isPending} onClick={()=>annulation.mutate()}>{annulation.isPending?"Annulation en cours…":"Oui, annuler"}</Button></AlertDialogFooter></AlertDialogContent>
+      </AlertDialog>
+      {!annulable&&<p id={aideId} className="max-w-[260px] text-xs text-muted-foreground md:text-right">Annulation impossible à moins de {delai} h du début de l’atelier. Pour toute question, écrivez à <a className="underline" href="mailto:support@creazio.fr">support@creazio.fr</a>.</p>}
+    </div>
+  </li>}
 export const packs=[{id:"decouverte",tag:"Initiation",name:"Pack Découverte",credits:45,price:50},{id:"regulier",tag:"Recommandé",name:"Pack Régulier",credits:90,price:100,popular:true},{id:"passionne",tag:"Approfondi",name:"Pack Passionné",credits:135,price:150}];
 export function ProfilePage(){
   const {inspirations,setInspirations,studentAddress,setStudentAddress}=useCreazioSession();
@@ -147,7 +189,7 @@ export function ProfilePage(){
   const [profileMessage,setProfileMessage]=useState("");const [msg,setMsg]=useState("");const [busy,setBusy]=useState(false);
   const [selectedPackId,setSelectedPackId]=useState<string|null>(null);
   const profileQuery=useQuery({queryKey:["profil"],queryFn:async()=>{const {data:{user}}=await supabase.auth.getUser();if(!user)return null;const {data,error}=await supabase.from("profiles").select("*").eq("id",user.id).maybeSingle();if(error)throw error;return data;}});
-  const walletQuery=useQuery({queryKey:["portefeuille"],queryFn:async()=>{const {data:{user}}=await supabase.auth.getUser();if(!user)return null;const {data}=await supabase.from("portefeuilles").select("solde_credits").eq("eleve_id",user.id).maybeSingle();return data;}});
+  const wallet=useQuery(walletQuery);
   const packsQuery=useQuery({queryKey:["packs_credits"],queryFn:async()=>{const {data,error}=await supabase.from("packs_credits").select("id,prix_eur,nombre_credits").eq("actif",true).order("prix_eur");if(error)throw error;return data;}});
   const profile=profileQuery.data;
   useEffect(()=>{if(profile){setPrenom(profile.prenom);setNom(profile.nom);
@@ -163,7 +205,7 @@ export function ProfilePage(){
   },[packsQuery.data]);
   useEffect(()=>{if(packsQuery.data&&!(selectedPackId&&availablePacks.some(p=>p.id===selectedPackId))){const popular=availablePacks.find(p=>p.popular)??availablePacks[0];if(popular)setSelectedPackId(popular.id);}},[packsQuery.data,availablePacks,selectedPackId]);
   const sel=availablePacks.find(p=>p.id===selectedPackId)??availablePacks[0]??{credits:90,price:100};
-  const solde=walletQuery.data?.solde_credits??0;
+  const solde=wallet.data?.solde_credits??0;
   async function saveProfile(){
     setBusy(true);
     const {data:{user}}=await supabase.auth.getUser();
@@ -181,7 +223,28 @@ export function ProfilePage(){
     navigate({to:"/connexion",replace:true});
   }
   return <><MemberHeader/><main className="mx-auto max-w-[1100px] px-5 py-8 md:px-12"><PageTitle title="Mon profil et mes crédits"/><div className="grid gap-6 lg:grid-cols-[.9fr_1.1fr]"><section className="rounded-2xl border bg-card p-6"><div className="flex items-center gap-4"><div className="grid size-14 place-items-center rounded-full bg-secondary text-xl font-bold text-secondary-foreground">{(prenom||profile?.email||"C").charAt(0).toUpperCase()}</div><div><h2 className="font-semibold">Votre profil</h2><p className="text-sm text-muted-foreground">Informations à compléter</p></div></div><div className="mt-6 grid gap-4"><div className="grid grid-cols-2 gap-4"><Field label="Prénom"><Input value={prenom} onChange={e=>setPrenom(e.target.value)} placeholder="Prénom"/></Field><Field label="Nom"><Input value={nom} onChange={e=>setNom(e.target.value)} placeholder="Nom"/></Field></div><Field label="Email"><Input type="email" value={profile?.email??""} disabled readOnly/></Field><AddressFields value={studentAddress} onChange={setStudentAddress}/><h2 className="mt-3 text-lg font-semibold">Ce qui m’inspire</h2><CategoryPicker values={inspirations} onChange={setInspirations}/><Button variant="outline" onClick={saveProfile} disabled={busy}>Enregistrer</Button>{profileMessage&&<p role="status" className="text-sm text-muted-foreground">{profileMessage}</p>}<Button variant="ghost" onClick={logout} className="text-muted-foreground"><LogOut/>Me déconnecter</Button></div></section><div className="grid gap-6 content-start"><section className="rounded-2xl bg-secondary p-6 text-secondary-foreground"><Coins className="size-7"/><p className="mt-4 text-sm opacity-80">Solde disponible</p><strong className="text-4xl">{solde} {solde>1?"crédits":"crédit"}</strong><p className="mt-2 text-sm opacity-80">Valables 12 mois sur tous les ateliers.</p></section><section className="rounded-2xl border bg-card p-6"><h2 className="text-xl font-semibold">Recharger mes crédits</h2><div className="mt-5 grid gap-3 sm:grid-cols-3">{availablePacks.map(p=><button key={p.id} type="button" onClick={()=>{setSelectedPackId(p.id);setMsg("")}} aria-pressed={selectedPackId===p.id} className={cn("relative flex flex-col rounded-xl border-2 p-4 text-left transition active:scale-[.98]",selectedPackId===p.id?"border-primary bg-accent":"border-border hover:border-primary/50")}>{p.popular&&<span className="label-font absolute -top-2.5 right-3 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase text-primary-foreground">Populaire</span>}<span className="label-font text-[10px] font-semibold uppercase text-muted-foreground">{p.tag}</span><span className="mt-1 text-sm font-semibold">{p.name}</span><strong className="mt-3 text-3xl text-primary">{p.credits}</strong><span className="text-xs text-muted-foreground">crédits · {p.price} € TTC</span><span className={cn("mt-3 inline-flex items-center gap-1 text-xs font-semibold",selectedPackId===p.id?"text-primary":"text-muted-foreground")}>{selectedPackId===p.id?<><Check className="size-3.5"/>Sélectionné</>:"Choisir ce pack"}</span></button>)}</div><div className="mt-6 rounded-xl bg-muted p-4"><div className="flex items-center justify-between text-sm"><span className="flex items-center gap-2"><WalletCards className="size-4 text-primary"/>Pack sélectionné : {sel.credits} crédits</span><strong>{sel.price},00 €</strong></div></div><Button className="mt-5 w-full" size="lg" onClick={()=>setMsg("Le paiement par carte sera activé lors de la mise en place des paiements.")}>Payer {sel.price} € et créditer mon compte</Button>{msg&&<p role="status" className="mt-3 rounded-xl bg-accent p-3 text-sm text-accent-foreground">{msg}</p>}<p className="mt-3 text-center text-xs text-muted-foreground">Paiement unique, sans engagement ni abonnement.</p></section></div></div></main></>}
-export function ConfirmationPage(){return <><MemberHeader/><main className="mx-auto max-w-xl px-5 py-16 text-center"><div className="mx-auto grid size-20 place-items-center rounded-full bg-secondary text-secondary-foreground"><Check className="size-9"/></div><h1 className="mt-6 text-3xl font-bold">Réservation prête à être confirmée</h1><p className="mt-3 text-muted-foreground">Aucune donnée n’a été enregistrée. La confirmation réelle sera activée avec Supabase.</p><div className="mt-8 rounded-2xl border bg-card p-5 text-left"><p className="font-semibold">Initiation au tour de potier</p><p className="mt-2 text-sm text-muted-foreground">Créneau sélectionné · 1 participant</p></div><Button asChild className="mt-8"><Link to="/espace-eleve/reservations">Voir mes réservations</Link></Button></main></>}
+export function ConfirmationPage(){
+  const {reservation:id}=useSearch({strict:false}) as {reservation?:string};
+  const {data:r,isPending,error,refetch}=useQuery({...reservationQuery(id??""),enabled:Boolean(id)});
+  const {data:wallet}=useQuery(walletQuery);
+  const {data:delai=48}=useQuery(delaiAnnulationQuery);
+  const atelier=r?.sessions?.ateliers;
+  return <><MemberHeader/><main className="mx-auto max-w-xl px-5 py-16">
+    {!id?<EmptyState icon={<CalendarDays/>} title="Aucune réservation à afficher" body="Retrouvez toutes vos réservations dans « Mes réservations »." action={<Button asChild><Link to="/espace-eleve/reservations">Voir mes réservations</Link></Button>}/>
+    :isPending?<p role="status" className="text-center text-sm text-muted-foreground">Chargement de votre réservation…</p>
+    :error?<div className="text-center"><p role="alert" className="text-sm">{messageErreur(error)}</p><Button variant="outline" className="mt-3" onClick={()=>refetch()}>Réessayer</Button></div>
+    :!r||!r.sessions||r.statut!=="confirmee"?<EmptyState icon={<CalendarDays/>} title="Réservation introuvable" body="Elle a peut-être été annulée. Retrouvez vos réservations à venir dans « Mes réservations »." action={<Button asChild><Link to="/espace-eleve/reservations">Voir mes réservations</Link></Button>}/>
+    :<div className="text-center"><div className="mx-auto grid size-20 place-items-center rounded-full bg-secondary text-secondary-foreground"><Check className="size-9"/></div><h1 className="mt-6 text-3xl font-bold">Réservation confirmée</h1><p className="mt-3 text-muted-foreground">Un récapitulatif reste disponible dans « Mes réservations ».</p>
+      <div className="mt-8 rounded-2xl border bg-card p-5 text-left"><p className="text-lg font-semibold">{atelier?.titre??"Atelier"}</p>{atelier?.artisans?.nom_commercial&&<p className="text-sm text-muted-foreground">avec {atelier.artisans.nom_commercial}</p>}
+        <dl className="mt-4 grid gap-3 text-sm">
+          <div className="flex gap-2"><CalendarDays className="size-4 shrink-0 text-primary"/><dt className="sr-only">Date</dt><dd>{formatJour(r.sessions.debut_le)} · {formatHeure(r.sessions.debut_le)} – {formatHeure(r.sessions.fin_le)}</dd></div>
+          {atelier&&<div className="flex gap-2"><MapPin className="size-4 shrink-0 text-primary"/><dt className="sr-only">Adresse</dt><dd>{atelier.adresse_ligne}, {atelier.code_postal} {atelier.ville}</dd></div>}
+          <div className="flex gap-2"><Coins className="size-4 shrink-0 text-primary"/><dt className="sr-only">Crédits</dt><dd>{formatCredits(r.credits_debites)} débités{wallet&&<> · nouveau solde : <strong>{formatCredits(wallet.solde_credits)}</strong></>}</dd></div>
+        </dl>
+        <div className="mt-5 rounded-xl bg-muted p-4 text-center"><p className="text-sm text-muted-foreground">Votre code Creazio, à présenter à l’artisan</p><p className="mt-1 font-mono text-3xl font-bold tracking-widest text-primary">{r.code_creazio}</p></div>
+        <p className="mt-4 text-xs text-muted-foreground">Arrivez 10 minutes avant le début. Annulation gratuite jusqu’à {delai} h avant l’atelier, depuis « Mes réservations ».</p></div>
+      <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row"><Button asChild><Link to="/espace-eleve/reservations">Voir mes réservations</Link></Button><Button asChild variant="outline"><Link to="/ateliers">Découvrir d’autres ateliers</Link></Button></div></div>}
+  </main></>}
 
 export function ArtisanApplicationPage(){const [done,setDone]=useState(false);return <><PublicHeader/><main className="mx-auto max-w-3xl px-5 py-10"><Link to="/devenir-artisan" className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground"><ArrowLeft className="size-4"/>Retour</Link><PageTitle eyebrow="Artisans partenaires" title="Votre candidature" body="Présentez-nous votre atelier en quelques minutes."/>{done?<EmptyState icon={<Check/>} title="Formulaire validé" body="Votre candidature n’a pas été enregistrée : elle le sera lorsque votre projet Supabase sera raccordé." action={<Button asChild><Link to="/devenir-artisan">Retour à la présentation</Link></Button>}/>:<form onSubmit={e=>{e.preventDefault();setDone(true)}} className="grid gap-8 rounded-2xl border bg-card p-5 shadow-sm md:p-8"><FormSection number="1" title="Vous et votre atelier"><div className="grid gap-4 md:grid-cols-2"><Field label="Prénom"><Input required/></Field><Field label="Nom"><Input required/></Field></div><Field label="Nom de l’atelier"><Input required/></Field><Field label="Adresse email professionnelle"><Input type="email" required/></Field></FormSection><ArtisanOnboardingFields/><Button type="submit" size="lg">Envoyer ma candidature <ArrowRight/></Button></form>}</main></>}
 function FormSection({number,title,children}:{number:string;title:string;children:ReactNode}){return <section className="grid gap-5"><div className="flex items-center gap-3"><span className="grid size-8 place-items-center rounded-full border border-primary text-sm font-bold text-primary">{number}</span><h2 className="text-lg font-semibold">{title}</h2></div>{children}</section>}
