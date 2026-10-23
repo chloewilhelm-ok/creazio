@@ -38,6 +38,19 @@ export async function saveInterests(userId: string, categories: string[]) {
   if (values.length) await supabase.from("profil_savoirs_faire").insert(values.map(savoir_faire => ({ profile_id: userId, savoir_faire })));
 }
 
+/**
+ * Enregistre les ateliers favoris choisis à l'inscription (user_metadata.categories) si l'élève n'a encore
+ * aucun centre d'intérêt. Nécessaire quand la connexion vient du lien de confirmation de l'email :
+ * le formulaire de connexion n'est alors jamais passé, et le trigger de la base ne gère que les artisans.
+ */
+export async function ensureSignupInterests(user: { id: string; user_metadata?: { role?: unknown; categories?: unknown } }) {
+  const meta = user.user_metadata ?? {};
+  const categories = Array.isArray(meta.categories) ? meta.categories.filter((c): c is string => typeof c === "string") : [];
+  if (meta.role === "artisan" || !categories.length) return;
+  const { count } = await supabase.from("profil_savoirs_faire").select("savoir_faire", { count: "exact", head: true }).eq("profile_id", user.id);
+  if (!count) await saveInterests(user.id, categories);
+}
+
 /** Complète les coordonnées du profil si elles manquent. */
 export async function ensureProfileCoords(userId: string) {
   const { data } = await supabase.from("profiles").select("adresse_ligne,code_postal,ville,latitude").eq("id", userId).maybeSingle();
@@ -71,7 +84,7 @@ export const recommendationsQuery = queryOptions({
   queryFn: async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { status: "anon" as const, items: [] };
-    await ensureProfileCoords(user.id);
+    await Promise.all([ensureProfileCoords(user.id), ensureSignupInterests(user)]);
     const [{ data: profile }, { count }] = await Promise.all([
       supabase.from("profiles").select("latitude").eq("id", user.id).maybeSingle(),
       supabase.from("profil_savoirs_faire").select("savoir_faire", { count: "exact", head: true }).eq("profile_id", user.id),

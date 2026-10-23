@@ -12,7 +12,7 @@ import pottery from "@/assets/creazio-pottery.jpg";
 import leather from "@/assets/creazio-leather.jpg";
 import printmaking from "@/assets/creazio-print.jpg";
 import { cn } from "@/lib/utils";
-import { RAYON_RECOMMANDATION_KM, distanceKm, formatDuree, geocodeAddress, labelSavoirFaire, publishedWorkshopsQuery, recommendationsQuery, saveInterests, workshopQuery } from "@/lib/workshops";
+import { RAYON_RECOMMANDATION_KM, distanceKm, ensureSignupInterests, formatDuree, geocodeAddress, labelSavoirFaire, publishedWorkshopsQuery, recommendationsQuery, saveInterests, workshopQuery } from "@/lib/workshops";
 import { craftCategories, savoirFaireByCategory, type CraftCategory } from "./catalog";
 import { AddressFields, ArtisanOnboardingFields, CategoryPicker, useCreazioSession } from "./session-state";
 import { WorkshopSlots } from "./workshop-slots";
@@ -77,7 +77,7 @@ function AuthPage({artisan=false}:{artisan?:boolean}){
       catch(insertError){setError(friendlyAuthError(insertError instanceof Error?insertError.message:undefined));setBusy(false);return;}
     }
     const role=profile?.role??meta.role;
-    if(role!=="artisan"&&meta.categories?.length){const {count}=await supabase.from("profil_savoirs_faire").select("savoir_faire",{count:"exact",head:true}).eq("profile_id",user.id);if(!count)await saveInterests(user.id,meta.categories);}
+    if(role!=="artisan")await ensureSignupInterests(user);
     navigate({to:role==="artisan"?"/artisan/planning":"/espace-eleve"});
   }
   return <><PublicHeader/><main className="mx-auto grid min-h-[calc(100vh-80px)] max-w-[1100px] items-center px-5 py-12"><div className="mx-auto w-full max-w-md"><Link to={artisan?"/devenir-artisan":"/"} className="mb-8 inline-flex items-center gap-2 text-sm text-muted-foreground"><ArrowLeft className="size-4"/>Retour</Link><PageTitle eyebrow={artisan?"Espace artisan":"Espace élève"} title="Ravi de vous revoir" body="Connectez-vous pour accéder à votre espace."/><form onSubmit={submit} className="grid gap-5"><Field label="Adresse email"><Input type="email" required autoComplete="email" placeholder="vous@exemple.fr" value={email} onChange={e=>setEmail(e.target.value)}/></Field><Field label="Mot de passe"><Input type="password" required autoComplete="current-password" placeholder="••••••••" value={password} onChange={e=>setPassword(e.target.value)}/></Field>{error&&<p role="alert" className="rounded-xl bg-accent p-4 text-sm text-accent-foreground">{error}</p>}<Button type="submit" size="lg" disabled={busy}>{busy?"Connexion…":"Se connecter"}</Button></form>{artisan?<p className="mt-6 text-center text-sm text-muted-foreground">Pas encore partenaire ? <Link to="/artisan/inscription" className="font-semibold text-primary">S’inscrire</Link></p>:<p className="mt-6 text-center text-sm text-muted-foreground">Pas encore membre ? <Link to="/inscription" className="font-semibold text-primary">Créer un compte</Link></p>}</div></main></>}
