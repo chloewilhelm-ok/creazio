@@ -13,6 +13,15 @@ const DESCRIPTIONS: Record<string, string> = {
   "/ateliers/bougies.jpg":
     "Quatre bougies coulées dans des pots en céramique, posées sur une planche en bois",
   "/ateliers/reliure.jpg": "Pile de carnets reliés à couverture noire, vus par la tranche",
+  "/ateliers/bijouterie.jpg":
+    "Bijoutière à son établi examinant des bagues en argent glissées sur ses doigts",
+  "/ateliers/cuir.jpg":
+    "Mains cousant une pièce de cuir au fil ciré, maintenue dans une pince en bois",
+  "/ateliers/tissage.jpg":
+    "Mains passant des fils colorés sur un métier à tisser, motifs géométriques roses et bleus",
+  "/ateliers/bois.jpg": "Main gantée sculptant un morceau de bois à la gouge, entourée de copeaux",
+  "/ateliers/terrarium.jpg":
+    "Mains plantant une succulente dans un terrarium en verre géométrique, sur une table d'atelier",
 };
 const DESCRIPTION_PAR_DEFAUT = "Mains façonnant un vase en terre sur un tour de potier";
 

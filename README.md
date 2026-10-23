@@ -33,3 +33,7 @@ npm run dev
 - TypeScript
 - React
 - Tailwind CSS
+
+## Crédits photo
+
+Les photos des ateliers de démonstration (`public/ateliers/`) proviennent d'[Unsplash](https://unsplash.com) et sont utilisées sous la [licence Unsplash](https://unsplash.com/license) : utilisation libre, y compris commerciale, attribution non requise. Les noms des photographes n'ont pas été conservés lors du téléchargement.
