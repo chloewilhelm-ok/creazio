@@ -76,3 +76,14 @@ describe("affichage des crédits", () => {
     ]);
   });
 });
+
+describe("achat de crédits en mode démo", () => {
+  it("explique un pack devenu indisponible", () => {
+    expect(
+      toReservationError({ message: "PACK_INDISPONIBLE: Ce pack de crédits n'est pas disponible." })
+        .message,
+    ).toBe(
+      "Ce pack de crédits n’est plus disponible. Rechargez la page et choisissez-en un autre.",
+    );
+  });
+});

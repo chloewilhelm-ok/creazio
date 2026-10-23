@@ -36,6 +36,9 @@ const MESSAGES_ERREUR: Record<string, string> = {
   RESERVATION_INTROUVABLE: "Cette réservation est introuvable.",
   NON_CONNECTE: "Votre session a expiré. Reconnectez-vous pour continuer.",
   ROLE_INTERDIT: "Cette action est réservée aux comptes élèves.",
+  PACK_INDISPONIBLE:
+    "Ce pack de crédits n’est plus disponible. Rechargez la page et choisissez-en un autre.",
+  PARAMETRES_MANQUANTS: "L’achat de crédits est momentanément indisponible. Réessayez plus tard.",
 };
 const MESSAGE_PAR_DEFAUT = "Une erreur est survenue. Vérifiez votre connexion et réessayez.";
 
@@ -154,6 +157,13 @@ export async function annulerReservation(reservationId: string) {
   const { data, error } = await supabase.rpc("annuler_reservation", {
     p_reservation_id: reservationId,
   });
+  if (error) throw toReservationError(error);
+  return data;
+}
+
+/** Achat d'un pack en mode démo (aucun paiement réel) ; renvoie le nouveau solde. */
+export async function acheterPackDemo(packId: string) {
+  const { data, error } = await supabase.rpc("acheter_pack_demo", { p_pack_id: packId });
   if (error) throw toReservationError(error);
   return data;
 }
