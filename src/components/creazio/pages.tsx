@@ -31,18 +31,22 @@ function Logo({large=false}:{large?:boolean}) {
   return <Link to="/" className={cn("flex items-center gap-2 font-bold text-primary",large?"text-2xl sm:text-3xl":"text-xl sm:text-2xl")}><Palette className={large?"size-7 sm:size-8":"size-6"} aria-hidden="true"/><span>Creazio</span></Link>;
 }
 
-// « Espace artisans » en étiquette Laiton Solaire / Deep Forest (contraste 6,4:1) pour signaler le changement d'univers.
-const ETIQUETTE_ARTISANS="inline-flex items-center rounded-full bg-laiton px-4 py-1.5 text-sm font-semibold text-deep-forest transition hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deep-forest focus-visible:ring-offset-2";
+// « Espace artisans » : étiquette discrète pour signaler le changement d'univers (texte #0F3D3A sur #FFF6E0 : 11,2:1).
+const ETIQUETTE_ARTISANS="inline-flex items-center rounded-full border border-laiton bg-laiton-pale px-3.5 py-1 text-sm font-normal text-deep-forest transition hover:bg-abricot focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deep-forest focus-visible:ring-offset-2";
+// « Se connecter » et « S'inscrire » : même taille, même police ; plein pour l'action principale, contour pour la secondaire.
+const BOUTON_ENTETE="inline-flex h-10 items-center justify-center rounded-[8px] px-4 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deep-forest focus-visible:ring-offset-2";
+const BOUTON_PLEIN=cn(BOUTON_ENTETE,"bg-primary text-primary-foreground hover:bg-primary/90");
+const BOUTON_CONTOUR=cn(BOUTON_ENTETE,"border-[length:1.5px] border-deep-forest text-deep-forest hover:bg-sable");
 function PublicHeader() {
   const [open, setOpen] = useState(false);
   return <header className="sticky top-0 z-50 border-b border-border/70 bg-background/95 backdrop-blur-xl">
     <div className="mx-auto grid h-16 max-w-[1360px] grid-cols-[1fr_auto_1fr] items-center px-5 md:h-20 md:px-12">
       <div className="hidden md:block"><Link to="/devenir-artisan" className={ETIQUETTE_ARTISANS}>Espace artisans</Link></div>
       <div className="col-start-1 md:col-start-2"><Logo large/></div>
-      <nav className="hidden items-center justify-end gap-3 md:flex"><Button asChild size="sm"><Link to="/connexion">Se connecter</Link></Button><Button asChild size="sm"><Link to="/inscription">S’inscrire</Link></Button></nav>
+      <nav className="hidden items-center justify-end gap-3 md:flex"><Link to="/connexion" className={cn(BOUTON_CONTOUR,"w-36")}>Se connecter</Link><Link to="/inscription" className={cn(BOUTON_PLEIN,"w-36")}>S’inscrire</Link></nav>
       <Button variant="ghost" size="icon" className="col-start-3 justify-self-end md:hidden" aria-label={open?"Fermer le menu":"Ouvrir le menu"} aria-expanded={open} onClick={()=>setOpen(!open)}>{open?<X/>:<Menu/>}</Button>
     </div>
-    {open&&<nav className="border-t bg-card px-5 py-4 md:hidden"><div className="grid gap-3"><Link to="/devenir-artisan" className={cn(ETIQUETTE_ARTISANS,"justify-center py-2.5")}>Espace artisans</Link><Button asChild><Link to="/connexion">Se connecter</Link></Button><Button asChild><Link to="/inscription">S’inscrire</Link></Button></div></nav>}
+    {open&&<nav className="border-t bg-card px-5 py-4 md:hidden"><div className="grid gap-3"><Link to="/devenir-artisan" className={cn(ETIQUETTE_ARTISANS,"justify-center py-2")}>Espace artisans</Link><Link to="/connexion" className={BOUTON_CONTOUR}>Se connecter</Link><Link to="/inscription" className={BOUTON_PLEIN}>S’inscrire</Link></div></nav>}
   </header>;
 }
 

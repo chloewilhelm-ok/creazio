@@ -54,6 +54,7 @@
   --color-menthe: var(--menthe);
   --color-abricot: var(--abricot);
   --color-rose-argile: var(--rose-argile);
+  --color-laiton-pale: var(--laiton-pale);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -79,6 +80,7 @@
   --menthe: oklch(0.9 0.048 186.6); /* #BBE9E3 secondary-container */
   --abricot: oklch(0.915 0.071 75.1); /* #FFDDAF tertiary-fixed */
   --rose-argile: oklch(0.917 0.043 30.5); /* #FFDAD3 primary-fixed */
+  --laiton-pale: oklch(0.974 0.03 88.4); /* #FFF6E0 */
   --foreground: oklch(0.22 0.01 80);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.22 0.01 80);
