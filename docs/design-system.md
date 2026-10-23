@@ -142,10 +142,11 @@ L'esthétique fusionne un **minimalisme éditorial chaleureux** et une **sensibi
 
 La palette chromatique est tirée des matières premières de l'atelier parisien : argile brute, bois dense, feuillage d'hiver et reflets d'outils en laiton :
 
-- **Primaire (`#E0745E` - Terracotta Clay)** : Incarnation de l'énergie créative et de la terre cuite. Utilisée pour les actions déterminantes (réservation de créneau, achat de packs de crédits, jauges de progression).
+- **Primaire (`#8F3222` - Terracotta Cuit)** : Incarnation de l'énergie créative et de la terre cuite. Utilisée pour les actions déterminantes (réservation de créneau, achat de packs de crédits, jauges de progression). Teinte assombrie depuis le Terracotta Clay d'origine (`#E0745E`) pour l'accessibilité : texte blanc à **7,93:1** (WCAG AAA) contre 3,08:1 pour `#E0745E`, qui échouait au niveau AA (4,5:1). `#E0745E` reste réservé aux éléments décoratifs sans texte (illustrations, fonds de pastilles).
 - **Secondaire (`#0F3D3A` - Deep Forest)** : Évoque les tabliers d'atelier, l'ébénisterie et le cuir végétal. Employée pour la typographie de haut niveau, les headers structurants et les badges d'artisans vérifiés.
 - **Tertiaire (`#F4B13B` - Laiton Solaire)** : Ponctuation chaude rappelant le poinçon d'or et les finitions métalliques. Réservée aux soldes de crédits, aux créneaux en forte demande et aux certifications de maîtres artisans.
-- **Neutre (`#FAF7F2` - Sable Chaleureux)** : Toile de fond continue qui adoucit la perception visuelle sur écran desktop, relayée par `#F2E6D6` pour les cartes d'élévation intermédiaire et `#FFFFFF` pour les conteneurs d'interaction directe.
+- **Neutre (`#FFFEFD` - Blanc Coquille)** : Toile de fond continue, très légèrement chaude, relayée par `#F2E6D6` (Sable Chaleureux) pour les blocs d'élévation intermédiaire et `#FFFFFF` pour les conteneurs d'interaction directe, délimités par leur bordure. Éclaircie depuis `#FAF7F2` pour une page plus lumineuse.
+- **Pastilles de savoir-faire** : `#F2E6D6` (sable), `#BBE9E3` (menthe), `#FFDDAF` (abricot), `#FFDAD3` (rose argile), avec icône Deep Forest (contraste de 9,1 à 9,8:1).
 
 ## Typography
 
@@ -166,7 +167,7 @@ Le gabarit desktop est optimisé pour une largeur standard de **1440px** avec un
 
 Le principe de profondeur repose sur un étagement tactile et minéral évitant les ombres synthétiques lourdes :
 
-- **Superposition des plans** : Le fond de page `#FAF7F2` accueille des conteneurs d'ateliers en `#FFFFFF` ou des blocs d'informations secondaires en `#F2E6D6`.
+- **Superposition des plans** : Le fond de page `#FFFEFD` accueille des conteneurs d'ateliers en `#FFFFFF` ou des blocs d'informations secondaires en `#F2E6D6`.
 - **Ombres d'ambiance patinées** : Les surfaces interactives (cartes d'ateliers survolées, modales de réservation) utilisent une ombre douce infusée de teintes végétales et terracotta : `box-shadow: 0 12px 32px -8px rgba(15, 61, 58, 0.08), 0 4px 12px -2px rgba(224, 116, 94, 0.06)`.
 - **Filets de matière** : Délimitation géométrique précise via une bordure ténue de `1px solid rgba(15, 61, 58, 0.12)` assurant la lisibilité sans alourdir le regard.
 
@@ -190,9 +191,9 @@ La géométrie des interfaces traduit la rondeur d'un tour de potier ou le chanf
 - Version alternative "solde utilisateur" : fond `#FAF7F2`, bordure dorée, affichant l'icône de jeton et le nombre restant.
 
 ### Boutons
-- **Primary (Réserver / Confirmer)** : Fond plein Terracotta (`#E0745E`), texte blanc, coins arrondis à 12px, typographie Plus Jakarta Sans semibold. Au survol : assombrissement vers `#CE634D`.
+- **Primary (Réserver / Confirmer)** : Fond plein Terracotta Cuit (`#8F3222`), texte blanc (7,93:1), coins arrondis à 12px, typographie Plus Jakarta Sans semibold. Au survol : fond à 90 % d'opacité (`#9A4638`, texte blanc à 6,35:1).
 - **Secondary (Découvrir l'artisan)** : Fond transparent, bordure 1.5px Deep Forest (`#0F3D3A`), typographie Deep Forest. Survol sur fond `#F2E6D6`.
-- **Tertiary (Action rapide)** : Fond Golden Hour (`#F4B13B`), texte Deep Forest (`#0F3D3A`), réservé aux offres éclairs ou réapprovisionnements de crédits.
+- **Tertiary (Action rapide)** : Fond Laiton Solaire (`#F4B13B`), texte Deep Forest (`#0F3D3A`, contraste 6,4:1), réservé aux offres éclairs, aux réapprovisionnements de crédits et à l'étiquette « Espace artisans » de l'en-tête public (changement d'univers).
 
 ### Filtres & Chips
 - Puces en Space Grotesk `label-sm` avec fond `#F2E6D6` et texte `#1C1C19`.
@@ -204,3 +205,15 @@ La géométrie des interfaces traduit la rondeur d'un tour de potier ou le chanf
 
 ### Jauge de Disponibilité (Seat Counter)
 - Micro-composant placé sous l'horaire de l'atelier : barre fine de 4px, fond gris sable avec remplissage Terracotta indiquant le nombre de places restantes (ex: "Plus que 2 places").
+
+## Mise en œuvre dans le code
+
+Les couleurs ci-dessus sont déclarées en oklch dans `src/styles.css` (variables `--primary`, `--secondary`, `--background`, `--laiton`, `--deep-forest`, `--sable`, `--menthe`, `--abricot`, `--rose-argile`) et exposées en classes Tailwind (`bg-laiton`, `text-deep-forest`…). Les jetons de l'en-tête de ce fichier (`colors:`) sont l'export d'origine de Stitch ; en cas d'écart, les valeurs des sections ci-dessus et de `src/styles.css` font foi.
+
+| Rôle | Valeur appliquée | Contraste vérifié |
+|---|---|---|
+| Bouton principal | `#8F3222`, texte blanc | 7,93:1 (AAA) |
+| Bouton principal au survol | `#9A4638`, texte blanc | 6,35:1 (AA) |
+| Étiquette « Espace artisans » | `#F4B13B`, texte `#0F3D3A` | 6,40:1 (AA) |
+| Titres | `#0F3D3A` sur `#FFFEFD` | 11,92:1 (AAA) |
+| Pastilles de savoir-faire | 4 teintes claires, icône `#0F3D3A` | 9,08 à 9,76:1 (AAA) |

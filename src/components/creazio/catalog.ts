@@ -31,8 +31,8 @@ export function newWorkshop(artisan: ArtisanInfo): WorkshopDraft {
 export function upsertWorkshop(workshops: WorkshopDraft[], workshop: WorkshopDraft): WorkshopDraft[] {
   return workshops.some(item => item.id === workshop.id) ? workshops.map(item => item.id === workshop.id ? workshop : item) : [...workshops, workshop];
 }
-// Valeurs de l’énumère Postgres public.savoir_faire (base Supabase de l’utilisateur).
-export type SavoirFaire = "poterie_ceramique" | "textile" | "bois" | "vegetal" | "papier" | "cosmetique_bien_etre" | "bijouterie" | "metal" | "cuir" | "verre" | "pierre" | "agriculture" | "a_manger" | "a_boire";
+// Valeurs de l’énumère Postgres public.savoir_faire utilisées par le catalogue (base Supabase de l’utilisateur).
+export type SavoirFaire = "poterie_ceramique" | "textile" | "bois" | "vegetal" | "papier" | "cosmetique_bien_etre" | "bijouterie" | "metal" | "cuir" | "verre" | "a_manger" | "a_boire";
 export const savoirFaireByCategory: Record<CraftCategory, SavoirFaire> = {
   "Poterie et Céramique": "poterie_ceramique",
   "À manger": "a_manger",
