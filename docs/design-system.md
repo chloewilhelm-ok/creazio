@@ -1,0 +1,206 @@
+---
+name: Atelier Forest & Terracotta
+colors:
+  surface: '#fcf9f4'
+  surface-dim: '#dcdad5'
+  surface-bright: '#fcf9f4'
+  surface-container-lowest: '#ffffff'
+  surface-container-low: '#f6f3ee'
+  surface-container: '#f0ede9'
+  surface-container-high: '#ebe8e3'
+  surface-container-highest: '#e5e2dd'
+  on-surface: '#1c1c19'
+  on-surface-variant: '#56423e'
+  inverse-surface: '#31302d'
+  inverse-on-surface: '#f3f0eb'
+  outline: '#89726d'
+  outline-variant: '#dcc0bb'
+  surface-tint: '#9e412f'
+  primary: '#7f2a1a'
+  on-primary: '#ffffff'
+  primary-container: '#9e412f'
+  on-primary-container: '#ffcdc3'
+  inverse-primary: '#ffb4a5'
+  secondary: '#3b6662'
+  on-secondary: '#ffffff'
+  secondary-container: '#bbe9e3'
+  on-secondary-container: '#3f6a66'
+  tertiary: '#614000'
+  on-tertiary: '#ffffff'
+  tertiary-container: '#7b5819'
+  on-tertiary-container: '#ffd18d'
+  error: '#ba1a1a'
+  on-error: '#ffffff'
+  error-container: '#ffdad6'
+  on-error-container: '#93000a'
+  primary-fixed: '#ffdad3'
+  primary-fixed-dim: '#ffb4a5'
+  on-primary-fixed: '#3e0400'
+  on-primary-fixed-variant: '#7f2a1a'
+  secondary-fixed: '#beebe6'
+  secondary-fixed-dim: '#a2cfca'
+  on-secondary-fixed: '#00201e'
+  on-secondary-fixed-variant: '#224e4a'
+  tertiary-fixed: '#ffddaf'
+  tertiary-fixed-dim: '#eebf76'
+  on-tertiary-fixed: '#281800'
+  on-tertiary-fixed-variant: '#614000'
+  background: '#fcf9f4'
+  on-background: '#1c1c19'
+  surface-variant: '#e5e2dd'
+typography:
+  headline-xl:
+    fontFamily: Plus Jakarta Sans
+    fontSize: 48px
+    fontWeight: '700'
+    lineHeight: 56px
+  headline-xl-mobile:
+    fontFamily: Plus Jakarta Sans
+    fontSize: 34px
+    fontWeight: '700'
+    lineHeight: 42px
+  headline-lg:
+    fontFamily: Plus Jakarta Sans
+    fontSize: 36px
+    fontWeight: '700'
+    lineHeight: 44px
+  headline-lg-mobile:
+    fontFamily: Plus Jakarta Sans
+    fontSize: 28px
+    fontWeight: '700'
+    lineHeight: 36px
+  headline-md:
+    fontFamily: Plus Jakarta Sans
+    fontSize: 24px
+    fontWeight: '600'
+    lineHeight: 32px
+  headline-sm:
+    fontFamily: Plus Jakarta Sans
+    fontSize: 20px
+    fontWeight: '600'
+    lineHeight: 28px
+  body-lg:
+    fontFamily: Plus Jakarta Sans
+    fontSize: 18px
+    fontWeight: '400'
+    lineHeight: 28px
+  body-md:
+    fontFamily: Plus Jakarta Sans
+    fontSize: 16px
+    fontWeight: '400'
+    lineHeight: 24px
+  body-sm:
+    fontFamily: Plus Jakarta Sans
+    fontSize: 14px
+    fontWeight: '400'
+    lineHeight: 20px
+  label-lg:
+    fontFamily: Space Grotesk
+    fontSize: 14px
+    fontWeight: '600'
+    lineHeight: 20px
+    letterSpacing: 0.02em
+  label-md:
+    fontFamily: Space Grotesk
+    fontSize: 12px
+    fontWeight: '500'
+    lineHeight: 16px
+    letterSpacing: 0.03em
+  label-sm:
+    fontFamily: Space Grotesk
+    fontSize: 10px
+    fontWeight: '600'
+    lineHeight: 14px
+    letterSpacing: 0.05em
+rounded:
+  sm: 0.25rem
+  DEFAULT: 0.5rem
+  md: 0.75rem
+  lg: 1rem
+  xl: 1.5rem
+  full: 9999px
+spacing:
+  gutter: 1.5rem
+  margin: 3rem
+  space-xs: 0.25rem
+  space-sm: 0.5rem
+  space-md: 1rem
+  space-lg: 1.5rem
+  space-xl: 2rem
+---
+
+## Brand & Style
+
+Le système de design est conçu pour une plateforme de réservation d'ateliers d'artisans par crédits, implantée dans le paysage créatif parisien (poterie, travail du cuir, dorure, menuiserie d'art, verrerie). Il concilie la flexibilité servicielle d'un abonnement moderne avec la noblesse tactile du fait-main.
+
+L'esthétique fusionne un **minimalisme éditorial chaleureux** et une **sensibilité organique d'atelier** :
+- **Atmosphère minérale et texturée** : les fonds sables et terres cuites enveloppent l'expérience dans un climat calme, dépouillé de toute agressivité numérique.
+- **Rigueur d'atelier d'art** : des découpes nettes, un équilibre d'espaces calmes et une assise typographique contrastée traduisent le geste précis de l'artisan.
+- **Sobriété fonctionnelle** : l'interface valorise l'artisanat par le vide et la composition, sans fioritures superflues, pensée pour une navigation desktop 1440px aérée et engageante.
+
+## Colors
+
+La palette chromatique est tirée des matières premières de l'atelier parisien : argile brute, bois dense, feuillage d'hiver et reflets d'outils en laiton :
+
+- **Primaire (`#E0745E` - Terracotta Clay)** : Incarnation de l'énergie créative et de la terre cuite. Utilisée pour les actions déterminantes (réservation de créneau, achat de packs de crédits, jauges de progression).
+- **Secondaire (`#0F3D3A` - Deep Forest)** : Évoque les tabliers d'atelier, l'ébénisterie et le cuir végétal. Employée pour la typographie de haut niveau, les headers structurants et les badges d'artisans vérifiés.
+- **Tertiaire (`#F4B13B` - Laiton Solaire)** : Ponctuation chaude rappelant le poinçon d'or et les finitions métalliques. Réservée aux soldes de crédits, aux créneaux en forte demande et aux certifications de maîtres artisans.
+- **Neutre (`#FAF7F2` - Sable Chaleureux)** : Toile de fond continue qui adoucit la perception visuelle sur écran desktop, relayée par `#F2E6D6` pour les cartes d'élévation intermédiaire et `#FFFFFF` pour les conteneurs d'interaction directe.
+
+## Typography
+
+Le système typographique combine l'accueil chaleureux de **Plus Jakarta Sans** et la technicité d'atelier de **Space Grotesk** :
+
+- **Titres et récits (`Plus Jakarta Sans`)** : Utilisés du H1 au corps de texte pour conférer une voix humaine, fluide et élégante. Les titres s'expriment en teintes sombres (`#0F3D3A`) pour installer un ancrage visuel immédiat.
+- **Comptage et spécifications d'atelier (`Space Grotesk`)** : Consacré aux données précises du service : montants de crédits (ex: `4 CRÉDITS`), durées d'ateliers, jauges de places restantes, adresses dans Paris et filtres par matière.
+
+## Layout & Spacing
+
+Le gabarit desktop est optimisé pour une largeur standard de **1440px** avec une grille fluide à 12 colonnes contenue dans un max-width de 1360px :
+
+- **Desktop (1440px)** : Marges extérieures de `3rem` (48px) et gouttières de `1.5rem` (24px). L'espace négatif généreux (`space-xl`) isole les ateliers phares et laisse respirer la photographie artisanale.
+- **Tablette (768px - 1024px)** : 8 colonnes, marges de `2rem`, gouttières de `1.25rem`.
+- **Mobile (< 768px)** : 4 colonnes, marges resserrées à `1.25rem`, gouttières de `1rem`. Les filtres et sélecteurs de dates adoptent un défilement horizontal discret sans masquer la page.
+
+## Elevation & Depth
+
+Le principe de profondeur repose sur un étagement tactile et minéral évitant les ombres synthétiques lourdes :
+
+- **Superposition des plans** : Le fond de page `#FAF7F2` accueille des conteneurs d'ateliers en `#FFFFFF` ou des blocs d'informations secondaires en `#F2E6D6`.
+- **Ombres d'ambiance patinées** : Les surfaces interactives (cartes d'ateliers survolées, modales de réservation) utilisent une ombre douce infusée de teintes végétales et terracotta : `box-shadow: 0 12px 32px -8px rgba(15, 61, 58, 0.08), 0 4px 12px -2px rgba(224, 116, 94, 0.06)`.
+- **Filets de matière** : Délimitation géométrique précise via une bordure ténue de `1px solid rgba(15, 61, 58, 0.12)` assurant la lisibilité sans alourdir le regard.
+
+## Shapes
+
+La géométrie des interfaces traduit la rondeur d'un tour de potier ou le chanfreinage du bois poli :
+
+- **Composants d'action standard** : Rayon de courbure de `0.5rem` (8px) à `0.75rem` (12px) pour les boutons, champs et menus déroulants.
+- **Cartes et conteneurs d'atelier** : Rayon de `1rem` (16px) pour adoucir les blocs d'images et encadrer la mise en scène des métiers d'art.
+- **Jetons et indicateurs de crédits** : Formes en pilule (`full`) garantissant un repérage immédiat des badges tarifaires et filtres thématiques.
+
+## Components
+
+### Cartes d'Atelier (Workshop Cards)
+- Fond `#FFFFFF`, bordure fine `1px solid rgba(15, 61, 58, 0.08)`, coins arrondis à 16px.
+- En-tête photo pleine largeur en ratio 4:3 mettant en valeur le geste de l'artisan, rehaussée d'un badge de crédits flottant en haut à droite.
+- Au survol : translation verticale subtile (-2px) et intensification délicate de l'ombre d'ambiance.
+
+### Badge de Crédits (Credit Token)
+- Format pilule (`rounded-full`), fond Deep Forest (`#0F3D3A`) avec typographie Space Grotesk en doré solaire (`#F4B13B`).
+- Version alternative "solde utilisateur" : fond `#FAF7F2`, bordure dorée, affichant l'icône de jeton et le nombre restant.
+
+### Boutons
+- **Primary (Réserver / Confirmer)** : Fond plein Terracotta (`#E0745E`), texte blanc, coins arrondis à 12px, typographie Plus Jakarta Sans semibold. Au survol : assombrissement vers `#CE634D`.
+- **Secondary (Découvrir l'artisan)** : Fond transparent, bordure 1.5px Deep Forest (`#0F3D3A`), typographie Deep Forest. Survol sur fond `#F2E6D6`.
+- **Tertiary (Action rapide)** : Fond Golden Hour (`#F4B13B`), texte Deep Forest (`#0F3D3A`), réservé aux offres éclairs ou réapprovisionnements de crédits.
+
+### Filtres & Chips
+- Puces en Space Grotesk `label-sm` avec fond `#F2E6D6` et texte `#1C1C19`.
+- État actif : fond plein Deep Forest (`#0F3D3A`), texte `#FAF7F2`, témoignant d'un choix affirmé de matière ou de quartier parisien.
+
+### Champs de Saisie & Sélecteurs de Créneaux
+- Fond neutre chaud `#FAF7F2`, bordure 1px `rgba(15, 61, 58, 0.15)`, coins arrondis à 12px.
+- État focus : contour Deep Forest net assorti d'un halo doux Terracotta à 20% d'opacité (`0 0 0 3px rgba(224, 116, 94, 0.2)`). Labels en Space Grotesk.
+
+### Jauge de Disponibilité (Seat Counter)
+- Micro-composant placé sous l'horaire de l'atelier : barre fine de 4px, fond gris sable avec remplissage Terracotta indiquant le nombre de places restantes (ex: "Plus que 2 places").

@@ -48,6 +48,12 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-ring-offset-background: var(--background);
+  --color-laiton: var(--laiton);
+  --color-deep-forest: var(--deep-forest);
+  --color-sable: var(--sable);
+  --color-menthe: var(--menthe);
+  --color-abricot: var(--abricot);
+  --color-rose-argile: var(--rose-argile);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -65,7 +71,14 @@
 
 :root {
   --radius: 0.75rem;
-  --background: oklch(0.995 0.003 75);
+  --background: oklch(0.998 0.0015 75);
+  /* Couleurs du design system « Atelier Forest & Terracotta » (docs/design-system.md) */
+  --laiton: oklch(0.804 0.149 77.2); /* #F4B13B Laiton Solaire */
+  --deep-forest: oklch(0.329 0.049 188.8); /* #0F3D3A Deep Forest */
+  --sable: oklch(0.93 0.025 75.3); /* #F2E6D6 */
+  --menthe: oklch(0.9 0.048 186.6); /* #BBE9E3 secondary-container */
+  --abricot: oklch(0.915 0.071 75.1); /* #FFDDAF tertiary-fixed */
+  --rose-argile: oklch(0.917 0.043 30.5); /* #FFDAD3 primary-fixed */
   --foreground: oklch(0.22 0.01 80);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.22 0.01 80);

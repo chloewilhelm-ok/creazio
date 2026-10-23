@@ -81,7 +81,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Creazio" },
-      { name: "description", content: "Ateliers créatifs d’artisans en Île-de-France." },
+      { name: "description", content: "Ateliers créatifs d’artisans près de chez vous, à prix doux." },
       { name: "author", content: "Creazio" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
