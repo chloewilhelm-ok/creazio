@@ -420,6 +420,7 @@ export type Database = {
           latitude: number | null
           longitude: number | null
           nom: string
+          newsletter_acceptee_le: string | null
           prenom: string
           role: Database["public"]["Enums"]["role_utilisateur"]
           suppression_demandee_le: string | null
@@ -437,6 +438,7 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           nom: string
+          newsletter_acceptee_le?: string | null
           prenom: string
           role: Database["public"]["Enums"]["role_utilisateur"]
           suppression_demandee_le?: string | null
@@ -454,6 +456,7 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           nom?: string
+          newsletter_acceptee_le?: string | null
           prenom?: string
           role?: Database["public"]["Enums"]["role_utilisateur"]
           suppression_demandee_le?: string | null
@@ -721,6 +724,7 @@ export type Database = {
     }
     Functions: {
       acheter_pack_demo: { Args: { p_pack_id: string }; Returns: number }
+      definir_newsletter: { Args: { p_abonne: boolean }; Returns: string | null }
       annuler_reservation: {
         Args: { p_reservation_id: string }
         Returns: number

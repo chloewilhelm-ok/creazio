@@ -20,3 +20,18 @@ describe("grille des savoir-faire", () => {
     expect(Object.keys(iconeSavoirFaire)).toEqual([...craftCategories]);
   });
 });
+
+describe("grille des savoir-faire sélectionnable", () => {
+  it("coche et décoche un savoir-faire au clic, état annoncé par aria-pressed", async () => {
+    const { fireEvent } = await import("@testing-library/react");
+    let valeurs: string[] = ["Bois"];
+    const { rerender } = render(<SavoirFaireGrid values={valeurs} onChange={(v) => (valeurs = v)} />);
+    expect(screen.getByRole("button", { name: "Bois" })).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(screen.getByRole("button", { name: "Verre" }));
+    expect(valeurs).toEqual(["Bois", "Verre"]);
+    rerender(<SavoirFaireGrid values={valeurs} onChange={(v) => (valeurs = v)} />);
+    fireEvent.click(screen.getByRole("button", { name: "Bois" }));
+    expect(valeurs).toEqual(["Verre"]);
+    expect(screen.getAllByRole("button")).toHaveLength(craftCategories.length);
+  });
+});

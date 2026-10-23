@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Check } from "lucide-react";
+import { SavoirFaireGrid } from "./savoir-faire-grid";
 
 interface SessionState {
   inspirations: string[]; setInspirations: (values: string[]) => void;
@@ -64,8 +65,9 @@ export function useCreazioSession() {
   if (!session) throw new Error("CreazioSessionProvider is required");
   return session;
 }
-export function CategoryPicker({ values, onChange }: { values: string[]; onChange: (values: string[]) => void }) {
-  return <div className="flex flex-wrap gap-2">{craftCategories.map(category => <Button type="button" key={category} variant={values.includes(category) ? "default" : "outline"} aria-pressed={values.includes(category)} onClick={() => onChange(toggleSelection(values, category))} className="h-auto min-h-11 whitespace-normal rounded-lg px-3 py-2 text-left text-xs">{values.includes(category) && <Check className="size-4 shrink-0"/>}{category}</Button>)}</div>;
+/** Choix des savoir-faire : la grille à icônes de la landing, en version sélectionnable. */
+export function CategoryPicker({ values, onChange, describedBy }: { values: string[]; onChange: (values: string[]) => void; describedBy?: string }) {
+  return <SavoirFaireGrid values={values} onChange={onChange} {...(describedBy ? { describedBy } : {})}/>;
 }
 export function AddressFields({ value, onChange, artisan = false }: { value: Address; onChange: (address: Address) => void; artisan?: boolean }) {
   return <div className="grid gap-4"><label className="grid gap-2 text-sm font-semibold">{artisan ? "Adresse de l’atelier" : "Adresse principale"}<Input required autoComplete="street-address" value={value.street} onChange={event => onChange({ ...value, street: event.target.value })} placeholder="Numéro et rue"/></label><div className="grid grid-cols-[1fr_1.4fr] gap-4"><label className="grid gap-2 text-sm font-semibold">Code postal<Input required inputMode="numeric" autoComplete="postal-code" value={value.postcode} onChange={event => onChange({ ...value, postcode: event.target.value })} placeholder="75011"/></label><label className="grid gap-2 text-sm font-semibold">Ville<Input required autoComplete="address-level2" value={value.city} onChange={event => onChange({ ...value, city: event.target.value })} placeholder="Paris"/></label></div>{artisan && <label className="grid gap-2 text-sm font-semibold">Précisions d’accès<Textarea className="rounded-lg" value={value.access} onChange={event => onChange({ ...value, access: event.target.value })} placeholder="Étage, code d’accès, métro, accessibilité…"/></label>}</div>;

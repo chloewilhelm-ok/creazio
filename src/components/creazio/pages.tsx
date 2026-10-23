@@ -2,10 +2,11 @@ import { FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams, useSearch } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ensureProfile, friendlyAuthError, type ProfileRole } from "@/lib/auth";
+import { ensureProfile, friendlyAuthError, pendingProfileFromMetadata } from "@/lib/auth";
 import { ArrowLeft, ArrowRight, BadgeCheck, CalendarDays, Check, ChevronRight, CircleUserRound, Clock3, Coins, Euro, Eye, Filter, Heart, LogOut, MapPin, Menu, Palette, Percent, Search, Sparkles, Users, WalletCards, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import hero from "@/assets/creazio-hero.jpg";
 import pottery from "@/assets/creazio-pottery.jpg";
@@ -18,7 +19,9 @@ import { AddressFields, ArtisanOnboardingFields, CategoryPicker, useCreazioSessi
 import { WorkshopSlots } from "./workshop-slots";
 import { SavoirFaireGrid } from "./savoir-faire-grid";
 import { photoAtelier } from "@/lib/photos-ateliers";
-import { acheterPackDemo, annulerReservation, delaiAnnulationQuery, formatCredits, formatHeure, formatJour, messageErreur, peutAnnuler, reservationQuery, upcomingReservationsQuery, walletQuery, type UpcomingReservation } from "@/lib/reservations";
+import { AddressAutocomplete } from "./address-autocomplete";
+import { metadonneesInscription, premierChampEnErreur, validerCompte, validerInspirations, type ChampCompte, type Consentements, type ErreursInspirations } from "@/lib/inscription";
+import { acheterPackDemo, annulerReservation, toReservationError, delaiAnnulationQuery, formatCredits, formatHeure, formatJour, messageErreur, peutAnnuler, reservationQuery, upcomingReservationsQuery, walletQuery, type UpcomingReservation } from "@/lib/reservations";
 
 const workshops = [
   { id: "tour-de-potier", category: "Céramique", title: "Initiation au tour de potier", artisan: "Michel, céramiste", place: "Paris 11e", duration: "2h30", credits: 32, old: 36, image: pottery },
@@ -66,7 +69,7 @@ export function ArtisanShell({active,children}:{active:"planning"|"ateliers"|"re
 }
 
 export function EmptyState({icon,title,body,action}:{icon:ReactNode;title:string;body:string;action?:ReactNode}) {return <div className="mx-auto flex max-w-xl flex-col items-center py-16 text-center"><div className="mb-5 grid size-16 place-items-center rounded-full bg-accent text-primary [&_svg]:size-7">{icon}</div><h2 className="text-xl font-semibold">{title}</h2><p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">{body}</p>{action&&<div className="mt-6">{action}</div>}</div>}
-export function PageTitle({eyebrow,title,body,action,niveau="h1"}:{eyebrow?:string;title:string;body?:string;action?:ReactNode;niveau?:"h1"|"h2"}) {const Titre=niveau;return <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div>{eyebrow&&<p className="label-font mb-2 text-xs font-semibold uppercase text-primary">{eyebrow}</p>}<Titre className="text-3xl font-bold text-foreground md:text-4xl">{title}</Titre>{body&&<p className="mt-2 max-w-2xl text-muted-foreground">{body}</p>}</div>{action}</div>}
+export function PageTitle({eyebrow,title,body,action,niveau="h1",titreId}:{eyebrow?:string;title:string;body?:string;action?:ReactNode;niveau?:"h1"|"h2";titreId?:string}) {const Titre=niveau;return <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div>{eyebrow&&<p className="label-font mb-2 text-xs font-semibold uppercase text-primary">{eyebrow}</p>}<Titre id={titreId} tabIndex={titreId?-1:undefined} className="text-3xl font-bold text-foreground focus:outline-none md:text-4xl">{title}</Titre>{body&&<p className="mt-2 max-w-2xl text-muted-foreground">{body}</p>}</div>{action}</div>}
 
 function WorkshopCard({w}:{w:typeof workshops[number]}) {return <Link to="/ateliers/$workshopId" params={{workshopId:w.id}} className="group overflow-hidden rounded-2xl border bg-card shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"><div className="relative aspect-[4/3] overflow-hidden"><img src={w.image} alt={w.title} className="size-full object-cover transition duration-500 group-hover:scale-105"/><span className="label-font absolute left-3 top-3 rounded-full bg-background/90 px-3 py-1 text-[10px] font-semibold uppercase">{w.category}</span></div><div className="p-4"><h3 className="text-lg font-semibold group-hover:text-primary">{w.title}</h3><p className="mt-1 text-sm text-muted-foreground">{w.artisan} · {w.place}</p><div className="mt-5 flex items-center justify-between text-sm"><span className="flex items-center gap-1 text-muted-foreground"><Clock3 className="size-4"/>{w.duration}</span><span><s className="mr-2 text-muted-foreground">{w.old}</s><strong className="text-primary">{w.credits} crédits</strong></span></div></div></Link>}
 
@@ -87,9 +90,10 @@ function AuthPage({artisan=false}:{artisan?:boolean}){
     const user=data.user;
     if(!user){setError("Connexion impossible. Réessayez.");setBusy(false);return;}
     const {data:profile}=await supabase.from("profiles").select("role").eq("id",user.id).maybeSingle();
-    const meta=(user.user_metadata??{}) as {role?:string;prenom?:string;nom?:string;adresse_ligne?:string;code_postal?:string;ville?:string;atelier?:string;categories?:string[]};
-    if(!profile&&meta.role){
-      try{await ensureProfile(user.id,{role:meta.role as ProfileRole,prenom:meta.prenom??"",nom:meta.nom??"",email:user.email??email,adresse_ligne:meta.adresse_ligne??null,code_postal:meta.code_postal??null,ville:meta.ville??null,atelier:meta.atelier,categories:meta.categories});}
+    const meta=(user.user_metadata??{}) as {role?:string};
+    const pending=pendingProfileFromMetadata(user.user_metadata??{},user.email??email);
+    if(!profile&&pending){
+      try{await ensureProfile(user.id,pending);}
       catch(insertError){setError(friendlyAuthError(insertError instanceof Error?insertError.message:undefined));setBusy(false);return;}
     }
     const role=profile?.role??meta.role;
@@ -119,25 +123,75 @@ export function ArtisanSignupPage(){
 export function StudentLoginPage(){return <AuthPage/>} export function ArtisanLoginPage(){return <AuthPage artisan/>}
 function Field({label,children}:{label:string;children:ReactNode}){return <label className="grid gap-2 text-sm font-semibold">{label}{children}</label>}
 
+/** Champ texte avec libellé et message d'erreur relié (aria-describedby). */
+function ChampTexte({id,label,error,...props}:{id:string;label:string;error?:string|undefined}&React.ComponentProps<typeof Input>){
+  return <div className="grid gap-2"><label htmlFor={id} className="text-sm font-semibold">{label}</label><Input id={id} aria-invalid={Boolean(error)} aria-describedby={error?`${id}-erreur`:undefined} className={cn(error&&"border-destructive")} {...props}/>{error&&<p id={`${id}-erreur`} className="text-sm font-medium text-destructive">{error}</p>}</div>;
+}
+const focusChamp=(id:string)=>setTimeout(()=>document.getElementById(id)?.focus(),0);
+
 export function SignupPage(){
   const navigate=useNavigate();
-  const [step,setStep]=useState(1);
+  const [step,setStep]=useState<1|2|3>(1);
   const {inspirations,setInspirations,studentAddress,setStudentAddress}=useCreazioSession();
-  const [prenom,setPrenom]=useState("");const [email,setEmail]=useState("");const [password,setPassword]=useState("");
+  const [prenom,setPrenom]=useState("");const [nom,setNom]=useState("");const [email,setEmail]=useState("");const [password,setPassword]=useState("");
+  const [adresseSaisie,setAdresseSaisie]=useState(false);
+  const [erreursCompte,setErreursCompte]=useState<Partial<Record<ChampCompte,string>>>({});
+  const [erreursChoix,setErreursChoix]=useState<ErreursInspirations>({});
+  const [consentements,setConsentements]=useState<Consentements>({cguLe:null,newsletterLe:null});
   const [busy,setBusy]=useState(false);const [error,setError]=useState("");const [pendingEmail,setPendingEmail]=useState("");
-  async function createAccount(){
-    setBusy(true);setError("");
-    const {data,error}=await supabase.auth.signUp({email,password,options:{data:{role:"eleve",prenom,categories:inspirations,adresse_ligne:studentAddress.street,code_postal:studentAddress.postcode,ville:studentAddress.city}}});
-    if(error){setError(friendlyAuthError(error.message));setBusy(false);return;}
+  const compte={prenom,nom,email,password,adresse:studentAddress,adresseSaisie};
+  // Une erreur affichée disparaît dès que le champ est corrigé.
+  const corriger=(champ:ChampCompte)=>setErreursCompte(e=>({...e,[champ]:undefined}));
+  function allerA(etape:1|2|3){setStep(etape);window.scrollTo({top:0});focusChamp("inscription-titre");}
+  function continuer(e:FormEvent){
+    e.preventDefault();
+    const erreurs=validerCompte(compte);setErreursCompte(erreurs);
+    const premier=premierChampEnErreur(erreurs);
+    if(premier){focusChamp(`inscription-${premier}`);return;}
+    allerA(2);
+  }
+  async function createAccount(e:FormEvent){
+    e.preventDefault();setError("");
+    const choix={inspirations,consentements};
+    const erreurs=validerInspirations(choix);setErreursChoix(erreurs);
+    if(erreurs.inspirations){focusChamp("inscription-savoir-faire");return;}
+    if(erreurs.cgu){focusChamp("inscription-cgu");return;}
+    setBusy(true);
+    const metadonnees=metadonneesInscription(compte,choix);
+    const {data,error}=await supabase.auth.signUp({email:email.trim(),password,options:{data:metadonnees}});
+    if(error){
+      const message=friendlyAuthError(error.message);setBusy(false);
+      if(error.message.includes("already registered")){setErreursCompte({email:message});allerA(1);focusChamp("inscription-email");return;}
+      setError(message);return;
+    }
     if(data.session&&data.user){
-      try{await ensureProfile(data.user.id,{role:"eleve",prenom,nom:"",email,adresse_ligne:studentAddress.street,code_postal:studentAddress.postcode,ville:studentAddress.city});await saveInterests(data.user.id,inspirations);}
+      try{await ensureProfile(data.user.id,{...metadonnees,email:email.trim()});await saveInterests(data.user.id,inspirations);}
       catch(insertError){setError(friendlyAuthError(insertError instanceof Error?insertError.message:undefined));setBusy(false);return;}
       navigate({to:"/espace-eleve"});
     }else{
-      setPendingEmail(email);setBusy(false);setStep(3);
+      setPendingEmail(email.trim());setBusy(false);allerA(3);
     }
   }
-  return <><PublicHeader/><main className="mx-auto max-w-2xl px-5 py-10"><div className="mb-8 flex gap-2">{[1,2,3].map(n=><span key={n} className={cn("h-1.5 flex-1 rounded-full",n<=step?"bg-primary":"bg-muted")}/>)}</div><PageTitle eyebrow={`Étape ${step} sur 3`} title={step===1?"Créons votre compte":step===2?"Qu’est-ce qui vous inspire ?":pendingEmail?"Dernière étape : confirmez votre email":"Vous êtes prêt·e"} body="Créez votre compte élève en trois étapes."/><div className="rounded-2xl border bg-card p-5 shadow-sm md:p-8">{step===1?<div className="grid gap-5"><Field label="Prénom"><Input required value={prenom} onChange={e=>setPrenom(e.target.value)} placeholder="Camille"/></Field><Field label="Adresse email"><Input required type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="camille@exemple.fr"/></Field><Field label="Mot de passe"><Input required type="password" minLength={8} autoComplete="new-password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="8 caractères minimum"/></Field><AddressFields value={studentAddress} onChange={setStudentAddress}/><p className="-mt-2 flex items-center gap-2 text-xs text-muted-foreground"><MapPin className="size-4"/>Elle sert à vous proposer les ateliers proches de chez vous.</p></div>:step===2?<CategoryPicker values={inspirations} onChange={setInspirations}/>:pendingEmail?<EmptyState icon={<Check/>} title="Consultez votre boîte mail" body={`Un lien de confirmation vous a été envoyé à ${pendingEmail}. Cliquez dessus, puis connectez-vous.`} action={<Button asChild><Link to="/connexion">Se connecter</Link></Button>}/>:<div className="grid gap-4"><p className="text-sm text-muted-foreground">Votre compte sera créé avec l’adresse <strong>{email}</strong>.</p>{error&&<p role="alert" className="rounded-xl bg-accent p-4 text-sm text-accent-foreground">{error}</p>}</div>}<div className="mt-8 flex justify-between">{step>1&&step<3?<Button variant="outline" onClick={()=>setStep(step-1)}>Retour</Button>:<span/>}{step===1?<Button onClick={()=>setStep(2)}>Continuer <ArrowRight/></Button>:step===2?<Button onClick={()=>setStep(3)}>Continuer <ArrowRight/></Button>:pendingEmail?<span/>:<Button onClick={createAccount} disabled={busy}>{busy?"Création…":"Créer mon compte"}</Button>}</div></div></main></>}
+  const titre=step===1?"Créons votre compte":step===2?"Qu’est-ce qui vous inspire ?":"Plus qu’une étape : confirmez votre email";
+  return <><PublicHeader/><main className="mx-auto max-w-2xl px-5 py-10"><div className="mb-8 flex gap-2" aria-hidden="true">{[1,2,3].map(n=><span key={n} className={cn("h-1.5 flex-1 rounded-full",n<=step?"bg-primary":"bg-muted")}/>)}</div><PageTitle eyebrow={`Étape ${step} sur 3`} title={titre} titreId="inscription-titre"/><div className="rounded-2xl border bg-card p-5 shadow-sm md:p-8">
+    {step===1?<form noValidate onSubmit={continuer} className="grid gap-5">
+      <div className="grid gap-5 sm:grid-cols-2"><ChampTexte id="inscription-prenom" label="Prénom" autoComplete="given-name" value={prenom} error={erreursCompte.prenom} onChange={e=>{setPrenom(e.target.value);corriger("prenom");}}/><ChampTexte id="inscription-nom" label="Nom" autoComplete="family-name" value={nom} error={erreursCompte.nom} onChange={e=>{setNom(e.target.value);corriger("nom");}}/></div>
+      <ChampTexte id="inscription-email" label="Adresse email" type="email" autoComplete="email" value={email} error={erreursCompte.email} onChange={e=>{setEmail(e.target.value);corriger("email");}}/>
+      <ChampTexte id="inscription-password" label="Mot de passe (8 caractères minimum)" type="password" autoComplete="new-password" value={password} error={erreursCompte.password} onChange={e=>{setPassword(e.target.value);corriger("password");}}/>
+      <AddressAutocomplete id="inscription-adresse" label="Adresse" value={studentAddress} onChange={a=>{setStudentAddress(a);if(a.city)corriger("adresse");}} onTexteChange={t=>setAdresseSaisie(t.trim().length>0)} error={erreursCompte.adresse} hint={<><MapPin className="size-4 shrink-0" aria-hidden="true"/>Elle sert à vous proposer les ateliers proches de chez vous.</>}/>
+      <div className="mt-3 flex justify-end"><Button type="submit">Continuer <ArrowRight/></Button></div>
+    </form>
+    :step===2?<form noValidate onSubmit={createAccount} className="grid gap-6">
+      <fieldset aria-describedby={erreursChoix.inspirations?"inscription-savoir-faire-erreur":"inscription-savoir-faire-aide"} className="grid gap-3"><legend className="sr-only">Les savoir-faire qui vous inspirent</legend><p id="inscription-savoir-faire-aide" className="text-sm text-muted-foreground">Choisissez un ou plusieurs savoir-faire : nous vous proposerons les ateliers qui leur correspondent.</p><div id="inscription-savoir-faire" tabIndex={-1} className="rounded-xl focus:outline-none"><CategoryPicker values={inspirations} onChange={v=>{setInspirations(v);if(v.length)setErreursChoix(e=>({...e,inspirations:undefined}));}}/></div>{erreursChoix.inspirations&&<p id="inscription-savoir-faire-erreur" className="text-sm font-medium text-destructive">{erreursChoix.inspirations}</p>}</fieldset>
+      <div className="grid gap-4 border-t pt-6">
+        <div className="grid gap-1"><label className="flex items-start gap-3 text-sm"><input id="inscription-cgu" type="checkbox" className="mt-0.5 size-5 shrink-0 accent-primary" checked={Boolean(consentements.cguLe)} aria-invalid={Boolean(erreursChoix.cgu)} aria-describedby={erreursChoix.cgu?"inscription-cgu-erreur":undefined} onChange={e=>{const le=e.target.checked?new Date().toISOString():null;setConsentements(c=>({...c,cguLe:le}));if(le)setErreursChoix(x=>({...x,cgu:undefined}));}}/><span>J’accepte les CGU et la politique de confidentialité <span className="text-muted-foreground">(obligatoire)</span></span></label>{erreursChoix.cgu&&<p id="inscription-cgu-erreur" className="pl-8 text-sm font-medium text-destructive">{erreursChoix.cgu}</p>}</div>
+        <label className="flex items-start gap-3 text-sm"><input type="checkbox" className="mt-0.5 size-5 shrink-0 accent-primary" checked={Boolean(consentements.newsletterLe)} onChange={e=>{const le=e.target.checked?new Date().toISOString():null;setConsentements(c=>({...c,newsletterLe:le}));}}/><span>Je souhaite recevoir chaque semaine une sélection d’ateliers près de chez moi <span className="text-muted-foreground">(facultatif)</span></span></label>
+      </div>
+      {error&&<p role="alert" className="rounded-xl bg-accent p-4 text-sm text-accent-foreground">{error}</p>}
+      <div className="flex justify-between gap-3"><Button type="button" variant="outline" onClick={()=>allerA(1)}>Retour</Button><Button type="submit" disabled={busy}>{busy?"Création…":"Créer mon compte"}</Button></div>
+    </form>
+    :<EmptyState icon={<Check/>} title="Consultez votre boîte mail" body={`Un lien de confirmation vous a été envoyé à ${pendingEmail}. Cliquez dessus, puis connectez-vous.`} action={<Button asChild><Link to="/connexion">Se connecter</Link></Button>}/>}
+  </div></main></>}
 
 type DbCard={id:string;titre:string;savoir_faire:string;ville:string;quartier:string|null;duree_minutes:number;photo_url:string|null;distance_km?:number|undefined;prix_min?:number|undefined};
 function DbWorkshopCard({w}:{w:DbCard}){return <Link to="/ateliers/$workshopId" params={{workshopId:w.id}} className="group overflow-hidden rounded-2xl border bg-card shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"><div className="relative aspect-[4/3] overflow-hidden bg-muted"><img {...photoAtelier(w.photo_url,w.titre)} className="size-full object-cover transition duration-500 group-hover:scale-105"/><span className="label-font absolute left-3 top-3 rounded-full bg-background/90 px-3 py-1 text-[10px] font-semibold uppercase">{labelSavoirFaire(w.savoir_faire)}</span></div><div className="p-4"><h3 className="text-lg font-semibold group-hover:text-primary">{w.titre}</h3><p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground"><MapPin className="size-4"/>{w.quartier?`${w.quartier} · `:""}{w.ville}{w.distance_km!=null&&` · ${String(w.distance_km).replace(".",",")} km`}</p><p className="mt-4 flex items-center gap-1 text-sm text-muted-foreground"><Clock3 className="size-4"/>{formatDuree(w.duree_minutes)}{w.prix_min!=null&&<span className="flex items-center gap-1">· <Coins className="size-4"/>{w.prix_min} crédits</span>}</p></div></Link>}
@@ -198,6 +252,17 @@ function ReservationCard({r,delai,onCancelled}:{r:UpcomingReservation;delai:numb
   </li>}
 // Packs affichés si la table packs_credits est vide ou injoignable (règle : 1 crédit = 1 €). Non achetables.
 export const packs=[{id:"decouverte",tag:"Initiation",name:"Pack Découverte",credits:50,price:50},{id:"regulier",tag:"Recommandé",name:"Pack Régulier",credits:100,price:100,popular:true},{id:"passionne",tag:"Approfondi",name:"Pack Passionné",credits:150,price:150}];
+/** Abonnement à la sélection hebdomadaire : la date d'accord est posée par la base (definir_newsletter). */
+function NewsletterSwitch({abonneLe,disabled}:{abonneLe:string|null;disabled:boolean}){
+  const queryClient=useQueryClient();
+  const [message,setMessage]=useState("");
+  const maj=useMutation({mutationFn:async(abonne:boolean)=>{const {data,error}=await supabase.rpc("definir_newsletter",{p_abonne:abonne});if(error)throw toReservationError(error);return data;},
+    onSuccess:(date)=>{queryClient.setQueryData(["profil"],(p:Record<string,unknown>|null|undefined)=>p?{...p,newsletter_acceptee_le:date}:p);setMessage(date?"C’est noté : vous recevrez la sélection chaque semaine.":"C’est noté : vous ne recevrez plus la sélection.");},
+    onError:(e)=>setMessage(messageErreur(e))});
+  const abonne=maj.isPending?Boolean(maj.variables):Boolean(abonneLe);
+  return <section className="mt-3 grid gap-2 border-t pt-5"><h2 className="text-lg font-semibold">Newsletter</h2><div className="flex items-start justify-between gap-4"><label htmlFor="profil-newsletter" className="text-sm">Recevoir chaque semaine une sélection d’ateliers près de chez moi</label><Switch id="profil-newsletter" checked={abonne} disabled={disabled} aria-busy={maj.isPending} onCheckedChange={v=>{if(maj.isPending)return;setMessage("");maj.mutate(v);}} className="mt-0.5 data-[state=unchecked]:bg-muted-foreground/60"/></div>{message&&<p role="status" className="text-sm text-muted-foreground">{message}</p>}</section>;
+}
+
 export function ProfilePage(){
   const {inspirations,setInspirations,studentAddress,setStudentAddress}=useCreazioSession();
   const navigate=useNavigate();
@@ -244,7 +309,7 @@ export function ProfilePage(){
     await supabase.auth.signOut();
     navigate({to:"/connexion",replace:true});
   }
-  return <><MemberHeader/><main className="mx-auto max-w-[1100px] px-5 py-8 md:px-12"><PageTitle title="Mon profil et mes crédits"/><div className="grid gap-6 lg:grid-cols-[.9fr_1.1fr]"><section className="rounded-2xl border bg-card p-6"><div className="flex items-center gap-4"><div className="grid size-14 place-items-center rounded-full bg-secondary text-xl font-bold text-secondary-foreground">{(prenom||profile?.email||"C").charAt(0).toUpperCase()}</div><div><h2 className="font-semibold">Votre profil</h2><p className="text-sm text-muted-foreground">Informations à compléter</p></div></div><div className="mt-6 grid gap-4"><div className="grid grid-cols-2 gap-4"><Field label="Prénom"><Input value={prenom} onChange={e=>setPrenom(e.target.value)} placeholder="Prénom"/></Field><Field label="Nom"><Input value={nom} onChange={e=>setNom(e.target.value)} placeholder="Nom"/></Field></div><Field label="Email"><Input type="email" value={profile?.email??""} disabled readOnly/></Field><AddressFields value={studentAddress} onChange={setStudentAddress}/><h2 className="mt-3 text-lg font-semibold">Ce qui m’inspire</h2><CategoryPicker values={inspirations} onChange={setInspirations}/><Button variant="outline" onClick={saveProfile} disabled={busy}>Enregistrer</Button>{profileMessage&&<p role="status" className="text-sm text-muted-foreground">{profileMessage}</p>}<Button variant="ghost" onClick={logout} className="text-muted-foreground"><LogOut/>Me déconnecter</Button></div></section><div className="grid gap-6 content-start"><section className="rounded-2xl bg-secondary p-6 text-secondary-foreground"><Coins className="size-7"/><p className="mt-4 text-sm opacity-80">Solde disponible</p><strong className="text-4xl">{solde} {solde>1?"crédits":"crédit"}</strong><p className="mt-2 text-sm opacity-80">Valables 12 mois sur tous les ateliers.</p></section><section className="rounded-2xl border bg-card p-6"><h2 className="text-xl font-semibold">Recharger mes crédits</h2><div className="mt-5 grid gap-3 sm:grid-cols-3">{availablePacks.map(p=><button key={p.id} type="button" onClick={()=>{setSelectedPackId(p.id);setMsg("");achat.reset()}} aria-pressed={selectedPackId===p.id} className={cn("relative flex flex-col rounded-xl border-2 p-4 text-left transition active:scale-[.98]",selectedPackId===p.id?"border-primary bg-accent":"border-border hover:border-primary/50")}>{p.popular&&<span className="label-font absolute -top-2.5 right-3 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase text-primary-foreground">Populaire</span>}<span className="label-font text-[10px] font-semibold uppercase text-muted-foreground">{p.tag}</span><span className="mt-1 text-sm font-semibold">{p.name}</span><strong className="mt-3 text-3xl text-primary">{p.credits}</strong><span className="text-xs text-muted-foreground">crédits · {p.price} € TTC</span><span className={cn("mt-3 inline-flex items-center gap-1 text-xs font-semibold",selectedPackId===p.id?"text-primary":"text-muted-foreground")}>{selectedPackId===p.id?<><Check className="size-3.5"/>Sélectionné</>:"Choisir ce pack"}</span></button>)}</div><div className="mt-6 rounded-xl bg-muted p-4"><div className="flex items-center justify-between text-sm"><span className="flex items-center gap-2"><WalletCards className="size-4 text-primary"/>Pack sélectionné : {sel.credits} crédits</span><strong>{sel.price},00 €</strong></div></div><ul className="mt-4 grid gap-2 text-sm"><li className="flex items-start gap-2"><Sparkles className="mt-0.5 size-4 shrink-0 text-primary"/><span><strong>Mode démonstration :</strong> aucun paiement réel.</span></li><li className="flex items-start gap-2"><CalendarDays className="mt-0.5 size-4 shrink-0 text-primary"/><span>Crédits valables 12 mois à compter de l’achat.</span></li></ul><Button className="mt-5 w-full" size="lg" disabled={achat.isPending||!packsAchetables} onClick={()=>{setMsg("");achat.mutate(sel)}}>{achat.isPending?"Achat en cours…":`Payer ${sel.price} € et créditer mon compte`}</Button>{!packsQuery.isPending&&!packsAchetables&&<p role="alert" className="mt-3 rounded-xl bg-muted p-3 text-sm">{packsQuery.error?"Impossible de charger les packs de crédits. Vérifiez votre connexion et rechargez la page.":"Aucun pack de crédits n’est disponible pour le moment."}</p>}{msg&&<p role="status" className="mt-3 rounded-xl bg-secondary p-3 text-sm text-secondary-foreground">{msg}</p>}{achat.error&&<p role="alert" className="mt-3 rounded-xl bg-muted p-3 text-sm">{messageErreur(achat.error)}</p>}<p className="mt-3 text-center text-xs text-muted-foreground">Paiement unique, sans engagement ni abonnement.</p></section></div></div></main></>}
+  return <><MemberHeader/><main className="mx-auto max-w-[1100px] px-5 py-8 md:px-12"><PageTitle title="Mon profil et mes crédits"/><div className="grid gap-6 lg:grid-cols-[.9fr_1.1fr]"><section className="rounded-2xl border bg-card p-6"><div className="flex items-center gap-4"><div className="grid size-14 place-items-center rounded-full bg-secondary text-xl font-bold text-secondary-foreground">{(prenom||profile?.email||"C").charAt(0).toUpperCase()}</div><div><h2 className="font-semibold">Votre profil</h2><p className="text-sm text-muted-foreground">Informations à compléter</p></div></div><div className="mt-6 grid gap-4"><div className="grid grid-cols-2 gap-4"><Field label="Prénom"><Input value={prenom} onChange={e=>setPrenom(e.target.value)} placeholder="Prénom"/></Field><Field label="Nom"><Input value={nom} onChange={e=>setNom(e.target.value)} placeholder="Nom"/></Field></div><Field label="Email"><Input type="email" value={profile?.email??""} disabled readOnly/></Field><AddressFields value={studentAddress} onChange={setStudentAddress}/><h2 className="mt-3 text-lg font-semibold">Ce qui m’inspire</h2><CategoryPicker values={inspirations} onChange={setInspirations}/><Button variant="outline" onClick={saveProfile} disabled={busy}>Enregistrer</Button>{profileMessage&&<p role="status" className="text-sm text-muted-foreground">{profileMessage}</p>}<NewsletterSwitch abonneLe={profile?.newsletter_acceptee_le??null} disabled={!profile}/><Button variant="ghost" onClick={logout} className="text-muted-foreground"><LogOut/>Me déconnecter</Button></div></section><div className="grid gap-6 content-start"><section className="rounded-2xl bg-secondary p-6 text-secondary-foreground"><Coins className="size-7"/><p className="mt-4 text-sm opacity-80">Solde disponible</p><strong className="text-4xl">{solde} {solde>1?"crédits":"crédit"}</strong><p className="mt-2 text-sm opacity-80">Valables 12 mois sur tous les ateliers.</p></section><section className="rounded-2xl border bg-card p-6"><h2 className="text-xl font-semibold">Recharger mes crédits</h2><div className="mt-5 grid gap-3 sm:grid-cols-3">{availablePacks.map(p=><button key={p.id} type="button" onClick={()=>{setSelectedPackId(p.id);setMsg("");achat.reset()}} aria-pressed={selectedPackId===p.id} className={cn("relative flex flex-col rounded-xl border-2 p-4 text-left transition active:scale-[.98]",selectedPackId===p.id?"border-primary bg-accent":"border-border hover:border-primary/50")}>{p.popular&&<span className="label-font absolute -top-2.5 right-3 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase text-primary-foreground">Populaire</span>}<span className="label-font text-[10px] font-semibold uppercase text-muted-foreground">{p.tag}</span><span className="mt-1 text-sm font-semibold">{p.name}</span><strong className="mt-3 text-3xl text-primary">{p.credits}</strong><span className="text-xs text-muted-foreground">crédits · {p.price} € TTC</span><span className={cn("mt-3 inline-flex items-center gap-1 text-xs font-semibold",selectedPackId===p.id?"text-primary":"text-muted-foreground")}>{selectedPackId===p.id?<><Check className="size-3.5"/>Sélectionné</>:"Choisir ce pack"}</span></button>)}</div><div className="mt-6 rounded-xl bg-muted p-4"><div className="flex items-center justify-between text-sm"><span className="flex items-center gap-2"><WalletCards className="size-4 text-primary"/>Pack sélectionné : {sel.credits} crédits</span><strong>{sel.price},00 €</strong></div></div><ul className="mt-4 grid gap-2 text-sm"><li className="flex items-start gap-2"><Sparkles className="mt-0.5 size-4 shrink-0 text-primary"/><span><strong>Mode démonstration :</strong> aucun paiement réel.</span></li><li className="flex items-start gap-2"><CalendarDays className="mt-0.5 size-4 shrink-0 text-primary"/><span>Crédits valables 12 mois à compter de l’achat.</span></li></ul><Button className="mt-5 w-full" size="lg" disabled={achat.isPending||!packsAchetables} onClick={()=>{setMsg("");achat.mutate(sel)}}>{achat.isPending?"Achat en cours…":`Payer ${sel.price} € et créditer mon compte`}</Button>{!packsQuery.isPending&&!packsAchetables&&<p role="alert" className="mt-3 rounded-xl bg-muted p-3 text-sm">{packsQuery.error?"Impossible de charger les packs de crédits. Vérifiez votre connexion et rechargez la page.":"Aucun pack de crédits n’est disponible pour le moment."}</p>}{msg&&<p role="status" className="mt-3 rounded-xl bg-secondary p-3 text-sm text-secondary-foreground">{msg}</p>}{achat.error&&<p role="alert" className="mt-3 rounded-xl bg-muted p-3 text-sm">{messageErreur(achat.error)}</p>}<p className="mt-3 text-center text-xs text-muted-foreground">Paiement unique, sans engagement ni abonnement.</p></section></div></div></main></>}
 export function ConfirmationPage(){
   const {reservation:id}=useSearch({strict:false}) as {reservation?:string};
   const {data:r,isPending,error,refetch}=useQuery({...reservationQuery(id??""),enabled:Boolean(id)});
