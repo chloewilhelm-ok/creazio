@@ -776,8 +776,6 @@ export type Database = {
         | "metal"
         | "cuir"
         | "verre"
-        | "pierre"
-        | "agriculture"
         | "a_manger"
         | "a_boire"
       statut_atelier: "en_verification" | "publie" | "archive"
@@ -947,8 +945,6 @@ export const Constants = {
         "metal",
         "cuir",
         "verre",
-        "pierre",
-        "agriculture",
         "a_manger",
         "a_boire",
       ],
