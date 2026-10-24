@@ -5,6 +5,7 @@ export const Route = createFileRoute("/artisan")({
   beforeLoad: async ({ location }) => {
     // Les écrans de connexion et d'inscription artisan restent accessibles sans session.
     if (location.pathname === "/artisan/connexion" || location.pathname === "/artisan/inscription") return;
-    await requireSession("artisan");
+    // Réservé aux artisans ; tant que la candidature n'est pas validée, seule la page « candidature en cours ».
+    await requireSession("artisan", location.pathname);
   },
   component: () => <Outlet/> });

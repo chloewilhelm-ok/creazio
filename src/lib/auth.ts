@@ -1,23 +1,54 @@
 import { redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { savoirFaireByCategory, type CraftCategory } from "@/components/creazio/catalog";
+import { MESSAGE_COMPTE_EXISTANT, redirectionEspace, type ProfilRole } from "./roles";
 
 export type ProfileRole = "eleve" | "artisan";
+export type { ProfilRole } from "./roles";
+
+// Rôle du compte connecté (profil) et statut de sa candidature artisan, lus sous RLS.
+// Mis en cache par utilisateur le temps de la visite : une validation de candidature se voit au rechargement.
+const profilsEnCache = new Map<string, ProfilRole>();
+export async function lireProfilRole(userId: string, meta?: { role?: unknown }): Promise<ProfilRole | null> {
+  const enCache = profilsEnCache.get(userId);
+  if (enCache) return enCache;
+  const [{ data: profil }, { data: artisan }] = await Promise.all([
+    supabase.from("profiles").select("role").eq("id", userId).maybeSingle(),
+    supabase.from("artisans").select("statut_candidature").eq("profile_id", userId).maybeSingle(),
+  ]);
+  // Sans profil (ancien compte créé avant le trigger), le rôle choisi à l'inscription fait foi.
+  const role = profil?.role ?? (meta?.role === "artisan" || meta?.role === "eleve" ? meta.role : null);
+  if (role !== "eleve" && role !== "artisan") return null;
+  const resultat: ProfilRole = { role, statutCandidature: artisan?.statut_candidature ?? null };
+  if (profil) profilsEnCache.set(userId, resultat);
+  return resultat;
+}
+export const oublierProfilRole = () => profilsEnCache.clear();
+if (typeof window !== "undefined") {
+  supabase.auth.onAuthStateChange((event) => {
+    if (event === "SIGNED_OUT" || event === "SIGNED_IN") oublierProfilRole();
+  });
+}
 
 // Route guard: the session lives in the browser only, so the check runs on the
-// client and redirects on hydration for direct visits.
-export async function requireSession(area: ProfileRole | "any"): Promise<void> {
+// client and redirects on hydration for direct visits. Protected areas also check
+// the account's role: student pages for students, artisan pages for validated artisans.
+export async function requireSession(area: ProfileRole | "any", chemin = ""): Promise<void> {
   if (typeof window === "undefined") return;
   const { data } = await supabase.auth.getSession();
   if (!data.session) {
     throw redirect({ to: area === "artisan" ? "/artisan/connexion" : "/connexion" });
   }
+  if (area === "any") return;
+  const profil = await lireProfilRole(data.session.user.id, data.session.user.user_metadata);
+  const cible = redirectionEspace(area, profil, chemin);
+  if (cible) throw redirect({ to: cible });
 }
 
 export function friendlyAuthError(message: string | undefined): string {
   if (!message) return "Une erreur est survenue. Réessayez.";
   if (message.includes("Invalid login credentials")) return "Email ou mot de passe incorrect.";
-  if (message.includes("already registered")) return "Un compte existe déjà avec cette adresse email.";
+  if (message.includes("already registered")) return MESSAGE_COMPTE_EXISTANT;
   if (message.includes("should be different")) return "Choisissez un mot de passe différent de l’ancien.";
   if (message.includes("session missing") || message.includes("Auth session")) return "Ce lien n’est plus valable. Demandez un nouveau lien de réinitialisation.";
   if (message.toLowerCase().includes("password")) return "Mot de passe trop court : 8 caractères minimum.";

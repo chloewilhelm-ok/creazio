@@ -2,8 +2,9 @@ import { FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams, useSearch } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ensureProfile, friendlyAuthError, pendingProfileFromMetadata } from "@/lib/auth";
-import { ArrowLeft, ArrowRight, BadgeCheck, CalendarDays, Check, ChevronRight, CircleUserRound, Clock3, Coins, Euro, Eye, Filter, Heart, LogOut, MapPin, Menu, Palette, Percent, Search, Sparkles, WalletCards, X } from "lucide-react";
+import { ensureProfile, friendlyAuthError, lireProfilRole, pendingProfileFromMetadata } from "@/lib/auth";
+import { MESSAGE_COMPTE_EXISTANT, PAGE_CANDIDATURE, accueilDuCompte, compteDejaExistant, pageConnexion, refusConnexion, type Espace } from "@/lib/roles";
+import { ArrowLeft, ArrowRight, BadgeCheck, CalendarDays, Check, ChevronRight, CircleUserRound, Clock3, Coins, Euro, Eye, Filter, Heart, LogOut, MapPin, Menu, Palette, Percent, Search, Sparkles, Users, WalletCards, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -14,14 +15,15 @@ import leather from "@/assets/creazio-leather.jpg";
 import printmaking from "@/assets/creazio-print.jpg";
 import { cn } from "@/lib/utils";
 import { RAYON_RECOMMANDATION_KM, distanceKm, ensureSignupInterests, formatDuree, geocodeAddress, labelSavoirFaire, publishedWorkshopsQuery, recommendationsQuery, saveInterests, workshopQuery } from "@/lib/workshops";
-import { craftCategories, savoirFaireByCategory, type CraftCategory } from "./catalog";
-import { AddressFields, ArtisanOnboardingFields, CategoryPicker, useCreazioSession } from "./session-state";
+import { craftCategories, craftTechniques, savoirFaireByCategory, toggleSelection, type CraftCategory } from "./catalog";
+import { AddressFields, CategoryPicker, useCreazioSession } from "./session-state";
+import { Textarea } from "@/components/ui/textarea";
 import { WorkshopSlots } from "./workshop-slots";
 import { ArtisanDashboard } from "./artisan-dashboard";
 import { SavoirFaireGrid } from "./savoir-faire-grid";
 import { photoAtelier } from "@/lib/photos-ateliers";
 import { AddressAutocomplete } from "./address-autocomplete";
-import { metadonneesInscription, premierChampEnErreur, validerCompte, validerInspirations, type ChampCompte, type Consentements, type ErreursInspirations } from "@/lib/inscription";
+import { metadonneesCandidature, metadonneesInscription, premierChampCandidature, premierChampEnErreur, validerCandidatureArtisan, validerCompte, validerInspirations, type ChampCandidature, type ChampCompte, type Consentements, type ErreursCandidature, type ErreursInspirations } from "@/lib/inscription";
 import { acheterPackDemo, annulerReservation, toReservationError, delaiAnnulationQuery, formatCredits, formatHeure, formatJour, messageErreur, peutAnnuler, reservationQuery, upcomingReservationsQuery, walletQuery, type UpcomingReservation } from "@/lib/reservations";
 
 const workshops = [
@@ -41,16 +43,21 @@ const ETIQUETTE_ARTISANS="inline-flex items-center rounded-full border border-la
 const BOUTON_ENTETE="inline-flex h-10 items-center justify-center rounded-[8px] px-4 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deep-forest focus-visible:ring-offset-2";
 const BOUTON_PLEIN=cn(BOUTON_ENTETE,"bg-primary text-primary-foreground hover:bg-primary/90");
 const BOUTON_CONTOUR=cn(BOUTON_ENTETE,"border-[length:1.5px] border-deep-forest text-deep-forest hover:bg-sable");
-function PublicHeader() {
+// En-tête public : côté artisan, l'étiquette renvoie vers l'espace élève et les boutons vers la connexion
+// et l'inscription artisan ; côté élève, l'inverse. Un visiteur ne bascule jamais d'espace sans le voir.
+function PublicHeader({espace="eleve"}:{espace?:Espace}) {
   const [open, setOpen] = useState(false);
+  const liens=espace==="artisan"
+    ?{etiquette:"Espace élève",versEtiquette:"/" as const,connexion:"/artisan/connexion" as const,inscription:"/artisan/inscription" as const}
+    :{etiquette:"Espace artisans",versEtiquette:"/devenir-artisan" as const,connexion:"/connexion" as const,inscription:"/inscription" as const};
   return <header className="sticky top-0 z-50 border-b border-border/70 bg-background/95 backdrop-blur-xl">
     <div className="mx-auto grid h-16 max-w-[1360px] grid-cols-[1fr_auto_1fr] items-center px-5 md:h-20 md:px-12">
-      <div className="hidden md:block"><Link to="/devenir-artisan" className={ETIQUETTE_ARTISANS}>Espace artisans</Link></div>
+      <div className="hidden md:block"><Link to={liens.versEtiquette} className={ETIQUETTE_ARTISANS}>{liens.etiquette}</Link></div>
       <div className="col-start-1 md:col-start-2"><Logo large/></div>
-      <nav className="hidden items-center justify-end gap-3 md:flex"><Link to="/connexion" className={cn(BOUTON_CONTOUR,"w-36")}>Se connecter</Link><Link to="/inscription" className={cn(BOUTON_PLEIN,"w-36")}>S’inscrire</Link></nav>
+      <nav className="hidden items-center justify-end gap-3 md:flex"><Link to={liens.connexion} className={cn(BOUTON_CONTOUR,"w-36")}>Se connecter</Link><Link to={liens.inscription} className={cn(BOUTON_PLEIN,"w-36")}>S’inscrire</Link></nav>
       <Button variant="ghost" size="icon" className="col-start-3 justify-self-end md:hidden" aria-label={open?"Fermer le menu":"Ouvrir le menu"} aria-expanded={open} onClick={()=>setOpen(!open)}>{open?<X/>:<Menu/>}</Button>
     </div>
-    {open&&<nav className="border-t bg-card px-5 py-4 md:hidden"><div className="grid gap-3"><Link to="/devenir-artisan" className={cn(ETIQUETTE_ARTISANS,"justify-center py-2")}>Espace artisans</Link><Link to="/connexion" className={BOUTON_CONTOUR}>Se connecter</Link><Link to="/inscription" className={BOUTON_PLEIN}>S’inscrire</Link></div></nav>}
+    {open&&<nav className="border-t bg-card px-5 py-4 md:hidden"><div className="grid gap-3"><Link to={liens.versEtiquette} className={cn(ETIQUETTE_ARTISANS,"justify-center py-2")}>{liens.etiquette}</Link><Link to={liens.connexion} className={BOUTON_CONTOUR}>Se connecter</Link><Link to={liens.inscription} className={BOUTON_PLEIN}>S’inscrire</Link></div></nav>}
   </header>;
 }
 
@@ -77,50 +84,78 @@ function WorkshopCard({w}:{w:typeof workshops[number]}) {return <Link to="/ateli
 export function LandingPage(){const benefits=[{icon:<BadgeCheck/>,title:"Artisans sélectionnés",body:"Des ateliers vérifiés par Creazio"},{icon:<Percent/>,title:"Jusqu’à -40 % de réduction",body:"Tarifs réduits sur de nombreux créneaux"},{icon:<Clock3/>,title:"Réservation en 2 min",body:"Simple et sans engagement"}];return <><PublicHeader/><main><section className="mx-auto grid max-w-[1360px] gap-8 px-5 py-9 md:px-12 md:py-14 lg:grid-cols-2 lg:items-center"><div><h1 className="max-w-2xl text-4xl font-bold leading-tight text-secondary md:text-5xl">L’atelier créatif près de chez vous, à prix doux.</h1><p className="mt-5 max-w-xl text-lg leading-8 text-muted-foreground">Réservez en quelques clics chez les meilleurs artisans près de chez vous, à des tarifs moins chers.</p><Button asChild size="lg" className="mt-7"><Link to="/connexion">Découvrez les ateliers <ArrowRight/></Link></Button></div><img src={hero} alt="Groupe participant à un atelier de poterie" className="aspect-[4/3] w-full rounded-2xl object-cover shadow-xl"/></section><section className="mx-auto max-w-[1360px] px-5 pb-10 md:px-12"><div className="grid rounded-2xl border bg-card p-6 shadow-sm md:grid-cols-3 md:divide-x">{benefits.map(item=><div key={item.title} className="flex gap-4 p-3"><span className="grid size-12 shrink-0 place-items-center rounded-xl bg-accent text-primary [&_svg]:size-5"><span aria-hidden="true" className="contents">{item.icon}</span></span><div><h3 className="font-semibold">{item.title}</h3><p className="text-sm text-muted-foreground">{item.body}</p></div></div>)}</div></section><section className="mx-auto max-w-[1360px] px-5 pb-14 md:px-12"><div className="rounded-2xl border bg-card p-6"><h2 className="mb-6 text-xl font-bold text-secondary">Les savoir-faire à découvrir</h2><SavoirFaireGrid/></div></section><section className="bg-muted py-14"><div className="mx-auto max-w-[1360px] px-5 md:px-12"><h2 className="text-center text-3xl font-bold text-secondary">Comment ça marche ?</h2><div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-4">{[["01","Achetez vos crédits Creazio","Choisissez le pack qui vous ressemble, du créatif occasionnel au passionné."],["02","Choisissez votre atelier","Une sélection d’artisans passionnés."],["03","Réservez votre créneau","Des tarifs négociés directement."],["04","Profitez de l’atelier","Un accès simple, sans engagement."]].map(x=><div key={x[0]} className="rounded-2xl bg-card p-6"><span className="label-font rounded-full bg-accent px-3 py-1 text-xs font-bold text-secondary">{x[0]}</span><h3 className="mt-5 font-semibold">{x[1]}</h3><p className="mt-2 text-sm text-muted-foreground">{x[2]}</p></div>)}</div></div></section><section className="mx-auto max-w-[1360px] px-5 py-14 md:px-12"><PageTitle niveau="h2" title="Quelques ateliers à découvrir" body="Connectez-vous pour consulter les prochains créneaux."/><div className="grid gap-6 md:grid-cols-3">{workshops.map(w=><WorkshopCard key={w.id} w={w}/>)}</div></section></main><Footer/></>}
 function Footer(){return <footer className="border-t bg-muted"><div className="mx-auto flex max-w-[1360px] flex-col gap-4 px-5 py-8 text-sm md:flex-row md:items-center md:justify-between md:px-12"><strong>Creazio</strong><div className="flex gap-5 text-muted-foreground"><span>CGU</span><span>Confidentialité</span></div></div></footer>}
 
-export function ArtisanLandingPage(){return <><PublicHeader/><main><section className="relative min-h-[560px] overflow-hidden"><img src={leather} alt="Artisane au travail" className="absolute inset-0 size-full object-cover"/><div className="absolute inset-0 bg-foreground/55"/><div className="relative mx-auto flex min-h-[560px] max-w-[1360px] items-center px-5 py-16 md:px-12"><div className="max-w-2xl text-primary-foreground"><p className="label-font text-sm font-semibold uppercase">Artisans partenaires</p><h1 className="mt-4 text-4xl font-bold md:text-6xl">Remplissez vos créneaux creux, sans effort</h1><p className="mt-5 max-w-xl text-lg text-primary-foreground/85">Publiez vos ateliers, choisissez vos remises et accueillez de nouveaux élèves.</p><Button asChild size="lg" className="mt-8"><Link to="/artisan/inscription">Rejoindre Creazio <ArrowRight/></Link></Button><Button asChild size="lg" variant="outline" className="mt-8 ml-3 bg-transparent text-primary-foreground"><Link to="/artisan/connexion">Se connecter</Link></Button></div></div></section><section className="mx-auto grid max-w-[1100px] gap-6 px-5 py-16 md:grid-cols-3"><Stat value="Plus de visibilité" label="Une communauté d’élèves curieux"/><Stat value="Vous décidez" label="Créneaux, capacité et remise"/><Stat value="Suivi simple" label="Planning et revenus centralisés"/></section></main><Footer/></>}
-function Stat({value,label}:{value:string;label:string}){return <div className="border-l-2 border-primary pl-5"><strong className="text-xl">{value}</strong><p className="mt-1 text-sm text-muted-foreground">{label}</p></div>}
+export function ArtisanLandingPage(){const benefits=[{icon:<Users/>,title:"Plus de visibilité",body:"Une communauté d’élèves curieux près de chez vous"},{icon:<CalendarDays/>,title:"Vous décidez",body:"Vos créneaux, vos places et votre remise"},{icon:<WalletCards/>,title:"Suivi simple",body:"Planning et revenus réunis au même endroit"}];return <><PublicHeader espace="artisan"/><main><section className="mx-auto grid max-w-[1360px] gap-8 px-5 py-9 md:px-12 md:py-14 lg:grid-cols-2 lg:items-center"><div><h1 className="max-w-2xl text-4xl font-bold leading-tight text-secondary md:text-5xl">Remplissez vos créneaux creux, sans effort.</h1><p className="mt-5 max-w-xl text-lg leading-8 text-muted-foreground">Publiez vos ateliers sur Creazio, choisissez vos remises et accueillez de nouveaux élèves près de chez vous.</p><Button asChild size="lg" className="mt-7"><Link to="/artisan/inscription">Devenir artisan partenaire <ArrowRight/></Link></Button></div><img src={leather} alt={ALT_PHOTO_ARTISAN} className="aspect-[4/3] w-full rounded-2xl object-cover shadow-xl"/></section><section className="mx-auto max-w-[1360px] px-5 pb-10 md:px-12"><div className="grid rounded-2xl border bg-card p-6 shadow-sm md:grid-cols-3 md:divide-x">{benefits.map(item=><div key={item.title} className="flex gap-4 p-3"><span className="grid size-12 shrink-0 place-items-center rounded-xl bg-accent text-primary [&_svg]:size-5"><span aria-hidden="true" className="contents">{item.icon}</span></span><div><h2 className="font-semibold">{item.title}</h2><p className="text-sm text-muted-foreground">{item.body}</p></div></div>)}</div></section><section className="bg-muted py-14"><div className="mx-auto max-w-[1360px] px-5 md:px-12"><h2 className="text-center text-3xl font-bold text-secondary">Comment ça marche ?</h2><div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-4">{[["01","Créez votre compte","Présentez votre atelier et vos savoir-faire en quelques minutes."],["02","Nous validons votre candidature","Réponse sous 48 h, après un premier échange."],["03","Publiez vos créneaux","Choisissez les places ouvertes à Creazio et votre remise."],["04","Accueillez vos élèves","Virement effectué par Creazio 14 jours après l’atelier."]].map(x=><div key={x[0]} className="rounded-2xl bg-card p-6"><span className="label-font rounded-full bg-accent px-3 py-1 text-xs font-bold text-secondary">{x[0]}</span><h3 className="mt-5 font-semibold">{x[1]}</h3><p className="mt-2 text-sm text-muted-foreground">{x[2]}</p></div>)}</div><div className="mt-10 text-center"><Button asChild size="lg"><Link to="/artisan/inscription">Rejoindre Creazio <ArrowRight/></Link></Button></div></div></section></main><Footer/></>}
+// Texte alternatif de la photo de la landing artisan (à mettre à jour avec la photo définitive).
+const ALT_PHOTO_ARTISAN="Artisane maroquinière au travail dans son atelier, penchée sur une pièce de cuir";
 
 function AuthPage({artisan=false}:{artisan?:boolean}){
   const navigate=useNavigate();
+  const espace:Espace=artisan?"artisan":"eleve";
   const [email,setEmail]=useState("");const [password,setPassword]=useState("");
-  const [error,setError]=useState("");const [busy,setBusy]=useState(false);
+  const [error,setError]=useState<{message:string;lien?:"/connexion"|"/artisan/connexion";libelleLien?:string}|null>(null);const [busy,setBusy]=useState(false);
   async function submit(e:FormEvent){
-    e.preventDefault();setBusy(true);setError("");
+    e.preventDefault();setBusy(true);setError(null);
     const {data,error}=await supabase.auth.signInWithPassword({email,password});
-    if(error||!data.session){setError(friendlyAuthError(error?.message));setBusy(false);return;}
+    if(error||!data.session){setError({message:friendlyAuthError(error?.message)});setBusy(false);return;}
     const user=data.user;
-    if(!user){setError("Connexion impossible. Réessayez.");setBusy(false);return;}
-    const {data:profile}=await supabase.from("profiles").select("role").eq("id",user.id).maybeSingle();
-    const meta=(user.user_metadata??{}) as {role?:string};
+    if(!user){setError({message:"Connexion impossible. Réessayez."});setBusy(false);return;}
+    const profil=await lireProfilRole(user.id,user.user_metadata);
+    // Un compte ne se connecte que depuis son espace : sinon on le déconnecte et on indique la bonne page.
+    const refus=refusConnexion(espace,profil?.role);
+    if(refus){await supabase.auth.signOut();setError(refus);setBusy(false);return;}
+    const {data:existe}=await supabase.from("profiles").select("id").eq("id",user.id).maybeSingle();
     const pending=pendingProfileFromMetadata(user.user_metadata??{},user.email??email);
-    if(!profile&&pending){
+    if(!existe&&pending){
       try{await ensureProfile(user.id,pending);}
-      catch(insertError){setError(friendlyAuthError(insertError instanceof Error?insertError.message:undefined));setBusy(false);return;}
+      catch(insertError){setError({message:friendlyAuthError(insertError instanceof Error?insertError.message:undefined)});setBusy(false);return;}
     }
-    const role=profile?.role??meta.role;
-    if(role!=="artisan")await ensureSignupInterests(user);
-    navigate({to:role==="artisan"?"/artisan/planning":"/espace-eleve"});
+    if(!profil){setError({message:"Ce compte n’est pas encore prêt. Réessayez dans un instant."});await supabase.auth.signOut();setBusy(false);return;}
+    if(profil.role==="eleve")await ensureSignupInterests(user);
+    navigate({to:accueilDuCompte(profil)});
   }
-  return <><PublicHeader/><main className="mx-auto grid min-h-[calc(100vh-80px)] max-w-[1100px] items-center px-5 py-12"><div className="mx-auto w-full max-w-md"><Link to={artisan?"/devenir-artisan":"/"} className="mb-8 inline-flex items-center gap-2 text-sm text-muted-foreground"><ArrowLeft className="size-4"/>Retour</Link><PageTitle eyebrow={artisan?"Espace artisan":"Espace élève"} title="Ravi de vous revoir" body="Connectez-vous pour accéder à votre espace."/><form onSubmit={submit} className="grid gap-5"><Field label="Adresse email"><Input type="email" required autoComplete="email" placeholder="vous@exemple.fr" value={email} onChange={e=>setEmail(e.target.value)}/></Field><div className="grid gap-2"><Field label="Mot de passe"><Input type="password" required autoComplete="current-password" placeholder="••••••••" value={password} onChange={e=>setPassword(e.target.value)}/></Field><Link to="/mot-de-passe-oublie" className="justify-self-end text-sm font-semibold text-primary underline-offset-4 hover:underline">Mot de passe oublié ?</Link></div>{error&&<p role="alert" className="rounded-xl bg-accent p-4 text-sm text-accent-foreground">{error}</p>}<Button type="submit" size="lg" disabled={busy}>{busy?"Connexion…":"Se connecter"}</Button></form>{artisan?<p className="mt-6 text-center text-sm text-muted-foreground">Pas encore partenaire ? <Link to="/artisan/inscription" className="font-semibold text-primary">S’inscrire</Link></p>:<p className="mt-6 text-center text-sm text-muted-foreground">Pas encore membre ? <Link to="/inscription" className="font-semibold text-primary">Créer un compte</Link></p>}</div></main></>}
+  return <><PublicHeader espace={espace}/><main className="mx-auto grid min-h-[calc(100vh-80px)] max-w-[1100px] items-center px-5 py-12"><div className="mx-auto w-full max-w-md"><Link to={artisan?"/devenir-artisan":"/"} className="mb-8 inline-flex items-center gap-2 text-sm text-muted-foreground"><ArrowLeft className="size-4"/>Retour</Link><PageTitle eyebrow={artisan?"Espace artisan":"Espace élève"} title="Ravi de vous revoir"/><form onSubmit={submit} className="grid gap-5"><Field label="Adresse email"><Input type="email" required autoComplete="email" placeholder="vous@exemple.fr" value={email} onChange={e=>setEmail(e.target.value)}/></Field><div className="grid gap-2"><Field label="Mot de passe"><Input type="password" required autoComplete="current-password" placeholder="••••••••" value={password} onChange={e=>setPassword(e.target.value)}/></Field><Link to="/mot-de-passe-oublie" className="justify-self-end text-sm font-semibold text-primary underline-offset-4 hover:underline">Mot de passe oublié ?</Link></div>{error&&<p role="alert" className="rounded-xl bg-accent p-4 text-sm text-accent-foreground">{error.message}{error.lien&&<> <Link to={error.lien} className="font-semibold text-primary underline underline-offset-4">{error.libelleLien}</Link></>}</p>}<Button type="submit" size="lg" disabled={busy}>{busy?"Connexion…":"Se connecter"}</Button></form>{artisan?<p className="mt-6 text-center text-sm text-muted-foreground">Pas encore partenaire ? <Link to="/artisan/inscription" className="font-semibold text-primary">S’inscrire</Link></p>:<p className="mt-6 text-center text-sm text-muted-foreground">Pas encore membre ? <Link to="/inscription" className="font-semibold text-primary">Créer un compte</Link></p>}</div></main></>}
 export function ArtisanSignupPage(){
-  const navigate=useNavigate();
   const {artisan,setArtisan}=useCreazioSession();
   const [prenom,setPrenom]=useState("");const [nom,setNom]=useState("");const [email,setEmail]=useState("");const [password,setPassword]=useState("");
-  const [error,setError]=useState("");const [info,setInfo]=useState("");const [busy,setBusy]=useState(false);
+  const [adresseSaisie,setAdresseSaisie]=useState(false);const [cguLe,setCguLe]=useState<string|null>(null);
+  const [erreurs,setErreurs]=useState<ErreursCandidature>({});const [compteExistant,setCompteExistant]=useState(false);
+  const [error,setError]=useState("");const [busy,setBusy]=useState(false);const [envoyee,setEnvoyee]=useState("");
+  const candidature={prenom,nom,email,password,adresse:artisan.address,adresseSaisie,atelier:artisan.name,savoirFaire:artisan.categories,techniques:artisan.techniques,presentation:artisan.expertise,cguLe};
+  const corriger=(champ:ChampCandidature)=>{setErreurs(e=>({...e,[champ]:undefined}));if(champ==="email")setCompteExistant(false);};
+  const techniquesProposees=artisan.categories.flatMap(c=>craftTechniques[c as keyof typeof craftTechniques]??[]);
   async function submit(e:FormEvent){
-    e.preventDefault();setBusy(true);setError("");setInfo("");
-    const {data,error}=await supabase.auth.signUp({email,password,options:{data:{role:"artisan",prenom,nom,adresse_ligne:artisan.address.street,code_postal:artisan.address.postcode,ville:artisan.address.city,atelier:artisan.name,categories:artisan.categories}}});
-    if(error){setError(friendlyAuthError(error.message));setBusy(false);return;}
+    e.preventDefault();setError("");
+    const nouvelles=validerCandidatureArtisan(candidature);setErreurs(nouvelles);setCompteExistant(false);
+    const premier=premierChampCandidature(nouvelles);
+    if(premier){focusChamp(`artisan-${premier}`);return;}
+    setBusy(true);
+    const metadonnees=metadonneesCandidature(candidature);
+    const {data,error}=await supabase.auth.signUp({email:email.trim(),password,options:{data:metadonnees}});
+    if(compteDejaExistant(data.user,error)){setBusy(false);setErreurs({email:MESSAGE_COMPTE_EXISTANT});setCompteExistant(true);focusChamp("artisan-email");return;}
+    if(error){setBusy(false);setError(friendlyAuthError(error.message));return;}
     if(data.session&&data.user){
-      try{await ensureProfile(data.user.id,{role:"artisan",prenom,nom,email,adresse_ligne:artisan.address.street,code_postal:artisan.address.postcode,ville:artisan.address.city,atelier:artisan.name,categories:artisan.categories});}
+      try{await ensureProfile(data.user.id,{...metadonnees,email:email.trim()});}
       catch(insertError){setError(friendlyAuthError(insertError instanceof Error?insertError.message:undefined));setBusy(false);return;}
-      navigate({to:"/artisan/planning"});
-    }else{
-      setBusy(false);
-      setInfo("Compte créé ! Consultez votre boîte mail pour confirmer votre adresse, puis connectez-vous.");
     }
+    setBusy(false);setEnvoyee(email.trim());window.scrollTo({top:0});focusChamp("artisan-titre");
   }
-  return <><PublicHeader/><main className="mx-auto grid min-h-[calc(100vh-80px)] max-w-[1100px] items-center px-5 py-12"><div className="mx-auto w-full max-w-md"><Link to="/devenir-artisan" className="mb-8 inline-flex items-center gap-2 text-sm text-muted-foreground"><ArrowLeft className="size-4"/>Retour</Link><PageTitle eyebrow="Espace artisan" title="Créer mon compte artisan" body="Créez votre accès, puis complétez votre candidature."/><form onSubmit={submit} className="grid gap-5"><div className="grid grid-cols-2 gap-4"><Field label="Prénom"><Input required autoComplete="given-name" value={prenom} onChange={e=>setPrenom(e.target.value)}/></Field><Field label="Nom"><Input required autoComplete="family-name" value={nom} onChange={e=>setNom(e.target.value)}/></Field></div><Field label="Nom de l’atelier"><Input required placeholder="Atelier Terres Vives" value={artisan.name} onChange={e=>setArtisan({...artisan,name:e.target.value})}/></Field><Field label="Adresse email professionnelle"><Input type="email" required autoComplete="email" placeholder="atelier@exemple.fr" value={email} onChange={e=>setEmail(e.target.value)}/></Field><Field label="Mot de passe"><Input type="password" required minLength={8} autoComplete="new-password" placeholder="8 caractères minimum" value={password} onChange={e=>setPassword(e.target.value)}/></Field><ArtisanOnboardingFields/>{error&&<p role="alert" className="rounded-xl bg-accent p-4 text-sm text-accent-foreground">{error}</p>}{info&&<p role="status" className="rounded-xl bg-accent p-4 text-sm text-accent-foreground">{info}</p>}<Button type="submit" size="lg" disabled={busy}>{busy?"Création…":"Créer mon compte"} <ArrowRight/></Button></form><p className="mt-6 text-center text-sm text-muted-foreground">Déjà partenaire ? <Link to="/artisan/connexion" className="font-semibold text-primary">Se connecter</Link></p></div></main></>}
+  const erreurEmail=compteExistant?<>{MESSAGE_COMPTE_EXISTANT} <Link to={pageConnexion("artisan")} className="underline underline-offset-4">Se connecter</Link></>:erreurs.email;
+  return <><PublicHeader espace="artisan"/><main className="mx-auto max-w-2xl px-5 py-10"><Link to="/devenir-artisan" className="mb-8 inline-flex items-center gap-2 text-sm text-muted-foreground"><ArrowLeft className="size-4"/>Retour</Link><PageTitle eyebrow="Espace artisan" title={envoyee?"Candidature envoyée":"Créer mon compte artisan"} titreId="artisan-titre"/><div className="rounded-2xl border bg-card p-5 shadow-sm md:p-8">
+    {envoyee?<CandidatureEnvoyee email={envoyee}/>
+    :<form noValidate onSubmit={submit} className="grid gap-6">
+      <div className="grid gap-5 sm:grid-cols-2"><ChampTexte id="artisan-prenom" label="Prénom" autoComplete="given-name" value={prenom} error={erreurs.prenom} onChange={e=>{setPrenom(e.target.value);corriger("prenom");}}/><ChampTexte id="artisan-nom" label="Nom" autoComplete="family-name" value={nom} error={erreurs.nom} onChange={e=>{setNom(e.target.value);corriger("nom");}}/></div>
+      <ChampTexte id="artisan-atelier" label="Nom de l’atelier" autoComplete="organization" value={artisan.name} error={erreurs.atelier} onChange={e=>{setArtisan({...artisan,name:e.target.value});corriger("atelier");}}/>
+      <ChampTexte id="artisan-email" label="Adresse email professionnelle" type="email" autoComplete="email" value={email} error={erreurEmail} onChange={e=>{setEmail(e.target.value);corriger("email");}}/>
+      <ChampTexte id="artisan-password" label="Mot de passe (8 caractères minimum)" type="password" autoComplete="new-password" value={password} error={erreurs.password} onChange={e=>{setPassword(e.target.value);corriger("password");}}/>
+      <AddressAutocomplete id="artisan-adresse" label="Adresse de l’atelier" value={artisan.address} onChange={a=>{setArtisan({...artisan,address:a});if(a.city)corriger("adresse");}} onTexteChange={t=>setAdresseSaisie(t.trim().length>0)} error={erreurs.adresse}/>
+      <fieldset aria-describedby={erreurs.savoirFaire?"artisan-savoirFaire-erreur":"artisan-savoirFaire-aide"} className="grid gap-3"><legend className="text-sm font-semibold">Vos savoir-faire</legend><p id="artisan-savoirFaire-aide" className="text-sm text-muted-foreground">Choisissez un ou plusieurs savoir-faire.</p><div id="artisan-savoirFaire" tabIndex={-1} className="rounded-xl focus:outline-none"><CategoryPicker values={artisan.categories} onChange={categories=>{setArtisan({...artisan,categories,techniques:artisan.techniques.filter(t=>categories.some(c=>(craftTechniques[c as keyof typeof craftTechniques]??[]).includes(t)))});if(categories.length)corriger("savoirFaire");}}/></div>{erreurs.savoirFaire&&<p id="artisan-savoirFaire-erreur" className="text-sm font-medium text-destructive">{erreurs.savoirFaire}</p>}</fieldset>
+      {techniquesProposees.length>0&&<fieldset className="grid gap-2"><legend className="text-sm font-semibold">Techniques pratiquées <span className="font-normal text-muted-foreground">(facultatif)</span></legend><div className="flex flex-wrap gap-2">{techniquesProposees.map(t=><Button key={t} type="button" size="sm" variant={artisan.techniques.includes(t)?"secondary":"outline"} aria-pressed={artisan.techniques.includes(t)} onClick={()=>setArtisan({...artisan,techniques:toggleSelection(artisan.techniques,t)})} className="h-auto min-h-11 whitespace-normal rounded-lg">{artisan.techniques.includes(t)&&<Check/>}{t}</Button>)}</div></fieldset>}
+      <div className="grid gap-2"><label htmlFor="artisan-presentation" className="text-sm font-semibold">Votre spécialité et votre expérience</label><Textarea id="artisan-presentation" className={cn("min-h-28 rounded-lg",erreurs.presentation&&"border-destructive")} aria-invalid={Boolean(erreurs.presentation)} aria-describedby={erreurs.presentation?"artisan-presentation-erreur":undefined} value={artisan.expertise} onChange={e=>{setArtisan({...artisan,expertise:e.target.value});corriger("presentation");}} placeholder="Techniques, matières travaillées, objets que les élèves pourront réaliser…"/>{erreurs.presentation&&<p id="artisan-presentation-erreur" className="text-sm font-medium text-destructive">{erreurs.presentation}</p>}</div>
+      <div className="grid gap-1 border-t pt-6"><label className="flex items-start gap-3 text-sm"><input id="artisan-cgu" type="checkbox" className="mt-0.5 size-5 shrink-0 accent-primary" checked={Boolean(cguLe)} aria-invalid={Boolean(erreurs.cgu)} aria-describedby={erreurs.cgu?"artisan-cgu-erreur":undefined} onChange={e=>{const le=e.target.checked?new Date().toISOString():null;setCguLe(le);if(le)corriger("cgu");}}/><span>J’accepte les CGU et la politique de confidentialité <span className="text-muted-foreground">(obligatoire)</span></span></label>{erreurs.cgu&&<p id="artisan-cgu-erreur" className="pl-8 text-sm font-medium text-destructive">{erreurs.cgu}</p>}</div>
+      {error&&<p role="alert" className="rounded-xl bg-accent p-4 text-sm text-accent-foreground">{error}</p>}
+      <Button type="submit" size="lg" disabled={busy}>{busy?"Envoi…":"Envoyer ma candidature"} <ArrowRight/></Button>
+    </form>}
+  </div>{!envoyee&&<p className="mt-6 text-center text-sm text-muted-foreground">Déjà partenaire ? <Link to="/artisan/connexion" className="font-semibold text-primary">Se connecter</Link></p>}</main></>}
 /** Demande d'un lien de réinitialisation. Message identique qu'un compte existe ou non (pas d'indice pour un tiers). */
 export function ForgotPasswordPage(){
   const [email,setEmail]=useState("");const [erreur,setErreur]=useState("");const [envoye,setEnvoye]=useState("");const [busy,setBusy]=useState(false);
@@ -172,11 +207,19 @@ export function NewPasswordPage(){
     :<form noValidate onSubmit={submit} className="grid gap-5"><ChampTexte id="nouveau-password" label="Nouveau mot de passe (8 caractères minimum)" type="password" autoComplete="new-password" value={password} error={erreurs.password} onChange={e=>{setPassword(e.target.value);setErreurs(x=>({...x,password:undefined}));}}/><ChampTexte id="nouveau-confirmation" label="Confirmez le mot de passe" type="password" autoComplete="new-password" value={confirmation} error={erreurs.confirmation} onChange={e=>{setConfirmation(e.target.value);setErreurs(x=>({...x,confirmation:undefined}));}}/>{erreur&&<p role="alert" className="rounded-xl bg-accent p-4 text-sm text-accent-foreground">{erreur}</p>}<Button type="submit" size="lg" disabled={busy}>{busy?"Enregistrement…":"Enregistrer mon mot de passe"}</Button></form>}
   </div></main></>;
 }
+/** Message affiché après l'inscription artisan, et seule page visible tant que la candidature n'est pas validée. */
+function CandidatureEnvoyee({email,connecte=false}:{email?:string;connecte?:boolean}){
+  const navigate=useNavigate();
+  async function deconnexion(){await supabase.auth.signOut();navigate({to:"/devenir-artisan",replace:true});}
+  return <EmptyState icon={<Check/>} title="Candidature envoyée, nous revenons vers vous sous 48 h" body={email?`Un lien de confirmation vient d’être envoyé à ${email} : cliquez dessus pour activer votre compte. Notre équipe étudie ensuite votre candidature et vous contacte par email.`:"Notre équipe étudie votre candidature et vous contacte par email. Votre espace artisan s’ouvrira dès sa validation."} action={connecte?<Button variant="outline" onClick={deconnexion}><LogOut/>Se déconnecter</Button>:<Button asChild variant="outline"><Link to="/devenir-artisan">Retour à l’espace artisans</Link></Button>}/>;
+}
+export function ApplicationPendingPage(){return <><PublicHeader espace="artisan"/><main className="mx-auto max-w-2xl px-5 py-10"><PageTitle eyebrow="Espace artisan" title="Candidature en cours"/><div className="rounded-2xl border bg-card p-5 shadow-sm md:p-8"><CandidatureEnvoyee connecte/></div></main></>}
+
 export function StudentLoginPage(){return <AuthPage/>} export function ArtisanLoginPage(){return <AuthPage artisan/>}
 function Field({label,children}:{label:string;children:ReactNode}){return <label className="grid gap-2 text-sm font-semibold">{label}{children}</label>}
 
 /** Champ texte avec libellé et message d'erreur relié (aria-describedby). */
-function ChampTexte({id,label,error,...props}:{id:string;label:string;error?:string|undefined}&React.ComponentProps<typeof Input>){
+function ChampTexte({id,label,error,...props}:{id:string;label:string;error?:ReactNode}&React.ComponentProps<typeof Input>){
   return <div className="grid gap-2"><label htmlFor={id} className="text-sm font-semibold">{label}</label><Input id={id} aria-invalid={Boolean(error)} aria-describedby={error?`${id}-erreur`:undefined} className={cn(error&&"border-destructive")} {...props}/>{error&&<p id={`${id}-erreur`} className="text-sm font-medium text-destructive">{error}</p>}</div>;
 }
 const focusChamp=(id:string)=>setTimeout(()=>document.getElementById(id)?.focus(),0);
@@ -193,7 +236,8 @@ export function SignupPage(){
   const [busy,setBusy]=useState(false);const [error,setError]=useState("");const [pendingEmail,setPendingEmail]=useState("");
   const compte={prenom,nom,email,password,adresse:studentAddress,adresseSaisie};
   // Une erreur affichée disparaît dès que le champ est corrigé.
-  const corriger=(champ:ChampCompte)=>setErreursCompte(e=>({...e,[champ]:undefined}));
+  const [compteExistant,setCompteExistant]=useState(false);
+  const corriger=(champ:ChampCompte)=>{setErreursCompte(e=>({...e,[champ]:undefined}));if(champ==="email")setCompteExistant(false);};
   function allerA(etape:1|2|3){setStep(etape);window.scrollTo({top:0});focusChamp("inscription-titre");}
   function continuer(e:FormEvent){
     e.preventDefault();
@@ -211,11 +255,9 @@ export function SignupPage(){
     setBusy(true);
     const metadonnees=metadonneesInscription(compte,choix);
     const {data,error}=await supabase.auth.signUp({email:email.trim(),password,options:{data:metadonnees}});
-    if(error){
-      const message=friendlyAuthError(error.message);setBusy(false);
-      if(error.message.includes("already registered")){setErreursCompte({email:message});allerA(1);focusChamp("inscription-email");return;}
-      setError(message);return;
-    }
+    // Email déjà utilisé : Supabase répond souvent par un faux succès (aucune identité), sans créer de compte.
+    if(compteDejaExistant(data.user,error)){setBusy(false);setErreursCompte({email:MESSAGE_COMPTE_EXISTANT});setCompteExistant(true);allerA(1);focusChamp("inscription-email");return;}
+    if(error){setBusy(false);setError(friendlyAuthError(error.message));return;}
     if(data.session&&data.user){
       try{await ensureProfile(data.user.id,{...metadonnees,email:email.trim()});await saveInterests(data.user.id,inspirations);}
       catch(insertError){setError(friendlyAuthError(insertError instanceof Error?insertError.message:undefined));setBusy(false);return;}
@@ -228,7 +270,7 @@ export function SignupPage(){
   return <><PublicHeader/><main className="mx-auto max-w-2xl px-5 py-10"><div className="mb-8 flex gap-2" aria-hidden="true">{[1,2,3].map(n=><span key={n} className={cn("h-1.5 flex-1 rounded-full",n<=step?"bg-primary":"bg-muted")}/>)}</div><PageTitle eyebrow={`Étape ${step} sur 3`} title={titre} titreId="inscription-titre"/><div className="rounded-2xl border bg-card p-5 shadow-sm md:p-8">
     {step===1?<form noValidate onSubmit={continuer} className="grid gap-5">
       <div className="grid gap-5 sm:grid-cols-2"><ChampTexte id="inscription-prenom" label="Prénom" autoComplete="given-name" value={prenom} error={erreursCompte.prenom} onChange={e=>{setPrenom(e.target.value);corriger("prenom");}}/><ChampTexte id="inscription-nom" label="Nom" autoComplete="family-name" value={nom} error={erreursCompte.nom} onChange={e=>{setNom(e.target.value);corriger("nom");}}/></div>
-      <ChampTexte id="inscription-email" label="Adresse email" type="email" autoComplete="email" value={email} error={erreursCompte.email} onChange={e=>{setEmail(e.target.value);corriger("email");}}/>
+      <ChampTexte id="inscription-email" label="Adresse email" type="email" autoComplete="email" value={email} error={compteExistant?<>{MESSAGE_COMPTE_EXISTANT} <Link to={pageConnexion("eleve")} className="underline underline-offset-4">Se connecter</Link></>:erreursCompte.email} onChange={e=>{setEmail(e.target.value);corriger("email");}}/>
       <ChampTexte id="inscription-password" label="Mot de passe (8 caractères minimum)" type="password" autoComplete="new-password" value={password} error={erreursCompte.password} onChange={e=>{setPassword(e.target.value);corriger("password");}}/>
       <AddressAutocomplete id="inscription-adresse" label="Adresse" value={studentAddress} onChange={a=>{setStudentAddress(a);if(a.city)corriger("adresse");}} onTexteChange={t=>setAdresseSaisie(t.trim().length>0)} error={erreursCompte.adresse} hint={<><MapPin className="size-4 shrink-0" aria-hidden="true"/>Elle sert à vous proposer les ateliers proches de chez vous.</>}/>
       <div className="mt-3 flex justify-end"><Button type="submit">Continuer <ArrowRight/></Button></div>
@@ -385,8 +427,6 @@ export function ConfirmationPage(){
       <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row"><Button asChild><Link to="/espace-eleve/reservations">Voir mes réservations</Link></Button><Button asChild variant="outline"><Link to="/ateliers">Découvrir d’autres ateliers</Link></Button></div></div>}
   </main></>}
 
-export function ArtisanApplicationPage(){const [done,setDone]=useState(false);return <><PublicHeader/><main className="mx-auto max-w-3xl px-5 py-10"><Link to="/devenir-artisan" className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground"><ArrowLeft className="size-4"/>Retour</Link><PageTitle eyebrow="Artisans partenaires" title="Votre candidature" body="Présentez-nous votre atelier en quelques minutes."/>{done?<EmptyState icon={<Check/>} title="Formulaire validé" body="Votre candidature n’a pas été enregistrée : elle le sera lorsque votre projet Supabase sera raccordé." action={<Button asChild><Link to="/devenir-artisan">Retour à la présentation</Link></Button>}/>:<form onSubmit={e=>{e.preventDefault();setDone(true)}} className="grid gap-8 rounded-2xl border bg-card p-5 shadow-sm md:p-8"><FormSection number="1" title="Vous et votre atelier"><div className="grid gap-4 md:grid-cols-2"><Field label="Prénom"><Input required/></Field><Field label="Nom"><Input required/></Field></div><Field label="Nom de l’atelier"><Input required/></Field><Field label="Adresse email professionnelle"><Input type="email" required/></Field></FormSection><ArtisanOnboardingFields/><Button type="submit" size="lg">Envoyer ma candidature <ArrowRight/></Button></form>}</main></>}
-function FormSection({number,title,children}:{number:string;title:string;children:ReactNode}){return <section className="grid gap-5"><div className="flex items-center gap-3"><span className="grid size-8 place-items-center rounded-full border border-primary text-sm font-bold text-primary">{number}</span><h2 className="text-lg font-semibold">{title}</h2></div>{children}</section>}
 
 export { ArtisanWorkshopsPage, ArtisanPlanningPage, ArtisanSessionPage } from "./workshop-pages";
 export function ArtisanRevenuePage(){return <ArtisanShell active="revenus"><PageTitle title="Mes revenus" body="Vos réservations, vos créneaux et ce que Creazio vous doit, mis à jour en direct."/><ArtisanDashboard/></ArtisanShell>}

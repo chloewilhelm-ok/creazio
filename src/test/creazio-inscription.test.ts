@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("@/integrations/supabase/client", () => ({ supabase: {} }));
+vi.mock("@/integrations/supabase/client", () => ({ supabase: { auth: { onAuthStateChange: () => ({}) } } }));
 
 import { emptyAddress } from "@/components/creazio/catalog";
 import { pendingProfileFromMetadata } from "@/lib/auth";

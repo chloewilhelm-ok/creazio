@@ -19,6 +19,7 @@ import { Route as InscriptionRouteImport } from './routes/inscription'
 import { Route as MotDePasseOublieRouteImport } from './routes/mot-de-passe-oublie'
 import { Route as NouveauMotDePasseRouteImport } from './routes/nouveau-mot-de-passe'
 import { Route as ArtisanAteliersRouteImport } from './routes/artisan.ateliers'
+import { Route as ArtisanCandidatureEnvoyeeRouteImport } from './routes/artisan.candidature-envoyee'
 import { Route as ArtisanConnexionRouteImport } from './routes/artisan.connexion'
 import { Route as ArtisanCreerAtelierRouteImport } from './routes/artisan.creer-atelier'
 import { Route as ArtisanInscriptionRouteImport } from './routes/artisan.inscription'
@@ -87,6 +88,12 @@ const ArtisanAteliersRoute = ArtisanAteliersRouteImport.update({
   path: '/ateliers',
   getParentRoute: () => ArtisanRoute,
 } as any)
+const ArtisanCandidatureEnvoyeeRoute =
+  ArtisanCandidatureEnvoyeeRouteImport.update({
+    id: '/candidature-envoyee',
+    path: '/candidature-envoyee',
+    getParentRoute: () => ArtisanRoute,
+  } as any)
 const ArtisanConnexionRoute = ArtisanConnexionRouteImport.update({
   id: '/connexion',
   path: '/connexion',
@@ -188,6 +195,7 @@ export interface FileRoutesByFullPath {
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
   '/nouveau-mot-de-passe': typeof NouveauMotDePasseRoute
   '/artisan/ateliers': typeof ArtisanAteliersRoute
+  '/artisan/candidature-envoyee': typeof ArtisanCandidatureEnvoyeeRoute
   '/artisan/connexion': typeof ArtisanConnexionRoute
   '/artisan/creer-atelier': typeof ArtisanCreerAtelierRoute
   '/artisan/inscription': typeof ArtisanInscriptionRoute
@@ -214,6 +222,7 @@ export interface FileRoutesByTo {
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
   '/nouveau-mot-de-passe': typeof NouveauMotDePasseRoute
   '/artisan/ateliers': typeof ArtisanAteliersRoute
+  '/artisan/candidature-envoyee': typeof ArtisanCandidatureEnvoyeeRoute
   '/artisan/connexion': typeof ArtisanConnexionRoute
   '/artisan/creer-atelier': typeof ArtisanCreerAtelierRoute
   '/artisan/inscription': typeof ArtisanInscriptionRoute
@@ -244,6 +253,7 @@ export interface FileRoutesById {
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
   '/nouveau-mot-de-passe': typeof NouveauMotDePasseRoute
   '/artisan/ateliers': typeof ArtisanAteliersRoute
+  '/artisan/candidature-envoyee': typeof ArtisanCandidatureEnvoyeeRoute
   '/artisan/connexion': typeof ArtisanConnexionRoute
   '/artisan/creer-atelier': typeof ArtisanCreerAtelierRoute
   '/artisan/inscription': typeof ArtisanInscriptionRoute
@@ -275,6 +285,7 @@ export interface FileRouteTypes {
     | '/mot-de-passe-oublie'
     | '/nouveau-mot-de-passe'
     | '/artisan/ateliers'
+    | '/artisan/candidature-envoyee'
     | '/artisan/connexion'
     | '/artisan/creer-atelier'
     | '/artisan/inscription'
@@ -301,6 +312,7 @@ export interface FileRouteTypes {
     | '/mot-de-passe-oublie'
     | '/nouveau-mot-de-passe'
     | '/artisan/ateliers'
+    | '/artisan/candidature-envoyee'
     | '/artisan/connexion'
     | '/artisan/creer-atelier'
     | '/artisan/inscription'
@@ -330,6 +342,7 @@ export interface FileRouteTypes {
     | '/mot-de-passe-oublie'
     | '/nouveau-mot-de-passe'
     | '/artisan/ateliers'
+    | '/artisan/candidature-envoyee'
     | '/artisan/connexion'
     | '/artisan/creer-atelier'
     | '/artisan/inscription'
@@ -432,6 +445,13 @@ declare module '@tanstack/react-router' {
       path: '/ateliers'
       fullPath: '/artisan/ateliers'
       preLoaderRoute: typeof ArtisanAteliersRouteImport
+      parentRoute: typeof ArtisanRoute
+    }
+    '/artisan/candidature-envoyee': {
+      id: '/artisan/candidature-envoyee'
+      path: '/candidature-envoyee'
+      fullPath: '/artisan/candidature-envoyee'
+      preLoaderRoute: typeof ArtisanCandidatureEnvoyeeRouteImport
       parentRoute: typeof ArtisanRoute
     }
     '/artisan/connexion': {
@@ -558,6 +578,7 @@ declare module '@tanstack/react-router' {
 
 interface ArtisanRouteChildren {
   ArtisanAteliersRoute: typeof ArtisanAteliersRoute
+  ArtisanCandidatureEnvoyeeRoute: typeof ArtisanCandidatureEnvoyeeRoute
   ArtisanConnexionRoute: typeof ArtisanConnexionRoute
   ArtisanCreerAtelierRoute: typeof ArtisanCreerAtelierRoute
   ArtisanInscriptionRoute: typeof ArtisanInscriptionRoute
@@ -571,6 +592,7 @@ interface ArtisanRouteChildren {
 
 const ArtisanRouteChildren: ArtisanRouteChildren = {
   ArtisanAteliersRoute: ArtisanAteliersRoute,
+  ArtisanCandidatureEnvoyeeRoute: ArtisanCandidatureEnvoyeeRoute,
   ArtisanConnexionRoute: ArtisanConnexionRoute,
   ArtisanCreerAtelierRoute: ArtisanCreerAtelierRoute,
   ArtisanInscriptionRoute: ArtisanInscriptionRoute,
