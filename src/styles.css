@@ -55,6 +55,9 @@
   --color-abricot: var(--abricot);
   --color-rose-argile: var(--rose-argile);
   --color-laiton-pale: var(--laiton-pale);
+  --color-erreur-fond: var(--erreur-fond);
+  --color-erreur-texte: var(--erreur-texte);
+  --color-coquille: var(--coquille);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -71,7 +74,8 @@
 }
 
 :root {
-  --radius: 0.75rem;
+  /* 8 px : boutons et champs (rounded-lg) ; 12 px : encadrés (rounded-xl) ; 16 px : cartes (rounded-2xl). */
+  --radius: 0.5rem;
   --background: oklch(0.998 0.0015 75);
   /* Couleurs du design system « Atelier Forest & Terracotta » (docs/design-system.md) */
   --laiton: oklch(0.804 0.149 77.2); /* #F4B13B Laiton Solaire */
@@ -88,14 +92,17 @@
   --popover-foreground: oklch(0.22 0.01 80);
   --primary: oklch(0.45 0.13 32);
   --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.42 0.07 182);
+  --secondary: oklch(0.329 0.049 188.8); /* #0F3D3A Deep Forest */
   --secondary-foreground: oklch(1 0 0);
   --muted: oklch(0.955 0.013 76);
   --muted-foreground: oklch(0.42 0.03 42);
   --accent: oklch(0.92 0.035 76);
   --accent-foreground: oklch(0.31 0.06 180);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
+  --destructive: oklch(0.506 0.193 27.7); /* #BA1A1A erreur (6,5:1 sur blanc) */
+  --destructive-foreground: oklch(1 0 0);
+  --erreur-fond: oklch(0.918 0.042 25.2); /* #FFDAD6 error-container */
+  --erreur-texte: oklch(0.417 0.17 27.4); /* #93000A on-error-container */
+  --coquille: oklch(0.977 0.007 80.7); /* #FAF7F2 fond des champs et du solde */
   --border: oklch(0.89 0.012 72);
   --input: oklch(0.89 0.012 72);
   --ring: oklch(0.45 0.13 32);
@@ -167,6 +174,9 @@
 }
 
 @utility label-font { font-family: var(--font-label); }
+/* Ombre « patinée » du design system : douce, teintée vert forêt et terracotta. */
+@utility shadow-patine { box-shadow: 0 12px 32px -8px rgba(15, 61, 58, 0.08), 0 4px 12px -2px rgba(224, 116, 94, 0.06); }
+@utility shadow-patine-forte { box-shadow: 0 16px 40px -8px rgba(15, 61, 58, 0.14), 0 6px 16px -2px rgba(224, 116, 94, 0.1); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }

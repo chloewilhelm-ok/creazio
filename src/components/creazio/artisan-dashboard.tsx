@@ -102,7 +102,7 @@ function Indicateur({ icon, libelle, valeur, detail }: { icon: ReactNode; libell
     <div className="rounded-2xl border bg-card p-5">
       <span className="text-primary [&_svg]:size-5" aria-hidden="true">{icon}</span>
       <p className="mt-4 text-sm text-muted-foreground">{libelle}</p>
-      <strong className="text-2xl text-foreground">{valeur}</strong>
+      <strong className="label-font text-2xl text-foreground">{valeur}</strong>
       <p className="mt-1 text-xs text-muted-foreground">{detail}</p>
     </div>
   );
@@ -235,7 +235,7 @@ function ListeReservations({ reservations }: { reservations: ReservationArtisan[
                       <td className="py-2.5">{formatJour(r.debut_le)} · {formatHeure(r.debut_le)}</td>
                       <td>{r.atelier_titre}</td>
                       <td>{r.prenom ?? <span className="text-muted-foreground">Anonyme</span>}</td>
-                      <td className="font-mono">{r.code_creazio}</td>
+                      <td className="label-font">{r.code_creazio}</td>
                       <td className="text-right">{r.credits_debites}</td>
                       <td className="text-right">{annulee ? "—" : formatEuros(r.montant_artisan_eur)}</td>
                       <td className="pl-4">{annulee ? "Annulée" : r.versee ? "Versé" : "À verser"}</td>

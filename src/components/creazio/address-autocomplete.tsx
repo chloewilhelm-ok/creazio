@@ -68,7 +68,7 @@ export function AddressAutocomplete({
 
   return (
     <div className="grid gap-2">
-      <label htmlFor={id} className="text-sm font-semibold">
+      <label htmlFor={id} className="label-font text-sm font-semibold">
         {label}
       </label>
       <div className="relative">

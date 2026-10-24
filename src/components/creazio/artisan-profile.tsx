@@ -63,11 +63,11 @@ export function ArtisanProfilePage() {
       <p className="mb-6 rounded-lg bg-accent p-3 text-sm font-semibold text-primary">{statut ? statutLabel[statut] : "Fiche atelier à compléter"}</p>
       <div className="grid gap-4">
         <div className="grid grid-cols-2 gap-4">
-          <label className="grid gap-2 text-sm font-semibold">Prénom<Input value={prenom} onChange={e => setPrenom(e.target.value)}/></label>
-          <label className="grid gap-2 text-sm font-semibold">Nom<Input value={nom} onChange={e => setNom(e.target.value)}/></label>
+          <label className="label-font grid gap-2 text-sm font-semibold">Prénom<Input value={prenom} onChange={e => setPrenom(e.target.value)}/></label>
+          <label className="label-font grid gap-2 text-sm font-semibold">Nom<Input value={nom} onChange={e => setNom(e.target.value)}/></label>
         </div>
-        <label className="grid gap-2 text-sm font-semibold">Email<Input value={data?.profile?.email ?? ""} disabled readOnly/></label>
-        <label className="grid gap-2 text-sm font-semibold">Nom de l’atelier<Input value={atelier} onChange={e => setAtelier(e.target.value)}/></label>
+        <label className="label-font grid gap-2 text-sm font-semibold">Email<Input value={data?.profile?.email ?? ""} disabled readOnly/></label>
+        <label className="label-font grid gap-2 text-sm font-semibold">Nom de l’atelier<Input value={atelier} onChange={e => setAtelier(e.target.value)}/></label>
         <AddressFields artisan value={address} onChange={setAddress}/>
         <fieldset><legend className="mb-3 text-sm font-semibold">Savoir-faire principal</legend><div className="flex flex-wrap gap-2">{craftCategories.map(c => <Button key={c} type="button" size="sm" variant={category === c ? "default" : "outline"} aria-pressed={category === c} onClick={() => setCategory(c)} className="rounded-lg">{c}</Button>)}</div></fieldset>
         <Button onClick={save} disabled={busy || !data}>Enregistrer</Button>

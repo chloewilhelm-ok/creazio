@@ -74,7 +74,7 @@ export function TrouveTonAtelier() {
       <div aria-live="polite">
         {recherche.isPending && <p role="status" className="mt-3 text-sm text-muted-foreground">L’assistant cherche les ateliers qui vous correspondent…</p>}
         {recherche.isError && (
-          <p role="alert" className="mt-3 rounded-xl bg-accent p-3 text-sm text-accent-foreground">
+          <p role="alert" className="mt-3 rounded-xl bg-erreur-fond p-3 text-sm text-erreur-texte">
             {recherche.error instanceof ErreurIA ? recherche.error.message : MESSAGE_IA_PAR_DEFAUT}
           </p>
         )}

@@ -117,6 +117,7 @@ rounded:
   DEFAULT: 0.5rem
   md: 0.75rem
   lg: 1rem
+  # Creazio : boutons et champs à 8px (DEFAULT), encadrés à 12px (md), cartes à 16px (lg).
   xl: 1.5rem
   full: 9999px
 spacing:
@@ -175,7 +176,8 @@ Le principe de profondeur repose sur un étagement tactile et minéral évitant 
 
 La géométrie des interfaces traduit la rondeur d'un tour de potier ou le chanfreinage du bois poli :
 
-- **Composants d'action standard** : Rayon de courbure de `0.5rem` (8px) à `0.75rem` (12px) pour les boutons, champs et menus déroulants.
+- **Composants d'action standard** : Rayon de courbure de `0.5rem` (**8px**) pour tous les boutons, champs et menus déroulants, sans exception (en-tête compris).
+- **Encadrés et messages** : `0.75rem` (12px) pour les blocs d'information, messages d'erreur ou de confirmation et sélecteurs de créneaux.
 - **Cartes et conteneurs d'atelier** : Rayon de `1rem` (16px) pour adoucir les blocs d'images et encadrer la mise en scène des métiers d'art.
 - **Jetons et indicateurs de crédits** : Formes en pilule (`full`) garantissant un repérage immédiat des badges tarifaires et filtres thématiques.
 
@@ -191,29 +193,45 @@ La géométrie des interfaces traduit la rondeur d'un tour de potier ou le chanf
 - Version alternative "solde utilisateur" : fond `#FAF7F2`, bordure dorée, affichant l'icône de jeton et le nombre restant.
 
 ### Boutons
-- **Primary (Réserver / Confirmer)** : Fond plein Terracotta Cuit (`#8F3222`), texte blanc (7,93:1), coins arrondis à 12px, typographie Plus Jakarta Sans semibold. Au survol : fond à 90 % d'opacité (`#9A4638`, texte blanc à 6,35:1).
-- **Secondary (Découvrir l'artisan)** : Fond transparent, bordure 1.5px Deep Forest (`#0F3D3A`), typographie Deep Forest. Survol sur fond `#F2E6D6`.
-- **Tertiary (Action rapide)** : Fond Laiton Solaire (`#F4B13B`), texte Deep Forest (`#0F3D3A`, contraste 6,4:1), réservé aux offres éclairs, aux réapprovisionnements de crédits et à l'étiquette « Espace artisans » de l'en-tête public (changement d'univers).
+- **Primary (Réserver / Confirmer)** : Fond plein Terracotta Cuit (`#8F3222`), texte blanc (7,93:1), coins arrondis à 8px, typographie Plus Jakarta Sans semibold. Au survol : fond à 90 % d'opacité (`#9A4638`, texte blanc à 6,35:1).
+- **Secondary (Découvrir l'artisan, Retour, Annuler)** : Fond transparent, bordure 1.5px Deep Forest (`#0F3D3A`), typographie Deep Forest, coins arrondis à 8px. Survol sur fond `#F2E6D6`.
+- **Même gabarit pour tous** : primaire et secondaire partagent hauteur, police et arrondi ; seule la couleur change. Pas de bouton rouge : une action d'annulation (« Oui, annuler ») reste un bouton primaire, son libellé suffit à l'identifier.
+- **Tertiary (Action rapide)** : Fond Laiton Solaire (`#F4B13B`), texte Deep Forest (`#0F3D3A`, contraste 6,4:1), réservé aux offres éclairs et aux réapprovisionnements de crédits.
+- **Étiquette de changement d'univers** (« Espace artisans » sur le site élève, « Espace élève » sur le site artisan) : pilule fond `#FFF6E0`, bordure 1px `#F4B13B`, texte Deep Forest en poids normal (11,2:1).
 
 ### Filtres & Chips
-- Puces en Space Grotesk `label-sm` avec fond `#F2E6D6` et texte `#1C1C19`.
+- Puces en pilule (`rounded-full`, 36px de haut), Space Grotesk 12px semibold, fond `#F2E6D6` et texte `#1C1C19` ; survol abricot `#FFDDAF`.
 - État actif : fond plein Deep Forest (`#0F3D3A`), texte `#FAF7F2`, témoignant d'un choix affirmé de matière ou de quartier parisien.
 
 ### Champs de Saisie & Sélecteurs de Créneaux
-- Fond neutre chaud `#FAF7F2`, bordure 1px `rgba(15, 61, 58, 0.15)`, coins arrondis à 12px.
-- État focus : contour Deep Forest net assorti d'un halo doux Terracotta à 20% d'opacité (`0 0 0 3px rgba(224, 116, 94, 0.2)`). Labels en Space Grotesk.
+- Fond neutre chaud `#FAF7F2`, bordure 1px `rgba(15, 61, 58, 0.15)`, coins arrondis à **8px** (champs d'une ligne comme zones de texte).
+- État focus : contour Deep Forest net assorti d'un halo doux Terracotta (`0 0 0 3px rgba(224, 116, 94, 0.25)`). Labels en Space Grotesk semibold 14px.
+- Erreur de saisie : message sous le champ en `#BA1A1A` (6,41:1), relié au champ (`aria-describedby`), bordure du champ dans la même couleur.
 
 ### Jauge de Disponibilité (Seat Counter)
-- Micro-composant placé sous l'horaire de l'atelier : barre fine de 4px, fond gris sable avec remplissage Terracotta indiquant le nombre de places restantes (ex: "Plus que 2 places").
+- Micro-composant placé sous l'horaire de l'atelier : barre fine de 4px, fond sable avec remplissage Terracotta proportionnel aux places restantes ; texte « Plus qu'une place », « Plus que 2 places », sinon « 4 places disponibles », en Space Grotesk.
+
+### Messages
+- **Erreur** : encadré fond `#FFDAD6` (error-container), texte `#93000A` (7,24:1), arrondi 12px, rôle `alert`.
+- **Confirmation** : encadré fond menthe `#BBE9E3`, texte Deep Forest (9,08:1), rôle `status`.
+
+### Chiffres
+- Montants de crédits, durées, horaires, places, codes de réservation (`CRZ-…`), soldes et indicateurs du dashboard en **Space Grotesk** (classe `label-font`) ; le texte courant reste en Plus Jakarta Sans.
 
 ## Mise en œuvre dans le code
 
-Les couleurs ci-dessus sont déclarées en oklch dans `src/styles.css` (variables `--primary`, `--secondary`, `--background`, `--laiton`, `--deep-forest`, `--sable`, `--menthe`, `--abricot`, `--rose-argile`) et exposées en classes Tailwind (`bg-laiton`, `text-deep-forest`…). Les jetons de l'en-tête de ce fichier (`colors:`) sont l'export d'origine de Stitch ; en cas d'écart, les valeurs des sections ci-dessus et de `src/styles.css` font foi.
+Les couleurs ci-dessus sont déclarées en oklch dans `src/styles.css` (variables `--primary`, `--secondary` = Deep Forest, `--background`, `--laiton`, `--deep-forest`, `--sable`, `--menthe`, `--abricot`, `--rose-argile`, `--coquille` pour le fond des champs, `--destructive` / `--erreur-fond` / `--erreur-texte` pour les erreurs ; arrondi de base `--radius: 0.5rem`, et utilitaires d'ombre `shadow-patine` / `shadow-patine-forte`) et exposées en classes Tailwind (`bg-laiton`, `text-deep-forest`…). Les jetons de l'en-tête de ce fichier (`colors:`) sont l'export d'origine de Stitch ; en cas d'écart, les valeurs des sections ci-dessus et de `src/styles.css` font foi.
 
 | Rôle | Valeur appliquée | Contraste vérifié |
 |---|---|---|
 | Bouton principal | `#8F3222`, texte blanc | 7,93:1 (AAA) |
 | Bouton principal au survol | `#9A4638`, texte blanc | 6,35:1 (AA) |
-| Étiquette « Espace artisans » | `#F4B13B`, texte `#0F3D3A` | 6,40:1 (AA) |
+| Étiquette « Espace artisans » / « Espace élève » | fond `#FFF6E0`, bordure `#F4B13B`, texte `#0F3D3A` | 11,2:1 (AAA) |
+| Badge de crédits | `#F4B13B` sur `#0F3D3A` | 6,40:1 (AA) |
+| Puce de filtre active | `#FAF7F2` sur `#0F3D3A` | 11,24:1 (AAA) |
+| Message d'erreur | `#93000A` sur `#FFDAD6` | 7,24:1 (AAA) |
+| Erreur sous un champ | `#BA1A1A` sur `#FFFEFD` | 6,41:1 (AA) |
+| Confirmation | `#0F3D3A` sur `#BBE9E3` | 9,08:1 (AAA) |
+| Solde de crédits (en-tête) | `#0F3D3A` sur `#FAF7F2`, bordure `#F4B13B` | 11,24:1 (AAA) |
 | Titres | `#0F3D3A` sur `#FFFEFD` | 11,92:1 (AAA) |
 | Pastilles de savoir-faire | 4 teintes claires, icône `#0F3D3A` | 9,08 à 9,76:1 (AAA) |

@@ -26,7 +26,7 @@ export const workshopSessionsQuery = (workshopId: string) =>
       const now = Date.now();
       const { data, error } = await supabase
         .from("sessions")
-        .select("id,debut_le,fin_le,statut,places_restantes,prix_credits")
+        .select("id,debut_le,fin_le,statut,places_restantes,places_ouvertes_creazio,prix_credits")
         .eq("atelier_id", workshopId)
         .eq("statut", "ouverte")
         .gt("debut_le", new Date(now).toISOString())

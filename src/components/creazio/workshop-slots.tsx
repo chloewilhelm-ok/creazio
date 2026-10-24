@@ -56,7 +56,7 @@ export function WorkshopSlots({ workshopId }: { workshopId: string }) {
     <section className="mt-6" aria-label="Créneaux disponibles">
       <h2 className="font-semibold">Créneaux disponibles</h2>
       {avis && (
-        <p role="alert" className="mt-3 rounded-lg bg-muted p-3 text-sm">
+        <p role="alert" className="mt-3 rounded-lg bg-erreur-fond p-3 text-sm text-erreur-texte">
           {avis}
         </p>
       )}
@@ -102,22 +102,22 @@ export function WorkshopSlots({ workshopId }: { workshopId: string }) {
                     </span>
                     {actif && <Check className="size-4 shrink-0 text-primary" aria-hidden />}
                   </span>
-                  <span className="mt-2 block text-sm">
+                  <span className="label-font mt-2 block text-sm">
                     {formatHeure(slot.debut_le)} – {formatHeure(slot.fin_le)}
                   </span>
+                  <JaugePlaces restantes={slot.places_restantes} ouvertes={slot.places_ouvertes_creazio} />
                   <span className="mt-3 flex flex-wrap items-center justify-between gap-2 text-sm">
                     {complet ? (
                       <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-semibold text-muted-foreground">
                         Complet
                       </span>
                     ) : (
-                      <span className="flex items-center gap-1 text-muted-foreground">
-                        <Users className="size-4" />
-                        {slot.places_restantes}{" "}
-                        {slot.places_restantes === 1 ? "place disponible" : "places disponibles"}
+                      <span className="label-font flex items-center gap-1 text-muted-foreground">
+                        <Users className="size-4" aria-hidden="true" />
+                        {libellePlaces(slot.places_restantes)}
                       </span>
                     )}
-                    <strong className="text-primary">{formatCredits(slot.prix_credits)}</strong>
+                    <strong className="label-font text-primary">{formatCredits(slot.prix_credits)}</strong>
                   </span>
                 </button>
               </li>
@@ -203,7 +203,7 @@ function BookingSummary({
                 {pending ? "Réservation en cours…" : `Confirmer avec ${formatCredits(prix)}`}
               </Button>
               {error && (
-                <p role="alert" className="mt-3 rounded-lg bg-background p-3 text-sm">
+                <p role="alert" className="mt-3 rounded-lg bg-erreur-fond p-3 text-sm text-erreur-texte">
                   {messageErreur(error)}
                 </p>
               )}
@@ -212,5 +212,20 @@ function BookingSummary({
         </>
       )}
     </div>
+  );
+}
+
+/** « Plus qu’une place », « Plus que 2 places » quand il en reste peu, sinon « 4 places disponibles ». */
+export const libellePlaces = (restantes: number) =>
+  restantes === 1 ? "Plus qu’une place" : restantes === 2 ? "Plus que 2 places" : `${restantes} places disponibles`;
+
+/** Jauge de disponibilité (design system) : barre fine de 4 px, remplissage terracotta = places restantes. */
+function JaugePlaces({ restantes, ouvertes }: { restantes: number; ouvertes: number }) {
+  if (ouvertes <= 0) return null;
+  const part = Math.max(0, Math.min(1, restantes / ouvertes));
+  return (
+    <span aria-hidden="true" className="mt-2 block h-1 w-full overflow-hidden rounded-full bg-sable">
+      <span className="block h-full rounded-full bg-primary" style={{ width: `${part * 100}%` }} />
+    </span>
   );
 }
