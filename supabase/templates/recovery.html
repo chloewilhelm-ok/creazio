@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="fr">
+<body style="margin:0;padding:0;background:#F2E6D6;font-family:Arial,Helvetica,sans-serif">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F2E6D6;padding:24px 12px">
+<tr><td align="center">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#FFFEFD;border-radius:16px;overflow:hidden">
+<tr><td style="padding:24px 28px;border-bottom:1px solid #F2E6D6"><span style="font-size:24px;font-weight:700;color:#8F3222">Creazio</span></td></tr>
+<tr><td style="padding:28px">
+<h1 style="margin:0 0 12px;font-size:26px;line-height:1.25;color:#0F3D3A">Réinitialisez votre mot de passe</h1>
+<p style="margin:0 0 20px;font-size:16px;line-height:1.5;color:#1C1C19">{{ if .Data.prenom }}Bonjour {{ .Data.prenom }},{{ else }}Bonjour,{{ end }}<br>vous avez demandé à changer le mot de passe de votre compte Creazio. Cliquez sur le bouton ci-dessous pour en choisir un nouveau.</p>
+<a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:12px 22px;border-radius:8px;background:#8F3222;color:#FFFFFF;font-size:15px;font-weight:700;text-decoration:none">Choisir un nouveau mot de passe</a>
+<p style="margin:24px 0 0;font-size:14px;line-height:1.5;color:#56423E">Ce lien est valable une heure et ne peut servir qu’une fois. Vous n’êtes pas à l’origine de cette demande ? Ignorez cet email : votre mot de passe actuel reste inchangé.</p>
+<p style="margin:16px 0 0;font-size:12px;line-height:1.5;color:#56423E">Le bouton ne fonctionne pas ? Copiez ce lien dans votre navigateur :<br><a href="{{ .ConfirmationURL }}" style="color:#8F3222;word-break:break-all">{{ .ConfirmationURL }}</a></p>
+</td></tr>
+<tr><td style="padding:18px 28px;background:#0F3D3A;color:#FFFFFF;font-size:12px;line-height:1.5">Creazio · L’atelier créatif près de chez vous, à prix doux.<br>Cet email a été envoyé à {{ .Email }}.</td></tr>
+</table>
+</td></tr>
+</table>
+</body>
+</html>
