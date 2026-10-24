@@ -72,7 +72,7 @@ export const publishedWorkshopsQuery = queryOptions({
   queryKey: ["ateliers", "publies"],
   queryFn: async () => {
     const { data, error } = await supabase.from("ateliers")
-      .select("id,titre,description,savoir_faire,ville,quartier,code_postal,duree_minutes,photo_url,cree_le,latitude,longitude,sessions(prix_credits)")
+      .select("id,titre,description,savoir_faire,ville,quartier,code_postal,duree_minutes,photo_url,cree_le,latitude,longitude,sessions(prix_credits),artisans(nom_commercial)")
       .eq("statut", "publie").order("cree_le", { ascending: false });
     if (error) throw error;
     return data;
@@ -82,7 +82,7 @@ export const publishedWorkshopsQuery = queryOptions({
 export const workshopQuery = (id: string) => queryOptions({
   queryKey: ["ateliers", id],
   queryFn: async () => {
-    const { data, error } = await supabase.from("ateliers").select("*").eq("id", id).maybeSingle();
+    const { data, error } = await supabase.from("ateliers").select("*, artisans(nom_commercial, statut_candidature)").eq("id", id).maybeSingle();
     if (error) throw error;
     return data;
   },

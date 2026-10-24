@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 export interface SuggestionAtelier {
   atelier_id: string;
   titre: string;
+  artisan: string | null;
   savoir_faire: string;
   lieu: string;
   duree_minutes: number;

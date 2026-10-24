@@ -92,7 +92,7 @@ export function TrouveTonAtelier() {
                     >
                       <img src={photo.src} alt={photo.alt} className="size-16 shrink-0 rounded-lg object-cover" />
                       <span className="grid content-start gap-1">
-                        <span className="text-sm font-semibold">{s.titre}</span>
+                        <span className="text-sm font-semibold">{s.titre}{s.artisan && <span className="font-normal text-muted-foreground"> · par {s.artisan}</span>}</span>
                         <span className="text-xs text-foreground">{s.raison}</span>
                         <span className="label-font text-[11px] text-muted-foreground">
                           {s.lieu} · {formatJour(s.prochaine_session)} {formatHeure(s.prochaine_session)} · dès {formatCredits(s.prix_min_credits)}

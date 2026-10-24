@@ -16,6 +16,8 @@ export const DELAI_GEMINI_MS = 20_000;
 export interface SessionDisponible {
   atelier_id: string;
   titre: string;
+  /** Nom commercial de l'artisan, renvoyé à l'élève (jamais envoyé à Gemini). */
+  artisan: string | null;
   savoir_faire: string;
   description: string;
   quartier: string | null;
@@ -31,6 +33,7 @@ export interface SessionDisponible {
 export interface AtelierCandidat {
   id: string;
   titre: string;
+  artisan: string | null;
   savoir_faire: string;
   description: string;
   lieu: string;
@@ -61,6 +64,7 @@ export function ateliersDisponibles(sessions: SessionDisponible[], now = Date.no
       parAtelier.set(s.atelier_id, {
         id: s.atelier_id,
         titre: s.titre,
+        artisan: s.artisan,
         savoir_faire: s.savoir_faire,
         description: s.description.replace(/\s+/g, " ").trim().slice(0, 280),
         lieu: zoneDepuisAdresse(s.code_postal, s.ville) + (s.quartier ? ` (${s.quartier})` : ""),

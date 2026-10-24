@@ -70,7 +70,7 @@ Deno.serve(async (req) => {
   const maintenant = new Date();
   const { data: lignes, error: erreurSessions } = await admin
     .from("sessions")
-    .select("debut_le, prix_credits, places_restantes, ateliers!inner(id, titre, savoir_faire, description, quartier, code_postal, ville, duree_minutes, photo_url, statut)")
+    .select("debut_le, prix_credits, places_restantes, ateliers!inner(id, titre, savoir_faire, description, quartier, code_postal, ville, duree_minutes, photo_url, statut, artisans(nom_commercial))")
     .eq("statut", "ouverte")
     .gt("places_restantes", 0)
     .gt("debut_le", maintenant.toISOString())
@@ -86,6 +86,7 @@ Deno.serve(async (req) => {
   const sessions: SessionDisponible[] = ((lignes ?? []) as unknown as Ligne[]).map((l) => ({
     atelier_id: String(l.ateliers.id),
     titre: String(l.ateliers.titre),
+    artisan: (l.ateliers.artisans as { nom_commercial?: string } | null)?.nom_commercial ?? null,
     savoir_faire: LIBELLES_SAVOIR_FAIRE[String(l.ateliers.savoir_faire)] ?? String(l.ateliers.savoir_faire),
     description: String(l.ateliers.description ?? ""),
     quartier: (l.ateliers.quartier as string | null) ?? null,
@@ -144,6 +145,7 @@ Deno.serve(async (req) => {
     suggestions: suggestions.map(({ atelier, raison }) => ({
       atelier_id: atelier.id,
       titre: atelier.titre,
+      artisan: atelier.artisan,
       savoir_faire: atelier.savoir_faire,
       lieu: atelier.lieu,
       duree_minutes: atelier.duree_minutes,

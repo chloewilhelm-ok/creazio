@@ -16,7 +16,7 @@ import { messageIA } from "@/lib/trouver-atelier";
 
 const NOW = Date.parse("2026-10-24T10:00:00Z");
 const session = (atelier_id: string, debut_le: string, extra: Partial<SessionDisponible> = {}): SessionDisponible => ({
-  atelier_id, titre: `Atelier ${atelier_id}`, savoir_faire: "Poterie et céramique", description: "Façonnez  un bol\nen grès.",
+  atelier_id, titre: `Atelier ${atelier_id}`, artisan: "Terres Vives", savoir_faire: "Poterie et céramique", description: "Façonnez  un bol\nen grès.",
   quartier: "Bastille", code_postal: "75011", ville: "Paris", duree_minutes: 120, photo_url: null,
   debut_le, prix_credits: 32, places_restantes: 2, ...extra,
 });
@@ -119,5 +119,14 @@ describe("requête allégée", () => {
     const liste = JSON.parse(corps.contents[0]!.parts[0]!.text.split("(JSON) :\n")[1]!);
     expect(liste).toHaveLength(40);
     expect(Object.keys(liste[0])).toEqual(["id", "titre", "savoir_faire", "zone", "date", "credits"]);
+  });
+});
+
+describe("nom de l'artisan", () => {
+  it("est gardé pour l'élève mais jamais envoyé à Gemini", async () => {
+    const { ateliersDisponibles: dispo, requeteGemini: requete } = await import("../../supabase/functions/trouver-atelier/logique");
+    const ateliers = dispo([session("a", "2026-10-27T17:00:00Z")], NOW);
+    expect(ateliers[0]!.artisan).toBe("Terres Vives");
+    expect(JSON.stringify(requete("un cadeau", null, ateliers))).not.toContain("Terres Vives");
   });
 });
