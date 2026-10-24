@@ -725,6 +725,32 @@ export type Database = {
     Functions: {
       acheter_pack_demo: { Args: { p_pack_id: string }; Returns: number }
       definir_newsletter: { Args: { p_abonne: boolean }; Returns: string | null }
+      reservations_artisan: {
+        Args: never
+        Returns: {
+          reservation_id: string
+          session_id: string
+          debut_le: string
+          atelier_titre: string
+          prenom: string | null
+          code_creazio: string
+          credits_debites: number
+          montant_artisan_eur: number
+          statut: Database["public"]["Enums"]["statut_reservation"]
+          versee: boolean
+          reservee_le: string
+        }[]
+      }
+      sessions_artisan: {
+        Args: never
+        Returns: {
+          session_id: string
+          atelier_titre: string
+          debut_le: string
+          places_ouvertes_creazio: number
+          places_reservees: number
+        }[]
+      }
       annuler_reservation: {
         Args: { p_reservation_id: string }
         Returns: number

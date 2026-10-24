@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams, useSearch } from "@tanstack/react-router"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ensureProfile, friendlyAuthError, pendingProfileFromMetadata } from "@/lib/auth";
-import { ArrowLeft, ArrowRight, BadgeCheck, CalendarDays, Check, ChevronRight, CircleUserRound, Clock3, Coins, Euro, Eye, Filter, Heart, LogOut, MapPin, Menu, Palette, Percent, Search, Sparkles, Users, WalletCards, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, BadgeCheck, CalendarDays, Check, ChevronRight, CircleUserRound, Clock3, Coins, Euro, Eye, Filter, Heart, LogOut, MapPin, Menu, Palette, Percent, Search, Sparkles, WalletCards, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -17,6 +17,7 @@ import { RAYON_RECOMMANDATION_KM, distanceKm, ensureSignupInterests, formatDuree
 import { craftCategories, savoirFaireByCategory, type CraftCategory } from "./catalog";
 import { AddressFields, ArtisanOnboardingFields, CategoryPicker, useCreazioSession } from "./session-state";
 import { WorkshopSlots } from "./workshop-slots";
+import { ArtisanDashboard } from "./artisan-dashboard";
 import { SavoirFaireGrid } from "./savoir-faire-grid";
 import { photoAtelier } from "@/lib/photos-ateliers";
 import { AddressAutocomplete } from "./address-autocomplete";
@@ -388,5 +389,4 @@ export function ArtisanApplicationPage(){const [done,setDone]=useState(false);re
 function FormSection({number,title,children}:{number:string;title:string;children:ReactNode}){return <section className="grid gap-5"><div className="flex items-center gap-3"><span className="grid size-8 place-items-center rounded-full border border-primary text-sm font-bold text-primary">{number}</span><h2 className="text-lg font-semibold">{title}</h2></div>{children}</section>}
 
 export { ArtisanWorkshopsPage, ArtisanPlanningPage, ArtisanSessionPage } from "./workshop-pages";
-export function ArtisanRevenuePage(){return <ArtisanShell active="revenus"><PageTitle title="Mes revenus" body="Suivez vos réservations et vos versements."/><div className="grid gap-4 sm:grid-cols-3"><Kpi icon={<Euro/>} label="Revenus ce mois" value="0 €"/><Kpi icon={<WalletCards/>} label="À recevoir" value="0 €"/><Kpi icon={<Users/>} label="Participants" value="0"/></div><section className="mt-8 rounded-2xl border bg-card p-6"><h2 className="font-semibold">Historique des versements</h2><EmptyState icon={<Euro/>} title="Aucun versement" body="L’historique apparaîtra après les premières réservations."/></section></ArtisanShell>}
-function Kpi({icon,label,value}:{icon:ReactNode;label:string;value:string}){return <div className="rounded-2xl border bg-card p-5"><span className="text-primary [&_svg]:size-5">{icon}</span><p className="mt-5 text-sm text-muted-foreground">{label}</p><strong className="text-2xl">{value}</strong></div>}
+export function ArtisanRevenuePage(){return <ArtisanShell active="revenus"><PageTitle title="Mes revenus" body="Vos réservations, vos créneaux et ce que Creazio vous doit, mis à jour en direct."/><ArtisanDashboard/></ArtisanShell>}
