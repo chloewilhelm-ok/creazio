@@ -56,8 +56,9 @@ describe("requête envoyée à Gemini", () => {
   const ateliers = ateliersDisponibles([session("a", "2026-10-27T17:00:00Z")], NOW);
   const corps = requeteGemini("Un cadeau fait main", "Paris 11e", ateliers);
   const texte = JSON.stringify(corps);
-  it("utilise le modèle Flash le plus récent et impose une réponse JSON", () => {
-    expect(MODELE_GEMINI).toBe("gemini-3.8-flash");
+  it("utilise Flash-Lite sans réflexion longue et impose une réponse JSON", () => {
+    expect(MODELE_GEMINI).toBe("gemini-3.5-flash-lite");
+    expect(corps.generationConfig.thinkingConfig).toEqual({ thinkingLevel: "minimal" });
     expect(corps.generationConfig.responseMimeType).toBe("application/json");
     expect(corps.generationConfig.responseSchema.required).toEqual(["suggestions", "message"]);
   });
@@ -107,5 +108,16 @@ describe("demande de l'élève et messages", () => {
     expect(LIMITE_PAR_HEURE).toBe(10);
     expect(messageIA("QUOTA")).toMatch(/10 demandes/);
     expect(messageIA("inconnu")).toMatch(/Une erreur est survenue/);
+  });
+});
+
+describe("requête allégée", () => {
+  it("n'envoie que 40 ateliers au plus, sans description", async () => {
+    const { ateliersDisponibles: dispo, requeteGemini: requete } = await import("../../supabase/functions/trouver-atelier/logique");
+    const sessions = Array.from({ length: 60 }, (_, i) => session(`at${i}`, new Date(NOW + (i + 1) * 3_600_000).toISOString()));
+    const corps = requete("un cadeau", "Paris 18e", dispo(sessions, NOW));
+    const liste = JSON.parse(corps.contents[0]!.parts[0]!.text.split("(JSON) :\n")[1]!);
+    expect(liste).toHaveLength(40);
+    expect(Object.keys(liste[0])).toEqual(["id", "titre", "savoir_faire", "zone", "date", "credits"]);
   });
 });

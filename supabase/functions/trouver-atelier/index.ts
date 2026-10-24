@@ -6,6 +6,7 @@
 // disponibles partent chez Google. Secret requis : GEMINI_API_KEY.
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
 import {
+  DELAI_GEMINI_MS,
   LIBELLES_SAVOIR_FAIRE,
   LIMITE_PAR_HEURE,
   MODELE_GEMINI,
@@ -25,6 +26,11 @@ const CORS = {
 const reponse = (status: number, corps: Record<string, unknown>) =>
   new Response(JSON.stringify(corps), { status, headers: { ...CORS, "Content-Type": "application/json" } });
 const JOURS_RECHERCHE = 45;
+class ErreurGemini extends Error {
+  constructor(public statut: number, message: string) {
+    super(message);
+  }
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
@@ -103,23 +109,33 @@ Deno.serve(async (req) => {
     return reponse(503, { code: "IA_INDISPONIBLE", erreur: "Assistant indisponible" });
   }
   const zone = zoneDepuisAdresse(profil.code_postal, profil.ville);
-  let texte = "";
-  try {
+  // Délai de 20 s ; en cas d'échec (délai dépassé, surcharge, erreur réseau), un seul nouvel essai.
+  const appelerGemini = async () => {
     const appel = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODELE_GEMINI}:generateContent`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-goog-api-key": cle },
       body: JSON.stringify(requeteGemini(phrase, zone, ateliers)),
-      signal: AbortSignal.timeout(25_000),
+      signal: AbortSignal.timeout(DELAI_GEMINI_MS),
     });
-    if (!appel.ok) {
-      console.error(`[trouver-atelier] Gemini a répondu ${appel.status} : ${(await appel.text()).slice(0, 500)}`);
-      return reponse(503, { code: appel.status === 429 ? "IA_SATUREE" : "IA_INDISPONIBLE", erreur: "Assistant indisponible" });
-    }
+    if (!appel.ok) throw new ErreurGemini(appel.status, (await appel.text()).slice(0, 500));
     const json = (await appel.json()) as { candidates?: { content?: { parts?: { text?: string; thought?: boolean }[] } }[] };
-    texte = (json.candidates?.[0]?.content?.parts ?? []).filter((p) => !p.thought).map((p) => p.text ?? "").join("");
-  } catch (e) {
-    console.error(`[trouver-atelier] Gemini injoignable : ${e instanceof Error ? e.message : String(e)}`);
-    return reponse(503, { code: "IA_INDISPONIBLE", erreur: "Assistant indisponible" });
+    return (json.candidates?.[0]?.content?.parts ?? []).filter((p) => !p.thought).map((p) => p.text ?? "").join("");
+  };
+  let texte = "";
+  for (let essai = 1; essai <= 2; essai++) {
+    const debut = Date.now();
+    try {
+      texte = await appelerGemini();
+      console.log(`[trouver-atelier] Gemini a répondu en ${Date.now() - debut} ms (essai ${essai})`);
+      break;
+    } catch (e) {
+      const statut = e instanceof ErreurGemini ? e.statut : 0;
+      console.error(`[trouver-atelier] essai ${essai} : ${e instanceof ErreurGemini ? `Gemini a répondu ${statut} : ${e.message}` : `Gemini injoignable : ${e instanceof Error ? e.message : String(e)}`}`);
+      // Une requête refusée (clé, paramètre) ne réussira pas mieux au second essai.
+      if (essai === 2 || (statut >= 400 && statut < 500 && statut !== 429)) {
+        return reponse(503, { code: statut === 429 ? "IA_SATUREE" : "IA_INDISPONIBLE", erreur: "Assistant indisponible" });
+      }
+    }
   }
 
   // 6. Vérification côté serveur : seuls des ateliers de la liste envoyée, au plus 3.
