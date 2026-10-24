@@ -18,6 +18,15 @@ export function distanceKm(a: { lat: number; lon: number }, b: { lat: number; lo
   return 6371 * 2 * Math.asin(Math.sqrt(h));
 }
 
+const formatKm = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 1 });
+
+/** Distance lisible : « 850 m » sous 1 km (arrondi à la dizaine), sinon « 7,1 km » (1 décimale, virgule). */
+export function formatDistance(km: number): string {
+  const metres = Math.round((km * 1000) / 10) * 10;
+  if (metres < 1000) return `${metres} m`;
+  return `${formatKm.format(km)} km`;
+}
+
 /** Géocode une adresse française via api-adresse.data.gouv.fr ; null si introuvable. */
 export async function geocodeAddress(street?: string | null, postcode?: string | null, city?: string | null): Promise<{ latitude: number; longitude: number } | null> {
   const q = [street, postcode, city].filter(Boolean).join(" ").trim();
