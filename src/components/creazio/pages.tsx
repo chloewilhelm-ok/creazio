@@ -100,7 +100,7 @@ function AuthPage({artisan=false}:{artisan?:boolean}){
     if(role!=="artisan")await ensureSignupInterests(user);
     navigate({to:role==="artisan"?"/artisan/planning":"/espace-eleve"});
   }
-  return <><PublicHeader/><main className="mx-auto grid min-h-[calc(100vh-80px)] max-w-[1100px] items-center px-5 py-12"><div className="mx-auto w-full max-w-md"><Link to={artisan?"/devenir-artisan":"/"} className="mb-8 inline-flex items-center gap-2 text-sm text-muted-foreground"><ArrowLeft className="size-4"/>Retour</Link><PageTitle eyebrow={artisan?"Espace artisan":"Espace élève"} title="Ravi de vous revoir" body="Connectez-vous pour accéder à votre espace."/><form onSubmit={submit} className="grid gap-5"><Field label="Adresse email"><Input type="email" required autoComplete="email" placeholder="vous@exemple.fr" value={email} onChange={e=>setEmail(e.target.value)}/></Field><Field label="Mot de passe"><Input type="password" required autoComplete="current-password" placeholder="••••••••" value={password} onChange={e=>setPassword(e.target.value)}/></Field>{error&&<p role="alert" className="rounded-xl bg-accent p-4 text-sm text-accent-foreground">{error}</p>}<Button type="submit" size="lg" disabled={busy}>{busy?"Connexion…":"Se connecter"}</Button></form>{artisan?<p className="mt-6 text-center text-sm text-muted-foreground">Pas encore partenaire ? <Link to="/artisan/inscription" className="font-semibold text-primary">S’inscrire</Link></p>:<p className="mt-6 text-center text-sm text-muted-foreground">Pas encore membre ? <Link to="/inscription" className="font-semibold text-primary">Créer un compte</Link></p>}</div></main></>}
+  return <><PublicHeader/><main className="mx-auto grid min-h-[calc(100vh-80px)] max-w-[1100px] items-center px-5 py-12"><div className="mx-auto w-full max-w-md"><Link to={artisan?"/devenir-artisan":"/"} className="mb-8 inline-flex items-center gap-2 text-sm text-muted-foreground"><ArrowLeft className="size-4"/>Retour</Link><PageTitle eyebrow={artisan?"Espace artisan":"Espace élève"} title="Ravi de vous revoir" body="Connectez-vous pour accéder à votre espace."/><form onSubmit={submit} className="grid gap-5"><Field label="Adresse email"><Input type="email" required autoComplete="email" placeholder="vous@exemple.fr" value={email} onChange={e=>setEmail(e.target.value)}/></Field><div className="grid gap-2"><Field label="Mot de passe"><Input type="password" required autoComplete="current-password" placeholder="••••••••" value={password} onChange={e=>setPassword(e.target.value)}/></Field><Link to="/mot-de-passe-oublie" className="justify-self-end text-sm font-semibold text-primary underline-offset-4 hover:underline">Mot de passe oublié ?</Link></div>{error&&<p role="alert" className="rounded-xl bg-accent p-4 text-sm text-accent-foreground">{error}</p>}<Button type="submit" size="lg" disabled={busy}>{busy?"Connexion…":"Se connecter"}</Button></form>{artisan?<p className="mt-6 text-center text-sm text-muted-foreground">Pas encore partenaire ? <Link to="/artisan/inscription" className="font-semibold text-primary">S’inscrire</Link></p>:<p className="mt-6 text-center text-sm text-muted-foreground">Pas encore membre ? <Link to="/inscription" className="font-semibold text-primary">Créer un compte</Link></p>}</div></main></>}
 export function ArtisanSignupPage(){
   const navigate=useNavigate();
   const {artisan,setArtisan}=useCreazioSession();
@@ -120,6 +120,57 @@ export function ArtisanSignupPage(){
     }
   }
   return <><PublicHeader/><main className="mx-auto grid min-h-[calc(100vh-80px)] max-w-[1100px] items-center px-5 py-12"><div className="mx-auto w-full max-w-md"><Link to="/devenir-artisan" className="mb-8 inline-flex items-center gap-2 text-sm text-muted-foreground"><ArrowLeft className="size-4"/>Retour</Link><PageTitle eyebrow="Espace artisan" title="Créer mon compte artisan" body="Créez votre accès, puis complétez votre candidature."/><form onSubmit={submit} className="grid gap-5"><div className="grid grid-cols-2 gap-4"><Field label="Prénom"><Input required autoComplete="given-name" value={prenom} onChange={e=>setPrenom(e.target.value)}/></Field><Field label="Nom"><Input required autoComplete="family-name" value={nom} onChange={e=>setNom(e.target.value)}/></Field></div><Field label="Nom de l’atelier"><Input required placeholder="Atelier Terres Vives" value={artisan.name} onChange={e=>setArtisan({...artisan,name:e.target.value})}/></Field><Field label="Adresse email professionnelle"><Input type="email" required autoComplete="email" placeholder="atelier@exemple.fr" value={email} onChange={e=>setEmail(e.target.value)}/></Field><Field label="Mot de passe"><Input type="password" required minLength={8} autoComplete="new-password" placeholder="8 caractères minimum" value={password} onChange={e=>setPassword(e.target.value)}/></Field><ArtisanOnboardingFields/>{error&&<p role="alert" className="rounded-xl bg-accent p-4 text-sm text-accent-foreground">{error}</p>}{info&&<p role="status" className="rounded-xl bg-accent p-4 text-sm text-accent-foreground">{info}</p>}<Button type="submit" size="lg" disabled={busy}>{busy?"Création…":"Créer mon compte"} <ArrowRight/></Button></form><p className="mt-6 text-center text-sm text-muted-foreground">Déjà partenaire ? <Link to="/artisan/connexion" className="font-semibold text-primary">Se connecter</Link></p></div></main></>}
+/** Demande d'un lien de réinitialisation. Message identique qu'un compte existe ou non (pas d'indice pour un tiers). */
+export function ForgotPasswordPage(){
+  const [email,setEmail]=useState("");const [erreur,setErreur]=useState("");const [envoye,setEnvoye]=useState("");const [busy,setBusy]=useState(false);
+  async function submit(e:FormEvent){
+    e.preventDefault();setErreur("");
+    const adresse=email.trim();
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(adresse)){setErreur(adresse?"Cette adresse email n’est pas valide. Exemple : camille@exemple.fr":"Indiquez votre adresse email.");focusChamp("oubli-email");return;}
+    setBusy(true);
+    const {error}=await supabase.auth.resetPasswordForEmail(adresse,{redirectTo:`${window.location.origin}/nouveau-mot-de-passe`});
+    setBusy(false);
+    if(error&&(error.message.includes("rate limit")||error.message.includes("Too many")||error.status===429)){setErreur(friendlyAuthError(error.message));return;}
+    setEnvoye(adresse);
+  }
+  return <><PublicHeader/><main className="mx-auto grid min-h-[calc(100vh-80px)] max-w-[1100px] items-center px-5 py-12"><div className="mx-auto w-full max-w-md"><Link to="/connexion" className="mb-8 inline-flex items-center gap-2 text-sm text-muted-foreground"><ArrowLeft className="size-4"/>Retour à la connexion</Link><PageTitle title="Mot de passe oublié" body="Indiquez l’adresse email de votre compte : nous vous enverrons un lien pour choisir un nouveau mot de passe."/>
+    {envoye?<p role="status" className="rounded-xl bg-accent p-4 text-sm text-accent-foreground">Si un compte existe avec l’adresse <strong>{envoye}</strong>, un email vient de lui être envoyé. Ouvrez-le et cliquez sur « Choisir un nouveau mot de passe ». Pensez à vérifier vos spams.</p>
+    :<form noValidate onSubmit={submit} className="grid gap-5"><ChampTexte id="oubli-email" label="Adresse email" type="email" autoComplete="email" value={email} error={erreur||undefined} onChange={e=>{setEmail(e.target.value);setErreur("");}}/><Button type="submit" size="lg" disabled={busy}>{busy?"Envoi…":"Recevoir le lien"}</Button></form>}
+  </div></main></>;
+}
+
+/** Page ouverte depuis l'email de réinitialisation : Supabase y ouvre une session de récupération. */
+export function NewPasswordPage(){
+  const navigate=useNavigate();
+  const [etat,setEtat]=useState<"verification"|"pret"|"invalide">("verification");
+  const [password,setPassword]=useState("");const [confirmation,setConfirmation]=useState("");
+  const [erreurs,setErreurs]=useState<{password?:string|undefined;confirmation?:string|undefined}>({});
+  const [erreur,setErreur]=useState("");const [busy,setBusy]=useState(false);
+  useEffect(()=>{
+    // Lien expiré ou déjà utilisé : Supabase renvoie l'erreur dans l'adresse.
+    if(/error_code=|error=/.test(window.location.hash+window.location.search)){setEtat("invalide");return;}
+    const {data:{subscription}}=supabase.auth.onAuthStateChange((event,session)=>{if(session&&(event==="PASSWORD_RECOVERY"||event==="SIGNED_IN"||event==="INITIAL_SESSION"))setEtat("pret");});
+    const minuteur=setTimeout(async()=>{const {data}=await supabase.auth.getSession();setEtat(e=>e==="pret"?e:data.session?"pret":"invalide");},1500);
+    return ()=>{subscription.unsubscribe();clearTimeout(minuteur);};
+  },[]);
+  async function submit(e:FormEvent){
+    e.preventDefault();setErreur("");
+    const nouvelles={password:!password?"Choisissez un mot de passe.":password.length<8?"Le mot de passe doit contenir au moins 8 caractères.":undefined,confirmation:password&&confirmation!==password?"Les deux mots de passe ne sont pas identiques.":!confirmation?"Confirmez votre mot de passe.":undefined};
+    setErreurs(nouvelles);
+    if(nouvelles.password){focusChamp("nouveau-password");return;}
+    if(nouvelles.confirmation){focusChamp("nouveau-confirmation");return;}
+    setBusy(true);
+    const {data,error}=await supabase.auth.updateUser({password});
+    if(error){setBusy(false);setErreur(friendlyAuthError(error.message));return;}
+    const {data:profil}=await supabase.from("profiles").select("role").eq("id",data.user.id).maybeSingle();
+    navigate({to:profil?.role==="artisan"?"/artisan/planning":"/espace-eleve",replace:true});
+  }
+  return <><PublicHeader/><main className="mx-auto grid min-h-[calc(100vh-80px)] max-w-[1100px] items-center px-5 py-12"><div className="mx-auto w-full max-w-md"><PageTitle title="Nouveau mot de passe" {...(etat==="pret"?{body:"Choisissez votre nouveau mot de passe : vous serez ensuite connecté·e à votre espace."}:{})}/>
+    {etat==="verification"?<p role="status" className="text-sm text-muted-foreground">Vérification du lien…</p>
+    :etat==="invalide"?<div className="grid gap-4"><p role="alert" className="rounded-xl bg-accent p-4 text-sm text-accent-foreground">Ce lien n’est plus valable : il a expiré ou a déjà servi. Demandez-en un nouveau.</p><Button asChild><Link to="/mot-de-passe-oublie">Recevoir un nouveau lien</Link></Button></div>
+    :<form noValidate onSubmit={submit} className="grid gap-5"><ChampTexte id="nouveau-password" label="Nouveau mot de passe (8 caractères minimum)" type="password" autoComplete="new-password" value={password} error={erreurs.password} onChange={e=>{setPassword(e.target.value);setErreurs(x=>({...x,password:undefined}));}}/><ChampTexte id="nouveau-confirmation" label="Confirmez le mot de passe" type="password" autoComplete="new-password" value={confirmation} error={erreurs.confirmation} onChange={e=>{setConfirmation(e.target.value);setErreurs(x=>({...x,confirmation:undefined}));}}/>{erreur&&<p role="alert" className="rounded-xl bg-accent p-4 text-sm text-accent-foreground">{erreur}</p>}<Button type="submit" size="lg" disabled={busy}>{busy?"Enregistrement…":"Enregistrer mon mot de passe"}</Button></form>}
+  </div></main></>;
+}
 export function StudentLoginPage(){return <AuthPage/>} export function ArtisanLoginPage(){return <AuthPage artisan/>}
 function Field({label,children}:{label:string;children:ReactNode}){return <label className="grid gap-2 text-sm font-semibold">{label}{children}</label>}
 

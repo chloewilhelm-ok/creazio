@@ -16,6 +16,8 @@ import { Route as ConnexionRouteImport } from './routes/connexion'
 import { Route as DevenirArtisanRouteImport } from './routes/devenir-artisan'
 import { Route as EspaceEleveRouteImport } from './routes/espace-eleve'
 import { Route as InscriptionRouteImport } from './routes/inscription'
+import { Route as MotDePasseOublieRouteImport } from './routes/mot-de-passe-oublie'
+import { Route as NouveauMotDePasseRouteImport } from './routes/nouveau-mot-de-passe'
 import { Route as ArtisanAteliersRouteImport } from './routes/artisan.ateliers'
 import { Route as ArtisanConnexionRouteImport } from './routes/artisan.connexion'
 import { Route as ArtisanCreerAtelierRouteImport } from './routes/artisan.creer-atelier'
@@ -68,6 +70,16 @@ const EspaceEleveRoute = EspaceEleveRouteImport.update({
 const InscriptionRoute = InscriptionRouteImport.update({
   id: '/inscription',
   path: '/inscription',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MotDePasseOublieRoute = MotDePasseOublieRouteImport.update({
+  id: '/mot-de-passe-oublie',
+  path: '/mot-de-passe-oublie',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NouveauMotDePasseRoute = NouveauMotDePasseRouteImport.update({
+  id: '/nouveau-mot-de-passe',
+  path: '/nouveau-mot-de-passe',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ArtisanAteliersRoute = ArtisanAteliersRouteImport.update({
@@ -173,6 +185,8 @@ export interface FileRoutesByFullPath {
   '/devenir-artisan': typeof DevenirArtisanRouteWithChildren
   '/espace-eleve': typeof EspaceEleveRouteWithChildren
   '/inscription': typeof InscriptionRoute
+  '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
+  '/nouveau-mot-de-passe': typeof NouveauMotDePasseRoute
   '/artisan/ateliers': typeof ArtisanAteliersRoute
   '/artisan/connexion': typeof ArtisanConnexionRoute
   '/artisan/creer-atelier': typeof ArtisanCreerAtelierRoute
@@ -197,6 +211,8 @@ export interface FileRoutesByTo {
   '/artisan': typeof ArtisanRouteWithChildren
   '/connexion': typeof ConnexionRoute
   '/inscription': typeof InscriptionRoute
+  '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
+  '/nouveau-mot-de-passe': typeof NouveauMotDePasseRoute
   '/artisan/ateliers': typeof ArtisanAteliersRoute
   '/artisan/connexion': typeof ArtisanConnexionRoute
   '/artisan/creer-atelier': typeof ArtisanCreerAtelierRoute
@@ -225,6 +241,8 @@ export interface FileRoutesById {
   '/devenir-artisan': typeof DevenirArtisanRouteWithChildren
   '/espace-eleve': typeof EspaceEleveRouteWithChildren
   '/inscription': typeof InscriptionRoute
+  '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
+  '/nouveau-mot-de-passe': typeof NouveauMotDePasseRoute
   '/artisan/ateliers': typeof ArtisanAteliersRoute
   '/artisan/connexion': typeof ArtisanConnexionRoute
   '/artisan/creer-atelier': typeof ArtisanCreerAtelierRoute
@@ -254,6 +272,8 @@ export interface FileRouteTypes {
     | '/devenir-artisan'
     | '/espace-eleve'
     | '/inscription'
+    | '/mot-de-passe-oublie'
+    | '/nouveau-mot-de-passe'
     | '/artisan/ateliers'
     | '/artisan/connexion'
     | '/artisan/creer-atelier'
@@ -278,6 +298,8 @@ export interface FileRouteTypes {
     | '/artisan'
     | '/connexion'
     | '/inscription'
+    | '/mot-de-passe-oublie'
+    | '/nouveau-mot-de-passe'
     | '/artisan/ateliers'
     | '/artisan/connexion'
     | '/artisan/creer-atelier'
@@ -305,6 +327,8 @@ export interface FileRouteTypes {
     | '/devenir-artisan'
     | '/espace-eleve'
     | '/inscription'
+    | '/mot-de-passe-oublie'
+    | '/nouveau-mot-de-passe'
     | '/artisan/ateliers'
     | '/artisan/connexion'
     | '/artisan/creer-atelier'
@@ -333,6 +357,8 @@ export interface RootRouteChildren {
   DevenirArtisanRoute: typeof DevenirArtisanRouteWithChildren
   EspaceEleveRoute: typeof EspaceEleveRouteWithChildren
   InscriptionRoute: typeof InscriptionRoute
+  MotDePasseOublieRoute: typeof MotDePasseOublieRoute
+  NouveauMotDePasseRoute: typeof NouveauMotDePasseRoute
   ReservationConfirmationRoute: typeof ReservationConfirmationRoute
 }
 
@@ -385,6 +411,20 @@ declare module '@tanstack/react-router' {
       path: '/inscription'
       fullPath: '/inscription'
       preLoaderRoute: typeof InscriptionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mot-de-passe-oublie': {
+      id: '/mot-de-passe-oublie'
+      path: '/mot-de-passe-oublie'
+      fullPath: '/mot-de-passe-oublie'
+      preLoaderRoute: typeof MotDePasseOublieRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/nouveau-mot-de-passe': {
+      id: '/nouveau-mot-de-passe'
+      path: '/nouveau-mot-de-passe'
+      fullPath: '/nouveau-mot-de-passe'
+      preLoaderRoute: typeof NouveauMotDePasseRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/artisan/ateliers': {
@@ -597,6 +637,8 @@ const rootRouteChildren: RootRouteChildren = {
   DevenirArtisanRoute: DevenirArtisanRouteWithChildren,
   EspaceEleveRoute: EspaceEleveRouteWithChildren,
   InscriptionRoute: InscriptionRoute,
+  MotDePasseOublieRoute: MotDePasseOublieRoute,
+  NouveauMotDePasseRoute: NouveauMotDePasseRoute,
   ReservationConfirmationRoute: ReservationConfirmationRoute,
 }
 export const routeTree = rootRouteImport

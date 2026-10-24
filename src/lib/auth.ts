@@ -18,6 +18,8 @@ export function friendlyAuthError(message: string | undefined): string {
   if (!message) return "Une erreur est survenue. Réessayez.";
   if (message.includes("Invalid login credentials")) return "Email ou mot de passe incorrect.";
   if (message.includes("already registered")) return "Un compte existe déjà avec cette adresse email.";
+  if (message.includes("should be different")) return "Choisissez un mot de passe différent de l’ancien.";
+  if (message.includes("session missing") || message.includes("Auth session")) return "Ce lien n’est plus valable. Demandez un nouveau lien de réinitialisation.";
   if (message.toLowerCase().includes("password")) return "Mot de passe trop court : 8 caractères minimum.";
   if (message.includes("rate limit") || message.includes("Too many")) return "Trop de tentatives. Patientez quelques minutes avant de réessayer.";
   if (message.includes("row-level security")) return "Votre base Supabase n’a pas encore les règles d’accès (RLS) nécessaires pour cette action.";

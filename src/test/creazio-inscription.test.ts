@@ -73,3 +73,14 @@ describe("inscription élève, étape 2", () => {
     expect(pendingProfileFromMetadata({}, "x@y.fr")).toBeNull();
   });
 });
+
+describe("messages d'erreur du mot de passe", () => {
+  it("traduit les erreurs de réinitialisation sans les confondre avec « trop court »", async () => {
+    const { friendlyAuthError } = await import("@/lib/auth");
+    expect(friendlyAuthError("New password should be different from the old password.")).toBe(
+      "Choisissez un mot de passe différent de l’ancien.",
+    );
+    expect(friendlyAuthError("Auth session missing!")).toMatch(/lien n’est plus valable/);
+    expect(friendlyAuthError("Password should be at least 8 characters.")).toMatch(/8 caractères/);
+  });
+});
