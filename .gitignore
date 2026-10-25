@@ -38,3 +38,7 @@ dist-ssr
 .env
 .env.*
 !.env.example
+
+# Résultats Playwright (les captures de référence sont dans docs/qa/)
+test-results/
+playwright-report/
