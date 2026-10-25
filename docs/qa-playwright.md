@@ -74,5 +74,5 @@ npm test             # vitest run
 
 ## Limites
 
-- Les parcours connectés (réservation, dashboard artisan) ne sont pas couverts par Playwright, car ils demandent un compte et une base. Ils sont couverts par les tests unitaires et ont été vérifiés manuellement sur www.creazio.fr.
+- Les parcours connectés (réservation, dashboard artisan) ne sont pas couverts par Playwright, car ils demandent un compte et une base. Leurs règles métier sont couvertes par les tests unitaires ; le parcours complet se vérifie à la main sur www.creazio.fr.
 - Le viewport iPhone est simulé avec Chromium : le moteur WebKit de Safari n'est pas installé dans l'environnement de test.
