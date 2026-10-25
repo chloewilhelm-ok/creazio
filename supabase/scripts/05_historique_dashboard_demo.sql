@@ -6,11 +6,11 @@
 --     4 places ouvertes à Creazio sur 8 ;
 --   * des réservations anonymes (eleve_id vide : aucun compte élève n'est touché), payées 32 crédits,
 --     part artisan 27,20 € (85 %, comme dans reserver_session) ;
---   * un versement de démo pour les séances terminées depuis plus de 14 jours.
+--   * un versement par mois (règle Creazio : le 15 du mois suivant), voir le bloc 2 ci-dessous.
 -- Le remplissage varie selon le créneau (le samedi matin est plein, le lundi soir est creux) pour que
 -- les graphiques soient parlants. Les identifiants sont calculés (md5) : le script ne s'applique
 -- qu'une fois, et l'annulation (en bas) ne retire que ces lignes-là.
--- Aucune ligne existante n'est modifiée ou supprimée.
+-- Aucune ligne réelle n'est modifiée ou supprimée : seules les lignes de démo (identifiants md5) le sont.
 
 DO $$
 DECLARE
@@ -64,28 +64,63 @@ BEGIN
     END LOOP;
   END LOOP;
 
-  -- Versement de démo : séances de démo terminées depuis plus de 14 jours.
-  INSERT INTO public.versements_artisans (id, artisan_id, montant_eur, virement_effectue_le, reference_virement)
-  SELECT v_versement, v_artisan, coalesce(sum(r.montant_artisan_eur), 0), now() - interval '3 days', 'DEMO-VIR-001'
-  FROM public.reservations r JOIN public.sessions s ON s.id = r.session_id
-  WHERE s.id IN (SELECT md5('creazio-demo-dashboard-' || w || '-' || c)::uuid FROM generate_series(1, 8) w, generate_series(1, 5) c)
-    AND s.fin_le < now() - interval '14 days';
-  UPDATE public.reservations r SET versement_id = v_versement
-  FROM public.sessions s
-  WHERE s.id = r.session_id
-    AND s.id IN (SELECT md5('creazio-demo-dashboard-' || w || '-' || c)::uuid FROM generate_series(1, 8) w, generate_series(1, 5) c)
-    AND s.fin_le < now() - interval '14 days';
-
   RAISE NOTICE 'Historique de démo ajouté : % séances, % réservations.',
     (SELECT count(*) FROM public.sessions WHERE id IN (SELECT md5('creazio-demo-dashboard-' || w || '-' || c)::uuid FROM generate_series(1, 8) w, generate_series(1, 5) c)),
     (SELECT count(*) FROM public.reservations WHERE session_id IN (SELECT md5('creazio-demo-dashboard-' || w || '-' || c)::uuid FROM generate_series(1, 8) w, generate_series(1, 5) c));
 END $$;
 
 -- ─────────────────────────────────────────────────────────────────────────────
+-- 2. Versements mensuels de démo (rejouable). Règle : Creazio verse l'artisan une fois par mois, le 15 du
+-- mois suivant, pour les réservations confirmées dont la séance a eu lieu dans le mois.
+-- Pour chaque mois de séances de démo dont le 15 du mois suivant est passé : un versement
+-- « DEMO-VIR-AAAA-MM » daté du 15 à 10 h (Paris), relié aux réservations de démo de ce mois.
+-- Les autres réservations de démo restent « à verser ». Ne touche qu'aux lignes de démo.
+DO $$
+DECLARE
+  v_artisan uuid;
+  v_mois record;
+  v_versement uuid;
+BEGIN
+  SELECT p.id INTO v_artisan FROM public.profiles p WHERE p.email = 'chloe.wilhelm@outlook.fr';
+  CREATE TEMP TABLE demo_sessions ON COMMIT DROP AS
+    SELECT md5('creazio-demo-dashboard-' || w || '-' || c)::uuid AS id FROM generate_series(1, 8) w, generate_series(1, 5) c;
+
+  -- Repart de zéro : détache les réservations de démo puis retire les versements de démo.
+  UPDATE public.reservations SET versement_id = NULL WHERE session_id IN (SELECT id FROM demo_sessions) AND versement_id IS NOT NULL;
+  DELETE FROM public.versements_artisans
+  WHERE reference_virement LIKE 'DEMO-VIR-%' AND artisan_id = v_artisan
+    AND NOT EXISTS (SELECT 1 FROM public.reservations r WHERE r.versement_id = versements_artisans.id);
+
+  FOR v_mois IN
+    SELECT date_trunc('month', s.debut_le AT TIME ZONE 'Europe/Paris')::date AS mois
+    FROM public.sessions s WHERE s.id IN (SELECT id FROM demo_sessions)
+    GROUP BY 1 ORDER BY 1
+  LOOP
+    CONTINUE WHEN ((v_mois.mois + interval '1 month' + interval '14 days 10 hours') AT TIME ZONE 'Europe/Paris') > now();
+    v_versement := md5('creazio-demo-dashboard-versement-' || to_char(v_mois.mois, 'YYYY-MM'))::uuid;
+    INSERT INTO public.versements_artisans (id, artisan_id, montant_eur, virement_effectue_le, reference_virement)
+    SELECT v_versement, v_artisan, coalesce(sum(r.montant_artisan_eur), 0),
+           (v_mois.mois + interval '1 month' + interval '14 days 10 hours') AT TIME ZONE 'Europe/Paris',
+           'DEMO-VIR-' || to_char(v_mois.mois, 'YYYY-MM')
+    FROM public.reservations r JOIN public.sessions s ON s.id = r.session_id
+    WHERE s.id IN (SELECT id FROM demo_sessions) AND r.statut = 'confirmee'
+      AND date_trunc('month', s.debut_le AT TIME ZONE 'Europe/Paris')::date = v_mois.mois;
+    UPDATE public.reservations r SET versement_id = v_versement
+    FROM public.sessions s
+    WHERE s.id = r.session_id AND s.id IN (SELECT id FROM demo_sessions) AND r.statut = 'confirmee'
+      AND date_trunc('month', s.debut_le AT TIME ZONE 'Europe/Paris')::date = v_mois.mois;
+  END LOOP;
+END $$;
+
+SELECT v.reference_virement, v.montant_eur, v.virement_effectue_le AT TIME ZONE 'Europe/Paris' AS verse_le,
+       (SELECT count(*) FROM public.reservations r WHERE r.versement_id = v.id) AS reservations
+FROM public.versements_artisans v WHERE v.reference_virement LIKE 'DEMO-VIR-%' ORDER BY 3;
+
+-- ─────────────────────────────────────────────────────────────────────────────
 -- ANNULER l'historique de démo : copier les 4 lignes ci-dessous (sans les « -- ») dans le SQL Editor.
 -- Elles ne retirent que les lignes créées par ce script (identifiants calculés plus haut).
 --
 -- DELETE FROM public.reservations WHERE session_id IN (SELECT md5('creazio-demo-dashboard-' || w || '-' || c)::uuid FROM generate_series(1, 8) w, generate_series(1, 5) c);
--- DELETE FROM public.versements_artisans WHERE id = md5('creazio-demo-dashboard-versement')::uuid;
+-- DELETE FROM public.versements_artisans WHERE reference_virement LIKE 'DEMO-VIR-%' AND artisan_id = (SELECT id FROM public.profiles WHERE email = 'chloe.wilhelm@outlook.fr');
 -- DELETE FROM public.sessions WHERE id IN (SELECT md5('creazio-demo-dashboard-' || w || '-' || c)::uuid FROM generate_series(1, 8) w, generate_series(1, 5) c);
 -- SELECT 'Historique de démo retiré' AS resultat;

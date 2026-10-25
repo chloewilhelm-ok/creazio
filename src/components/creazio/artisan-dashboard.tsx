@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bar, BarChart, CartesianGrid, Cell, LabelList, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { CalendarDays, Euro, Percent, Radio, RefreshCw } from "lucide-react";
+import { CalendarDays, Check, ChevronDown, Clock3, Euro, Landmark, Percent, Radio, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { formatHeure, formatJour } from "@/lib/reservations";
@@ -11,8 +11,12 @@ import {
   formatPourcent,
   indicateurs,
   messageTableauDeBord,
+  prochainVersement,
   remplissageParCreneau,
   reservationsParSemaine,
+  reservationsPassees,
+  versementsParMois,
+  type MoisVersement,
   resumeCreneaux,
   resumeSemaines,
   tableauDeBordQuery,
@@ -51,9 +55,14 @@ export function ArtisanDashboard() {
   const { enDirect, annonce } = useTempsReel();
   const calculs = useMemo(() => {
     if (!data) return null;
-    const semaines = reservationsParSemaine(data.reservations);
-    const creneaux = remplissageParCreneau(data.sessions);
-    return { kpi: indicateurs(data.reservations, data.sessions), semaines, creneaux };
+    return {
+      kpi: indicateurs(data.reservations, data.sessions),
+      creneaux: remplissageParCreneau(data.sessions),
+      semaines: reservationsParSemaine(data.reservations, Date.now(), 0),
+      mois: versementsParMois(data.reservations, data.versements),
+      prochain: prochainVersement(data.reservations),
+      passees: reservationsPassees(data.reservations),
+    };
   }, [data]);
 
   return (
@@ -76,24 +85,81 @@ export function ArtisanDashboard() {
         </div>
       ) : (
         <>
-          <section aria-label="Indicateurs clés" className="grid gap-4 sm:grid-cols-3">
-            <Indicateur icon={<Euro />} libelle="Montant à reverser" valeur={formatEuros(calculs.kpi.montantAReverser)} detail="Réservations confirmées pas encore versées" />
-            <Indicateur icon={<CalendarDays />} libelle="Réservations à venir" valeur={String(calculs.kpi.reservationsAVenir)} detail="Séances qui n’ont pas encore eu lieu" />
-            <Indicateur
-              icon={<Percent />}
-              libelle="Remplissage moyen à venir"
-              valeur={calculs.kpi.tauxRemplissageAVenir === null ? "—" : formatPourcent(calculs.kpi.tauxRemplissageAVenir)}
-              detail={`Places Creazio réservées sur les ${SEMAINES_A_VENIR} prochaines semaines (${calculs.kpi.creneauxAVenir} créneaux)`}
-            />
-          </section>
-          <div className="grid gap-6 xl:grid-cols-2">
-            <GraphiqueSemaines points={calculs.semaines} />
+          <section aria-labelledby="bloc-a-venir" className="grid gap-4">
+            <TitreBloc id="bloc-a-venir" titre="À venir" detail="Séances qui n’ont pas encore commencé." />
+            <div className="grid gap-4 sm:grid-cols-3">
+              <Indicateur icon={<CalendarDays />} libelle="Réservations à venir" valeur={String(calculs.kpi.reservationsAVenir)} detail="Élèves inscrits à vos prochaines séances" />
+              <Indicateur icon={<Euro />} libelle="Revenus prévus" valeur={formatEuros(calculs.kpi.revenusPrevus)} detail="Votre part (85 %) sur ces réservations" />
+              <Indicateur
+                icon={<Percent />}
+                libelle="Remplissage à venir"
+                valeur={calculs.kpi.tauxRemplissageAVenir === null ? "—" : formatPourcent(calculs.kpi.tauxRemplissageAVenir)}
+                detail={`Places Creazio réservées sur les ${SEMAINES_A_VENIR} prochaines semaines (${calculs.kpi.creneauxAVenir} créneaux)`}
+              />
+            </div>
             <GraphiqueCreneaux points={calculs.creneaux} />
-          </div>
-          <ListeReservations reservations={data.reservations} />
+          </section>
+
+          <section aria-labelledby="bloc-passe" className="mt-4 grid gap-4">
+            <TitreBloc id="bloc-passe" titre="Passé" detail="Séances déjà commencées et vos versements." />
+            <div className="rounded-2xl bg-deep-forest p-6 text-coquille">
+              <p className="flex items-center gap-2 text-sm"><Landmark className="size-5 text-laiton" aria-hidden="true" />Prochain versement</p>
+              <p className="label-font mt-2 text-3xl font-bold">
+                {calculs.prochain ? `${formatEuros(calculs.prochain.montant)} le ${calculs.prochain.date}` : "Rien à verser pour le moment"}
+              </p>
+              {calculs.prochain && <p className="mt-1 text-sm text-coquille/80">{calculs.prochain.reservations} réservation{calculs.prochain.reservations > 1 ? "s" : ""} passée{calculs.prochain.reservations > 1 ? "s" : ""} pas encore versée{calculs.prochain.reservations > 1 ? "s" : ""}</p>}
+              <p className="mt-3 text-sm text-coquille/80">Virement mensuel effectué par Creazio le 15 du mois suivant.</p>
+            </div>
+            <TableauVersements mois={calculs.mois} />
+            <GraphiqueSemaines points={calculs.semaines} />
+            <ListeReservationsPassees reservations={calculs.passees} />
+          </section>
         </>
       )}
     </div>
+  );
+}
+
+function TitreBloc({ id, titre, detail }: { id: string; titre: string; detail: string }) {
+  return (
+    <div>
+      <h2 id={id} className="text-2xl font-bold text-secondary">{titre}</h2>
+      <p className="text-sm text-muted-foreground">{detail}</p>
+    </div>
+  );
+}
+
+function TableauVersements({ mois }: { mois: MoisVersement[] }) {
+  return (
+    <section aria-labelledby="versements-titre" className="rounded-2xl border bg-card p-5">
+      <h3 id="versements-titre" className="text-lg font-semibold">Mes versements, mois par mois</h3>
+      {mois.length === 0 ? (
+        <p className="py-6 text-center text-sm text-muted-foreground">Aucune séance passée pour le moment.</p>
+      ) : (
+        <div className="mt-4 overflow-x-auto">
+          <table className="w-full min-w-[480px] text-left text-sm">
+            <caption className="sr-only">Montant gagné et statut du versement pour chaque mois de séances</caption>
+            <thead className="text-xs text-muted-foreground">
+              <tr><th scope="col" className="py-2 font-semibold">Mois</th><th scope="col" className="text-right font-semibold">Réservations</th><th scope="col" className="text-right font-semibold">Montant gagné</th><th scope="col" className="pl-6 font-semibold">Statut</th></tr>
+            </thead>
+            <tbody>
+              {mois.map((m) => (
+                <tr key={m.mois} className="border-t">
+                  <th scope="row" className="py-2.5 font-medium">{m.libelle}</th>
+                  <td className="label-font text-right">{m.reservations}</td>
+                  <td className="label-font text-right font-semibold">{formatEuros(m.montant)}</td>
+                  <td className="pl-6">
+                    <span className={m.verse ? "inline-flex items-center gap-1 rounded-full bg-menthe px-2.5 py-0.5 text-xs font-semibold text-deep-forest" : "inline-flex items-center gap-1 rounded-full bg-sable px-2.5 py-0.5 text-xs font-semibold text-foreground"}>
+                      {m.verse ? <Check className="size-3.5" aria-hidden="true" /> : <Clock3 className="size-3.5" aria-hidden="true" />}{m.statut}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
   );
 }
 
@@ -111,7 +177,7 @@ function Indicateur({ icon, libelle, valeur, detail }: { icon: ReactNode; libell
 function Carte({ id, titre, resume, children, table, legende }: { id: string; titre: string; resume: string; children: ReactNode; table: ReactNode; legende?: ReactNode }) {
   return (
     <figure aria-labelledby={`${id}-titre`} aria-describedby={`${id}-resume`} className="m-0 rounded-2xl border bg-card p-5">
-      <h2 id={`${id}-titre`} className="text-lg font-semibold">{titre}</h2>
+      <h3 id={`${id}-titre`} className="text-lg font-semibold">{titre}</h3>
       <p id={`${id}-resume`} className="mt-1 text-sm text-muted-foreground">{resume}</p>
       <div className="mt-4 h-64">{children}</div>
       {legende}
@@ -134,16 +200,10 @@ function GraphiqueSemaines({ points }: { points: PointSemaine[] }) {
       id="graphique-semaines"
       titre="Réservations par semaine"
       resume={resumeSemaines(points)}
-      legende={
-        <p className="mt-2 flex flex-wrap gap-4 text-xs text-muted-foreground" aria-hidden="true">
-        <span className="flex items-center gap-1.5"><span className="inline-block size-3 rounded-sm" style={{ background: C.barre }} />Semaines passées et en cours</span>
-        <span className="flex items-center gap-1.5"><span className="inline-block size-3 rounded-sm border" style={{ borderColor: C.barre, background: `repeating-linear-gradient(45deg, ${C.barre} 0 2px, #fff 2px 5px)` }} />À venir (déjà réservé)</span>
-      </p>
-      }
       table={
         <table className="w-full text-left">
-          <thead><tr><th className="py-1">Semaine du</th><th>Réservations</th><th>Période</th></tr></thead>
-          <tbody>{points.map((p) => <tr key={p.lundi} className="border-t"><td className="py-1">{p.libelle}</td><td>{p.reservations}</td><td>{p.aVenir ? "À venir" : "Passée ou en cours"}</td></tr>)}</tbody>
+          <thead><tr><th className="py-1">Semaine du</th><th>Réservations</th></tr></thead>
+          <tbody>{points.map((p) => <tr key={p.lundi} className="border-t"><td className="py-1">{p.libelle}</td><td>{p.reservations}</td></tr>)}</tbody>
         </table>
       }
     >
@@ -211,37 +271,34 @@ function GraphiqueCreneaux({ points }: { points: PointCreneau[] }) {
   );
 }
 
-function ListeReservations({ reservations }: { reservations: ReservationArtisan[] }) {
+function ListeReservationsPassees({ reservations }: { reservations: ReservationArtisan[] }) {
   const [nombre, setNombre] = useState(PAR_PAGE);
   const visibles = reservations.slice(0, nombre);
   return (
-    <section aria-labelledby="liste-reservations-titre" className="rounded-2xl border bg-card p-5">
-      <h2 id="liste-reservations-titre" className="text-lg font-semibold">Réservations</h2>
-      <p className="mt-1 text-sm text-muted-foreground">Virement effectué manuellement par Creazio après 14 jours.</p>
+    <details className="group rounded-2xl border bg-card p-5">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-lg text-lg font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deep-forest">
+        <span>Réservations passées <span className="label-font text-sm font-normal text-muted-foreground">({reservations.length})</span></span>
+        <ChevronDown className="size-5 shrink-0 transition group-open:rotate-180" aria-hidden="true" />
+      </summary>
       {reservations.length === 0 ? (
-        <p className="py-8 text-center text-sm text-muted-foreground">Aucune réservation pour le moment.</p>
+        <p className="py-8 text-center text-sm text-muted-foreground">Aucune réservation passée pour le moment.</p>
       ) : (
         <>
           <div className="mt-4 overflow-x-auto">
-            <table className="w-full min-w-[640px] text-left text-sm">
+            <table className="w-full min-w-[560px] text-left text-sm">
               <thead className="text-xs text-muted-foreground">
-                <tr><th className="py-2 font-semibold">Date</th><th className="font-semibold">Atelier</th><th className="font-semibold">Élève</th><th className="font-semibold">Code</th><th className="text-right font-semibold">Crédits</th><th className="text-right font-semibold">Montant reçu</th><th className="pl-4 font-semibold">Statut</th></tr>
+                <tr><th scope="col" className="py-2 font-semibold">Date</th><th scope="col" className="font-semibold">Atelier</th><th scope="col" className="font-semibold">Élève</th><th scope="col" className="font-semibold">Code</th><th scope="col" className="text-right font-semibold">Montant gagné</th></tr>
               </thead>
               <tbody>
-                {visibles.map((r) => {
-                  const annulee = r.statut !== "confirmee";
-                  return (
-                    <tr key={r.reservation_id} className="border-t">
-                      <td className="py-2.5">{formatJour(r.debut_le)} · {formatHeure(r.debut_le)}</td>
-                      <td>{r.atelier_titre}</td>
-                      <td>{r.prenom ?? <span className="text-muted-foreground">Anonyme</span>}</td>
-                      <td className="label-font">{r.code_creazio}</td>
-                      <td className="text-right">{r.credits_debites}</td>
-                      <td className="text-right">{annulee ? "—" : formatEuros(r.montant_artisan_eur)}</td>
-                      <td className="pl-4">{annulee ? "Annulée" : r.versee ? "Versé" : "À verser"}</td>
-                    </tr>
-                  );
-                })}
+                {visibles.map((r) => (
+                  <tr key={r.reservation_id} className="border-t">
+                    <td className="py-2.5">{formatJour(r.debut_le)} · {formatHeure(r.debut_le)}</td>
+                    <td>{r.atelier_titre}</td>
+                    <td>{r.prenom ?? <span className="text-muted-foreground">Anonyme</span>}</td>
+                    <td className="label-font">{r.code_creazio}</td>
+                    <td className="label-font text-right">{formatEuros(r.montant_artisan_eur)}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -252,6 +309,6 @@ function ListeReservations({ reservations }: { reservations: ReservationArtisan[
           )}
         </>
       )}
-    </section>
+    </details>
   );
 }

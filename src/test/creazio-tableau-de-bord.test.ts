@@ -4,7 +4,12 @@ vi.mock("@/integrations/supabase/client", () => ({ supabase: {} }));
 
 import {
   indicateurs,
+  libelleMois,
   lundiDe,
+  moisSuivant,
+  prochainVersement,
+  reservationsPassees,
+  versementsParMois,
   messageTableauDeBord,
   remplissageParCreneau,
   reservationsParSemaine,
@@ -43,8 +48,8 @@ describe("indicateurs clés", () => {
   ];
   const sessions = [session("2026-10-17T17:00:00Z", 4), session("2026-10-26T18:00:00Z", 1), session("2026-11-02T18:00:00Z", 2), session("2026-12-20T18:00:00Z", 0)];
   const k = indicateurs(reservations, sessions, NOW);
-  it("additionne la part artisan des réservations confirmées non versées", () => {
-    expect(k.montantAReverser).toBe(54.4);
+  it("additionne la part artisan des réservations confirmées à venir (revenus prévus)", () => {
+    expect(k.revenusPrevus).toBe(27.2);
   });
   it("compte les réservations confirmées à venir", () => {
     expect(k.reservationsAVenir).toBe(1);
@@ -112,5 +117,46 @@ describe("messages d'erreur du dashboard", () => {
   it("explique qu'il est réservé aux artisans", () => {
     expect(messageTableauDeBord({ code: "ROLE_INTERDIT" })).toBe("Ce tableau de bord est réservé aux comptes artisans.");
     expect(messageTableauDeBord(new Error("x"))).toMatch(/Impossible de charger/);
+  });
+});
+
+describe("versements mensuels (le 15 du mois suivant)", () => {
+  const versements = [
+    { id: "v8", montant_eur: 54.4, virement_effectue_le: "2026-09-15T08:00:00Z", reference_virement: "VIR-08" },
+    { id: "v9", montant_eur: 27.2, virement_effectue_le: "2026-10-15T08:00:00Z", reference_virement: "VIR-09" },
+  ];
+  const reservations = [
+    resa("2026-08-29T08:00:00Z", { versee: true }),
+    resa("2026-08-30T13:00:00Z", { versee: true }),
+    resa("2026-09-12T17:00:00Z", { versee: true }),
+    resa("2026-10-03T08:00:00Z"),
+    resa("2026-10-17T17:00:00Z"),
+    resa("2026-10-17T17:00:00Z", { statut: "annulee_cliente" }),
+    resa("2026-10-28T18:00:00Z"), // à venir : hors bloc « Passé »
+  ];
+  it("gère le passage d'année et nomme les mois", () => {
+    expect(moisSuivant("2026-12")).toBe("2027-01");
+    expect(libelleMois("2026-08")).toBe("Août 2026");
+  });
+  it("résume chaque mois passé, du plus récent au plus ancien, avec son statut", () => {
+    expect(versementsParMois(reservations, versements, NOW)).toEqual([
+      { mois: "2026-10", libelle: "Octobre 2026", reservations: 2, montant: 54.4, verse: false, statut: "À verser le 15/11" },
+      { mois: "2026-09", libelle: "Septembre 2026", reservations: 1, montant: 27.2, verse: true, statut: "Versé le 15/10" },
+      { mois: "2026-08", libelle: "Août 2026", reservations: 2, montant: 54.4, verse: true, statut: "Versé le 15/09" },
+    ]);
+  });
+  it("annonce le prochain versement des réservations passées non versées", () => {
+    expect(prochainVersement(reservations, NOW)).toEqual({ montant: 54.4, date: "15 novembre", reservations: 2 });
+    expect(prochainVersement([resa("2026-09-12T17:00:00Z", { versee: true })], NOW)).toBeNull();
+  });
+  it("liste les réservations passées confirmées, de la plus récente à la plus ancienne", () => {
+    const passees = reservationsPassees(reservations, NOW);
+    expect(passees).toHaveLength(5);
+    expect(passees[0]!.debut_le).toBe("2026-10-17T17:00:00Z");
+  });
+  it("ne garde que les semaines passées pour le graphique du bloc « Passé »", () => {
+    const points = reservationsParSemaine(reservations, NOW, 0);
+    expect(points.some((p) => p.aVenir)).toBe(false);
+    expect(resumeSemaines(points)).not.toContain("à venir");
   });
 });
