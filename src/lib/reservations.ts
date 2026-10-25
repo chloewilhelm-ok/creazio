@@ -167,3 +167,13 @@ export async function acheterPackDemo(packId: string) {
   if (error) throw toReservationError(error);
   return data;
 }
+
+/**
+ * Prix sans remise, en crédits, à afficher barré à côté du prix réel : le prix public de l'atelier
+ * (1 crédit = 1 €). Null s'il est inconnu ou s'il n'est pas plus élevé que le prix réel.
+ */
+export function creditsSansRemise(prixPublic: number | string | null | undefined, credits: number): number | null {
+  if (prixPublic == null || prixPublic === "") return null;
+  const n = Math.round(Number(prixPublic));
+  return Number.isFinite(n) && n > credits ? n : null;
+}

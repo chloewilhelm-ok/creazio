@@ -5,6 +5,7 @@ import { CalendarDays, Check, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { workshopSessionsQuery } from "@/lib/workshop-sessions";
+import { PrixCredits } from "./prix-credits";
 import {
   ReservationError,
   formatCredits,
@@ -15,7 +16,7 @@ import {
   walletQuery,
 } from "@/lib/reservations";
 
-export function WorkshopSlots({ workshopId }: { workshopId: string }) {
+export function WorkshopSlots({ workshopId, prixPublic }: { workshopId: string; prixPublic?: number | string | null | undefined }) {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const sessionsQuery = useQuery(workshopSessionsQuery(workshopId));
@@ -117,7 +118,7 @@ export function WorkshopSlots({ workshopId }: { workshopId: string }) {
                         {libellePlaces(slot.places_restantes)}
                       </span>
                     )}
-                    <strong className="label-font text-primary">{formatCredits(slot.prix_credits)}</strong>
+                    <PrixCredits credits={slot.prix_credits} prixPublic={prixPublic} className="label-font font-bold text-primary" />
                   </span>
                 </button>
               </li>
@@ -128,6 +129,7 @@ export function WorkshopSlots({ workshopId }: { workshopId: string }) {
       {selected && (
         <BookingSummary
           prix={selected.prix_credits}
+          prixPublic={prixPublic}
           wallet={wallet}
           pending={reservation.isPending}
           error={reservation.error}
@@ -140,12 +142,14 @@ export function WorkshopSlots({ workshopId }: { workshopId: string }) {
 
 function BookingSummary({
   prix,
+  prixPublic,
   wallet,
   pending,
   error,
   onConfirm,
 }: {
   prix: number;
+  prixPublic?: number | string | null | undefined;
   wallet: UseQueryResult<{ solde_credits: number } | null>;
   pending: boolean;
   error: Error | null;
@@ -176,7 +180,7 @@ function BookingSummary({
           <dl className="mt-3 grid gap-2 text-sm">
             <div className="flex justify-between">
               <dt className="text-muted-foreground">Coût du créneau</dt>
-              <dd className="font-semibold">{formatCredits(prix)}</dd>
+              <dd className="font-semibold"><PrixCredits credits={prix} prixPublic={prixPublic} /></dd>
             </div>
             <div className="flex justify-between">
               <dt className="text-muted-foreground">Solde actuel</dt>

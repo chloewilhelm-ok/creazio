@@ -25,6 +25,8 @@ export interface SessionDisponible {
   ville: string;
   duree_minutes: number;
   photo_url: string | null;
+  /** Prix public (€) = crédits sans remise, affiché barré à l'élève (jamais envoyé à Gemini). */
+  prix_public?: number | null;
   debut_le: string;
   prix_credits: number;
   places_restantes: number;
@@ -42,6 +44,7 @@ export interface AtelierCandidat {
   prochaine_session: string;
   nb_creneaux_disponibles: number;
   photo_url: string | null;
+  prix_public: number | null;
 }
 
 /** « 75011 » → « Paris 11e » ; « 75001 » → « Paris 1er » ; ailleurs, la ville ; sinon null. */
@@ -73,6 +76,7 @@ export function ateliersDisponibles(sessions: SessionDisponible[], now = Date.no
         prochaine_session: s.debut_le,
         nb_creneaux_disponibles: 1,
         photo_url: s.photo_url,
+        prix_public: s.prix_public ?? null,
       });
     } else {
       a.nb_creneaux_disponibles++;

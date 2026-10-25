@@ -14,6 +14,7 @@ export interface DonneesConfirmation {
 }
 
 export const LIEN_RESERVATIONS = "https://www.creazio.fr/espace-eleve/reservations";
+export const CONTACT = "contact@creazio.fr";
 
 // Couleurs du design system (docs/design-system.md).
 const C = {
@@ -86,7 +87,7 @@ ${ligne("Crédits", creditsDebites(d.creditsDebites))}
 <p style="margin:0 0 24px;font-size:14px;line-height:1.5;color:${C.texte}">${echapper(rappel)} Pensez à arriver 10 minutes avant le début.</p>
 <a href="${LIEN_RESERVATIONS}" style="display:inline-block;padding:12px 22px;border-radius:8px;background:${C.primaire};color:#FFFFFF;font-size:15px;font-weight:700;text-decoration:none">Voir mes réservations</a>
 </td></tr>
-<tr><td style="padding:18px 28px;background:${C.foret};color:#FFFFFF;font-size:12px;line-height:1.5">Creazio · L’atelier créatif près de chez vous, à prix doux.<br>Vous recevez cet email car vous avez réservé un atelier sur creazio.fr.</td></tr>
+<tr><td style="padding:18px 28px;background:${C.foret};color:#FFFFFF;font-size:12px;line-height:1.5">Creazio · L’atelier créatif près de chez vous, à prix doux.<br>Vous recevez cet email car vous avez réservé un atelier sur creazio.fr.<br>Une question ? <a href="mailto:${CONTACT}" style="color:#FFFFFF">${CONTACT}</a></td></tr>
 </table>
 </td></tr>
 </table>
@@ -108,6 +109,7 @@ ${ligne("Crédits", creditsDebites(d.creditsDebites))}
     "",
     rappel,
     `Mes réservations : ${LIEN_RESERVATIONS}`,
+    `Une question ? ${CONTACT}`,
   ].join("\n");
 
   return { sujet, html, texte };

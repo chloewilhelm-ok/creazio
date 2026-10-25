@@ -130,3 +130,11 @@ describe("nom de l'artisan", () => {
     expect(JSON.stringify(requete("un cadeau", null, ateliers))).not.toContain("Terres Vives");
   });
 });
+
+describe("prix sans remise", () => {
+  it("est renvoyé à l'élève pour l'affichage barré mais jamais envoyé à Gemini", () => {
+    const ateliers = ateliersDisponibles([session("a", "2026-10-27T17:00:00Z", { prix_public: 47 })], NOW);
+    expect(ateliers[0]!.prix_public).toBe(47);
+    expect(JSON.stringify(requeteGemini("un cadeau", null, ateliers))).not.toContain("47");
+  });
+});

@@ -9,6 +9,8 @@ export interface SuggestionAtelier {
   lieu: string;
   duree_minutes: number;
   prix_min_credits: number;
+  /** Prix public = crédits sans remise (affiché barré). Absent avant la mise à jour de la fonction. */
+  prix_public?: number | null;
   prochaine_session: string;
   photo_url: string | null;
   raison: string;

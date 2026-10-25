@@ -5,7 +5,8 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { photoAtelier } from "@/lib/photos-ateliers";
-import { formatCredits, formatHeure, formatJour } from "@/lib/reservations";
+import { formatHeure, formatJour } from "@/lib/reservations";
+import { PrixCredits } from "./prix-credits";
 import { ErreurIA, MESSAGE_IA_PAR_DEFAUT, trouverAtelier } from "@/lib/trouver-atelier";
 
 const LONGUEUR_MAX = 300;
@@ -95,7 +96,7 @@ export function TrouveTonAtelier() {
                         <span className="text-sm font-semibold">{s.titre}{s.artisan && <span className="font-normal text-muted-foreground"> · par {s.artisan}</span>}</span>
                         <span className="text-xs text-foreground">{s.raison}</span>
                         <span className="label-font text-[11px] text-muted-foreground">
-                          {s.lieu} · {formatJour(s.prochaine_session)} {formatHeure(s.prochaine_session)} · dès {formatCredits(s.prix_min_credits)}
+                          {s.lieu} · {formatJour(s.prochaine_session)} {formatHeure(s.prochaine_session)} · dès <PrixCredits credits={s.prix_min_credits} prixPublic={s.prix_public} />
                         </span>
                         <span className="flex items-center gap-1 text-xs font-semibold text-primary">Voir l’atelier <ArrowRight className="size-3.5" aria-hidden="true" /></span>
                       </span>

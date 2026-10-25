@@ -79,6 +79,7 @@ export type Database = {
           contrat_signe_le: string | null
           cree_le: string
           nom_commercial: string
+          prix_cours_unite_eur: number | null
           profile_id: string
           savoir_faire_principal: Database["public"]["Enums"]["savoir_faire"]
           statut_candidature: Database["public"]["Enums"]["statut_candidature"]
@@ -91,6 +92,7 @@ export type Database = {
           contrat_signe_le?: string | null
           cree_le?: string
           nom_commercial: string
+          prix_cours_unite_eur?: number | null
           profile_id: string
           savoir_faire_principal: Database["public"]["Enums"]["savoir_faire"]
           statut_candidature?: Database["public"]["Enums"]["statut_candidature"]
@@ -103,6 +105,7 @@ export type Database = {
           contrat_signe_le?: string | null
           cree_le?: string
           nom_commercial?: string
+          prix_cours_unite_eur?: number | null
           profile_id?: string
           savoir_faire_principal?: Database["public"]["Enums"]["savoir_faire"]
           statut_candidature?: Database["public"]["Enums"]["statut_candidature"]

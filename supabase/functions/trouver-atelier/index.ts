@@ -70,7 +70,7 @@ Deno.serve(async (req) => {
   const maintenant = new Date();
   const { data: lignes, error: erreurSessions } = await admin
     .from("sessions")
-    .select("debut_le, prix_credits, places_restantes, ateliers!inner(id, titre, savoir_faire, description, quartier, code_postal, ville, duree_minutes, photo_url, statut, artisans(nom_commercial))")
+    .select("debut_le, prix_credits, places_restantes, ateliers!inner(id, titre, savoir_faire, description, quartier, code_postal, ville, duree_minutes, photo_url, prix_public_eur, statut, artisans(nom_commercial))")
     .eq("statut", "ouverte")
     .gt("places_restantes", 0)
     .gt("debut_le", maintenant.toISOString())
@@ -94,6 +94,7 @@ Deno.serve(async (req) => {
     ville: String(l.ateliers.ville ?? ""),
     duree_minutes: Number(l.ateliers.duree_minutes),
     photo_url: (l.ateliers.photo_url as string | null) ?? null,
+    prix_public: l.ateliers.prix_public_eur == null ? null : Number(l.ateliers.prix_public_eur),
     debut_le: l.debut_le,
     prix_credits: l.prix_credits,
     places_restantes: l.places_restantes,
@@ -150,6 +151,7 @@ Deno.serve(async (req) => {
       lieu: atelier.lieu,
       duree_minutes: atelier.duree_minutes,
       prix_min_credits: atelier.prix_min_credits,
+      prix_public: atelier.prix_public,
       prochaine_session: atelier.prochaine_session,
       photo_url: atelier.photo_url,
       raison,
