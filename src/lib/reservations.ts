@@ -145,6 +145,31 @@ export const upcomingReservationsQuery = queryOptions({
   queryFn: fetchUpcomingReservations,
 });
 
+async function fetchPastReservations() {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+  const { data, error } = await supabase
+    .from("reservations")
+    .select(RESERVATION_SELECT)
+    .eq("eleve_id", user.id)
+    .eq("statut", "confirmee");
+  if (error) throw toReservationError(error);
+  const now = Date.now();
+  return (data ?? [])
+    .flatMap((r) =>
+      r.sessions && Date.parse(r.sessions.debut_le) <= now ? [{ ...r, sessions: r.sessions }] : [],
+    )
+    .sort((a, b) => Date.parse(b.sessions.debut_le) - Date.parse(a.sessions.debut_le));
+}
+
+/** Ateliers déjà suivis (réservations confirmées dont la session a commencé), du plus récent au plus ancien. */
+export const pastReservationsQuery = queryOptions({
+  queryKey: ["reservations", "passees"],
+  queryFn: fetchPastReservations,
+});
+
 export async function reserverSession(sessionId: string) {
   const { data, error } = await supabase.rpc("reserver_session", { p_session_id: sessionId });
   if (error) throw toReservationError(error);

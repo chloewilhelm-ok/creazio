@@ -30,7 +30,7 @@ import { PrixCredits } from "./prix-credits";
 import { PanneauFiltres } from "./filtres-recherche";
 import { FILTRES_PAR_DEFAUT, correspondLieu, nombreFiltresActifs, prixMinCorrespondant, villesDesCouronnes, type Filtres } from "@/lib/filtres-recherche";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { acheterPackDemo, annulerReservation, toReservationError, delaiAnnulationQuery, formatCredits, formatHeure, formatJour, messageErreur, peutAnnuler, reservationQuery, upcomingReservationsQuery, walletQuery, type UpcomingReservation } from "@/lib/reservations";
+import { acheterPackDemo, annulerReservation, toReservationError, delaiAnnulationQuery, formatCredits, formatHeure, formatJour, messageErreur, pastReservationsQuery, peutAnnuler, reservationQuery, upcomingReservationsQuery, walletQuery, type UpcomingReservation } from "@/lib/reservations";
 
 const workshops = [
   { id: "tour-de-potier", category: "Céramique", title: "Initiation au tour de potier", artisan: "Michel, céramiste", place: "Paris 11e", duration: "2h30", credits: 32, old: 36, image: pottery },
@@ -328,7 +328,19 @@ export function ReservationsPage(){
     :error?<div><p role="alert" className="text-sm">{messageErreur(error)}</p><Button variant="outline" className="mt-3" onClick={()=>refetch()}>Réessayer</Button></div>
     :!data.length?<EmptyState icon={<CalendarDays/>} title="Aucune réservation à venir" body="Vos prochains rendez-vous créatifs apparaîtront ici." action={<Button asChild><Link to="/ateliers">Découvrir les ateliers</Link></Button>}/>
     :<ul className="grid gap-4">{data.map(r=><ReservationCard key={r.id} r={r} delai={delai} onCancelled={setAnnonce}/>)}</ul>}
+    <ReservationsPassees/>
   </main></>}
+
+/** Ateliers déjà suivis, sous les réservations à venir, avec un lien pour réserver à nouveau. */
+function ReservationsPassees(){
+  const {data}=useQuery(pastReservationsQuery);
+  if(!data?.length)return null;
+  return <section aria-labelledby="reservations-passees" className="mt-12"><h2 id="reservations-passees" className="text-xl font-bold text-secondary">Ateliers passés</h2><p className="mt-1 text-sm text-muted-foreground">Envie de recommencer ? Retrouvez l’atelier et ses prochains créneaux.</p>
+    <ul className="mt-4 grid gap-3">{data.map(r=>{const atelier=r.sessions.ateliers;return <li key={r.id} className="flex flex-col gap-3 rounded-xl border border-deep-forest/10 bg-sable/40 p-4 sm:flex-row sm:items-center sm:justify-between">
+      <div><p className="font-semibold">{atelier?.titre??"Atelier"}</p>{atelier?.artisans?.nom_commercial&&<p className="text-sm text-muted-foreground">avec {atelier.artisans.nom_commercial}</p>}<p className="label-font mt-1 flex items-center gap-2 text-sm text-muted-foreground"><CalendarDays className="size-4" aria-hidden="true"/>{formatJour(r.sessions.debut_le)} · {formatHeure(r.sessions.debut_le)}</p></div>
+      {atelier&&<Button asChild variant="outline" className="shrink-0"><Link to="/ateliers/$workshopId" params={{workshopId:atelier.id}} aria-label={`Réserver à nouveau : ${atelier.titre}`}>Réserver à nouveau</Link></Button>}
+    </li>;})}</ul></section>;
+}
 function ReservationCard({r,delai,onCancelled}:{r:UpcomingReservation;delai:number;onCancelled:(message:string)=>void}){
   const queryClient=useQueryClient();
   const [open,setOpen]=useState(false);
