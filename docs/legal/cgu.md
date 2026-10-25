@@ -40,7 +40,7 @@ La version actuelle de Creazio est une **version de démonstration** : l'achat d
 ## 7. Artisans partenaires
 
 - L'artisan est un professionnel indépendant. Il publie ses ateliers, choisit ses créneaux, le nombre de places ouvertes à Creazio et une remise comprise entre 20 % et 50 %.
-- Le prix public de référence d'un cours est fixé avec Creazio au début du partenariat. Chaque nouvel atelier est vérifié par Creazio avant publication.
+- Le prix public de référence est fixé avec Creazio au début du partenariat. Il correspond au prix que l'artisan pratique pour un cours à l'unité, pour une prestation identique (même contenu, même durée, même matériel). La remise s'applique à ce prix. Chaque nouvel atelier est vérifié par Creazio avant publication.
 - Creazio prélève une commission de 15 % sur les crédits dépensés. L'artisan reçoit 85 %, versés une fois par mois, le 15 du mois suivant, pour les ateliers qui ont eu lieu.
 - L'artisan s'engage à honorer les réservations confirmées et à vérifier le code de réservation des participants.
 
