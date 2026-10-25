@@ -173,6 +173,8 @@
   ::selection { background: color-mix(in oklab, var(--primary) 22%, transparent); }
   /* Cible du lien d'évitement : reçoit le focus sans afficher de cadre autour de toute la page. */
   main:focus { outline: none; }
+  /* Les ancres (dont #contenu-principal) s'arrêtent sous l'en-tête fixe, dont la hauteur est mesurée en direct. */
+  [id] { scroll-margin-top: calc(var(--hauteur-entete, 0px) + 8px); }
   /* Contour de focus par défaut (WCAG 2.4.7) pour les liens et commandes sans style de focus propre :
      Deep Forest, contraste supérieur à 3:1 sur les fonds clairs. */
   :where(a, button, summary, select, [role="button"], [tabindex]:not([tabindex="-1"])):focus-visible {

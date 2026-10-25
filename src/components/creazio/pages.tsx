@@ -1,4 +1,4 @@
-import { FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
+import { FormEvent, ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams, useSearch } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -51,12 +51,24 @@ const BOUTON_PLEIN=cn(BOUTON_ENTETE,"bg-primary text-primary-foreground hover:bg
 const BOUTON_CONTOUR=cn(BOUTON_ENTETE,"border-[length:1.5px] border-deep-forest text-deep-forest hover:bg-sable");
 // En-tête public : côté artisan, l'étiquette renvoie vers l'espace élève et les boutons vers la connexion
 // et l'inscription artisan ; côté élève, l'inverse. Un visiteur ne bascule jamais d'espace sans le voir.
+/**
+ * En-tête fixe et opaque, précédé d'un espace de même hauteur (mesurée en direct) : le contenu commence
+ * toujours sous l'en-tête, y compris sur iPhone quand la barre de Safari se replie puis réapparaît (un en-tête
+ * « sticky » flouté s'y superposait au titre). La hauteur est aussi publiée dans --hauteur-entete pour le
+ * scroll-margin des ancres (lien « Aller au contenu principal »).
+ */
+function EnteteFixe({className,children}:{className:string;children:ReactNode}){
+  const ref=useRef<HTMLElement>(null);const [hauteur,setHauteur]=useState(64);
+  useEffect(()=>{const el=ref.current;if(!el)return;const maj=()=>{setHauteur(el.offsetHeight);document.documentElement.style.setProperty("--hauteur-entete",`${el.offsetHeight}px`);};maj();
+    if(typeof ResizeObserver==="undefined")return;const obs=new ResizeObserver(maj);obs.observe(el);return ()=>{obs.disconnect();document.documentElement.style.removeProperty("--hauteur-entete");};},[]);
+  return <><div aria-hidden="true" style={{height:hauteur}}/><header ref={ref} className={cn("fixed inset-x-0 top-0",className)}>{children}</header></>;
+}
 export function PublicHeader({espace="eleve"}:{espace?:Espace}) {
   const [open, setOpen] = useState(false);
   const liens=espace==="artisan"
     ?{etiquette:"Espace élève",versEtiquette:"/" as const,connexion:"/artisan/connexion" as const,inscription:"/artisan/inscription" as const}
     :{etiquette:"Espace artisans",versEtiquette:"/devenir-artisan" as const,connexion:"/connexion" as const,inscription:"/inscription" as const};
-  return <header className="sticky top-0 z-50 border-b border-border/70 bg-background/95 backdrop-blur-xl">
+  return <EnteteFixe className="z-50 border-b border-border/70 bg-background">
     <div className="mx-auto grid h-16 max-w-[1360px] grid-cols-[1fr_auto_1fr] items-center px-5 md:h-20 md:px-12">
       <div className="hidden md:block"><Link to={liens.versEtiquette} className={ETIQUETTE_ARTISANS}>{liens.etiquette}</Link></div>
       <div className="col-start-1 md:col-start-2"><Logo large/></div>
@@ -64,11 +76,11 @@ export function PublicHeader({espace="eleve"}:{espace?:Espace}) {
       <Button variant="ghost" size="icon" className="col-start-3 justify-self-end md:hidden" aria-label={open?"Fermer le menu":"Ouvrir le menu"} aria-expanded={open} onClick={()=>setOpen(!open)}>{open?<X aria-hidden="true"/>:<Menu aria-hidden="true"/>}</Button>
     </div>
     {open&&<nav className="border-t bg-card px-5 py-4 md:hidden"><div className="grid gap-3"><Link to={liens.versEtiquette} className={cn(ETIQUETTE_ARTISANS,"justify-center py-2")}>{liens.etiquette}</Link><Link to={liens.connexion} className={BOUTON_CONTOUR}>Se connecter</Link><Link to={liens.inscription} className={BOUTON_PLEIN}>S’inscrire</Link></div></nav>}
-  </header>;
+  </EnteteFixe>;
 }
 
 function MemberHeader() {
- return <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur"><div className="mx-auto flex h-16 max-w-[1360px] items-center justify-between px-5 md:h-20 md:px-12"><Logo/><nav className="hidden gap-2 md:flex"><NavLink to="/espace-eleve">Accueil</NavLink><NavLink to="/ateliers">Rechercher</NavLink><NavLink to="/espace-eleve/reservations">Mes réservations</NavLink></nav><div className="flex items-center gap-2"><HeaderBalance/><Button asChild variant="ghost" size="icon"><Link to="/espace-eleve/profil" aria-label="Mon profil"><CircleUserRound aria-hidden="true"/></Link></Button></div></div><nav className="grid grid-cols-3 border-t bg-card md:hidden"><MobileTab to="/espace-eleve" icon={<Sparkles aria-hidden="true"/>}>Accueil</MobileTab><MobileTab to="/ateliers" icon={<Search aria-hidden="true"/>}>Rechercher</MobileTab><MobileTab to="/espace-eleve/reservations" icon={<CalendarDays aria-hidden="true"/>}>Réservations</MobileTab></nav></header>;
+ return <EnteteFixe className="z-40 border-b bg-background"><div className="mx-auto flex h-16 max-w-[1360px] items-center justify-between px-5 md:h-20 md:px-12"><Logo/><nav className="hidden gap-2 md:flex"><NavLink to="/espace-eleve">Accueil</NavLink><NavLink to="/ateliers">Rechercher</NavLink><NavLink to="/espace-eleve/reservations">Mes réservations</NavLink></nav><div className="flex items-center gap-2"><HeaderBalance/><Button asChild variant="ghost" size="icon"><Link to="/espace-eleve/profil" aria-label="Mon profil"><CircleUserRound aria-hidden="true"/></Link></Button></div></div><nav className="grid grid-cols-3 border-t bg-card md:hidden"><MobileTab to="/espace-eleve" icon={<Sparkles aria-hidden="true"/>}>Accueil</MobileTab><MobileTab to="/ateliers" icon={<Search aria-hidden="true"/>}>Rechercher</MobileTab><MobileTab to="/espace-eleve/reservations" icon={<CalendarDays aria-hidden="true"/>}>Réservations</MobileTab></nav></EnteteFixe>;
 }
 function HeaderBalance(){const {data,isPending,error}=useQuery(walletQuery);const label=isPending?"…":error?"Solde indisponible":formatCredits(data?.solde_credits??0);
  return <Link to="/espace-eleve/profil" aria-live="polite" aria-label={`Mon solde : ${label}`} className="label-font inline-flex items-center gap-1 rounded-full border border-laiton bg-coquille px-3 py-2 text-xs font-semibold text-deep-forest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deep-forest focus-visible:ring-offset-2"><Coins className="size-4 text-primary" aria-hidden="true"/>{label}</Link>}
