@@ -80,6 +80,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
+      // Safari iOS : pas de liens automatiques sur les adresses, nombres (« 53 crédits »), emails et dates.
+      { name: "format-detection", content: "telephone=no, address=no, email=no, date=no" },
       { title: "Creazio" },
       { name: "description", content: "Ateliers créatifs d’artisans près de chez vous, à prix doux." },
       { name: "author", content: "Creazio" },
