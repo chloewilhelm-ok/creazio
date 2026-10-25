@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ArtisanRouteImport } from './routes/artisan'
 import { Route as AteliersRouteImport } from './routes/ateliers'
+import { Route as CguRouteImport } from './routes/cgu'
+import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
 import { Route as ConnexionRouteImport } from './routes/connexion'
 import { Route as DevenirArtisanRouteImport } from './routes/devenir-artisan'
 import { Route as EspaceEleveRouteImport } from './routes/espace-eleve'
@@ -51,6 +53,16 @@ const ArtisanRoute = ArtisanRouteImport.update({
 const AteliersRoute = AteliersRouteImport.update({
   id: '/ateliers',
   path: '/ateliers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CguRoute = CguRouteImport.update({
+  id: '/cgu',
+  path: '/cgu',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfidentialiteRoute = ConfidentialiteRouteImport.update({
+  id: '/confidentialite',
+  path: '/confidentialite',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConnexionRoute = ConnexionRouteImport.update({
@@ -188,6 +200,8 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/artisan': typeof ArtisanRouteWithChildren
   '/ateliers': typeof AteliersRouteWithChildren
+  '/cgu': typeof CguRoute
+  '/confidentialite': typeof ConfidentialiteRoute
   '/connexion': typeof ConnexionRoute
   '/devenir-artisan': typeof DevenirArtisanRouteWithChildren
   '/espace-eleve': typeof EspaceEleveRouteWithChildren
@@ -217,6 +231,8 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/artisan': typeof ArtisanRouteWithChildren
+  '/cgu': typeof CguRoute
+  '/confidentialite': typeof ConfidentialiteRoute
   '/connexion': typeof ConnexionRoute
   '/inscription': typeof InscriptionRoute
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
@@ -246,6 +262,8 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/artisan': typeof ArtisanRouteWithChildren
   '/ateliers': typeof AteliersRouteWithChildren
+  '/cgu': typeof CguRoute
+  '/confidentialite': typeof ConfidentialiteRoute
   '/connexion': typeof ConnexionRoute
   '/devenir-artisan': typeof DevenirArtisanRouteWithChildren
   '/espace-eleve': typeof EspaceEleveRouteWithChildren
@@ -278,6 +296,8 @@ export interface FileRouteTypes {
     | '/'
     | '/artisan'
     | '/ateliers'
+    | '/cgu'
+    | '/confidentialite'
     | '/connexion'
     | '/devenir-artisan'
     | '/espace-eleve'
@@ -307,6 +327,8 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/artisan'
+    | '/cgu'
+    | '/confidentialite'
     | '/connexion'
     | '/inscription'
     | '/mot-de-passe-oublie'
@@ -335,6 +357,8 @@ export interface FileRouteTypes {
     | '/'
     | '/artisan'
     | '/ateliers'
+    | '/cgu'
+    | '/confidentialite'
     | '/connexion'
     | '/devenir-artisan'
     | '/espace-eleve'
@@ -366,6 +390,8 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ArtisanRoute: typeof ArtisanRouteWithChildren
   AteliersRoute: typeof AteliersRouteWithChildren
+  CguRoute: typeof CguRoute
+  ConfidentialiteRoute: typeof ConfidentialiteRoute
   ConnexionRoute: typeof ConnexionRoute
   DevenirArtisanRoute: typeof DevenirArtisanRouteWithChildren
   EspaceEleveRoute: typeof EspaceEleveRouteWithChildren
@@ -396,6 +422,20 @@ declare module '@tanstack/react-router' {
       path: '/ateliers'
       fullPath: '/ateliers'
       preLoaderRoute: typeof AteliersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cgu': {
+      id: '/cgu'
+      path: '/cgu'
+      fullPath: '/cgu'
+      preLoaderRoute: typeof CguRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/confidentialite': {
+      id: '/confidentialite'
+      path: '/confidentialite'
+      fullPath: '/confidentialite'
+      preLoaderRoute: typeof ConfidentialiteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/connexion': {
@@ -655,6 +695,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ArtisanRoute: ArtisanRouteWithChildren,
   AteliersRoute: AteliersRouteWithChildren,
+  CguRoute: CguRoute,
+  ConfidentialiteRoute: ConfidentialiteRoute,
   ConnexionRoute: ConnexionRoute,
   DevenirArtisanRoute: DevenirArtisanRouteWithChildren,
   EspaceEleveRoute: EspaceEleveRouteWithChildren,
