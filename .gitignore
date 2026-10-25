@@ -33,3 +33,8 @@ dist-ssr
 
 # Sortie de build Vercel
 .vercel
+
+# Variables d’environnement : jamais dans Git (modèle sans valeurs : .env.example)
+.env
+.env.*
+!.env.example
