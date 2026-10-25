@@ -71,12 +71,16 @@ export async function ensureProfileCoords(userId: string) {
 export const publishedWorkshopsQuery = queryOptions({
   queryKey: ["ateliers", "publies"],
   queryFn: async () => {
-    const { data, error } = await supabase.from("ateliers")
-      .select("id,titre,description,savoir_faire,ville,quartier,code_postal,duree_minutes,photo_url,prix_public_eur,cree_le,latitude,longitude,sessions(debut_le,statut,places_restantes,prix_credits),artisans(nom_commercial)")
-      .eq("statut", "publie")
+    const requete = (statuts: ("publie" | "lancement_prochain")[]) => supabase.from("ateliers")
+      .select("id,titre,description,savoir_faire,ville,quartier,code_postal,duree_minutes,photo_url,prix_public_eur,statut,cree_le,latitude,longitude,sessions(debut_le,statut,places_restantes,prix_credits),artisans(nom_commercial)")
+      // Ateliers publiés, et ceux « Lancement prochainement » (carte seule : ni créneau, ni prix, ni fiche).
+      .in("statut", statuts)
       // Sessions à venir seulement : les filtres budget et créneau ne portent que sur elles.
       .gt("sessions.debut_le", new Date().toISOString())
       .order("cree_le", { ascending: false });
+    let { data, error } = await requete(["publie", "lancement_prochain"]);
+    // Base pas encore migrée (valeur d'enum inconnue, code 22P02) : on se contente des ateliers publiés.
+    if (error?.code === "22P02") ({ data, error } = await requete(["publie"]));
     if (error) throw error;
     return data;
   },

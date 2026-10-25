@@ -811,7 +811,7 @@ export type Database = {
         | "verre"
         | "a_manger"
         | "a_boire"
-      statut_atelier: "en_verification" | "publie" | "archive"
+      statut_atelier: "en_verification" | "publie" | "archive" | "lancement_prochain"
       statut_candidature: "en_attente" | "validee" | "refusee"
       statut_litige: "ouvert" | "clos_cliente_recreditee" | "clos_sans_suite"
       statut_paiement: "en_attente" | "reussi" | "echoue"
@@ -981,7 +981,7 @@ export const Constants = {
         "a_manger",
         "a_boire",
       ],
-      statut_atelier: ["en_verification", "publie", "archive"],
+      statut_atelier: ["en_verification", "publie", "archive", "lancement_prochain"],
       statut_candidature: ["en_attente", "validee", "refusee"],
       statut_litige: ["ouvert", "clos_cliente_recreditee", "clos_sans_suite"],
       statut_paiement: ["en_attente", "reussi", "echoue"],
