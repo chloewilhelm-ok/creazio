@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { type UseQueryResult, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CalendarDays, Check, Users } from "lucide-react";
@@ -159,8 +159,24 @@ function BookingSummary({
   const insuffisant =
     (!wallet.isPending && !wallet.error && solde < prix) ||
     (error instanceof ReservationError && error.code === "SOLDE_INSUFFISANT");
+  // Sous 768 px, le bloc est fixé en bas de l'écran ; un espace de même hauteur évite qu'il masque la page.
+  const bloc = useRef<HTMLDivElement>(null);
+  const [hauteur, setHauteur] = useState(0);
+  useEffect(() => {
+    const el = bloc.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const obs = new ResizeObserver(() => setHauteur(el.offsetHeight));
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
   return (
-    <div className="mt-5 rounded-xl bg-muted p-4" aria-live="polite">
+    <>
+    <div aria-hidden="true" className="md:hidden" style={{ height: hauteur }} />
+    <div
+      ref={bloc}
+      aria-live="polite"
+      className="mt-5 rounded-xl bg-muted p-4 max-md:fixed max-md:inset-x-0 max-md:bottom-0 max-md:z-40 max-md:mt-0 max-md:max-h-[70vh] max-md:overflow-y-auto max-md:rounded-b-none max-md:rounded-t-2xl max-md:border-t max-md:border-deep-forest/10 max-md:bg-card max-md:px-5 max-md:pb-[calc(1rem+env(safe-area-inset-bottom))] max-md:shadow-[0_-8px_24px_-4px_rgba(15,61,58,0.16)]"
+    >
       <h3 className="font-semibold">Votre réservation</h3>
       {wallet.isPending ? (
         <p role="status" className="mt-3 text-sm text-muted-foreground">
@@ -177,7 +193,7 @@ function BookingSummary({
         </div>
       ) : (
         <>
-          <dl className="mt-3 grid gap-2 text-sm">
+          <dl className="mt-3 grid gap-2 text-sm max-md:mt-2 max-md:gap-1">
             <div className="flex justify-between">
               <dt className="text-muted-foreground">Coût du créneau</dt>
               <dd className="font-semibold"><PrixCredits credits={prix} prixPublic={prixPublic} /></dd>
@@ -203,7 +219,7 @@ function BookingSummary({
             </div>
           ) : (
             <>
-              <Button className="mt-4 w-full" size="lg" disabled={pending} onClick={onConfirm}>
+              <Button className="mt-4 w-full max-md:mt-3" size="lg" disabled={pending} onClick={onConfirm}>
                 {pending ? "Réservation en cours…" : `Confirmer avec ${formatCredits(prix)}`}
               </Button>
               {error && (
@@ -216,6 +232,7 @@ function BookingSummary({
         </>
       )}
     </div>
+    </>
   );
 }
 
