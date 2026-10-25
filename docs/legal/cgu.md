@@ -21,8 +21,9 @@ La version actuelle de Creazio est une **version de démonstration** : l'achat d
 ## 4. Crédits
 
 - 1 crédit correspond à 1 €. Les crédits sont vendus par packs (Découverte 50, Régulier 100, Passionné 150).
-- Chaque achat est valable **12 mois** à compter de sa date. Les crédits les plus anciens sont utilisés en premier. Les crédits expirés sont perdus.
-- Les crédits ne peuvent être ni échangés contre de l'argent, ni transférés à un autre compte, sauf en cas de suppression du compte (voir article 8).
+- Chaque achat est valable **12 mois** à compter de sa date. Les crédits les plus anciens sont utilisés en premier.
+- À la date d'expiration, les crédits non utilisés sont perdus. Avant cette date, vous pouvez demander leur remboursement à contact@creazio.fr ; chaque demande est étudiée au cas par cas.
+- Les crédits ne peuvent être ni échangés contre de l'argent, ni transférés à un autre compte, sauf en cas de suppression du compte (voir article 8) ou de demande de remboursement acceptée avant leur expiration.
 
 ## 5. Réservation et annulation
 
