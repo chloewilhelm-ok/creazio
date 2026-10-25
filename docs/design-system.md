@@ -189,7 +189,8 @@ La géométrie des interfaces traduit la rondeur d'un tour de potier ou le chanf
 - Au survol : translation verticale subtile (-2px) et intensification délicate de l'ombre d'ambiance.
 
 ### Badge de Crédits (Credit Token)
-- Format pilule (`rounded-full`), fond Deep Forest (`#0F3D3A`) avec typographie Space Grotesk en doré solaire (`#F4B13B`).
+- Format pilule (`rounded-full`), fond Deep Forest (`#0F3D3A`), typographie Space Grotesk en blanc coquille (`#FAF7F2`) ; seule l'icône de jeton reste en doré solaire (`#F4B13B`). Le texte doré sur vert était jugé peu lisible sur photo.
+- Ancien prix : barré, juste avant le prix réel, en coquille à 70 % (« dès ~~40~~ 32 crédits »), toujours exprimé en crédits, jamais en euros.
 - Version alternative "solde utilisateur" : fond `#FAF7F2`, bordure dorée, affichant l'icône de jeton et le nombre restant.
 
 ### Boutons
@@ -227,7 +228,8 @@ Les couleurs ci-dessus sont déclarées en oklch dans `src/styles.css` (variable
 | Bouton principal | `#8F3222`, texte blanc | 7,93:1 (AAA) |
 | Bouton principal au survol | `#9A4638`, texte blanc | 6,35:1 (AA) |
 | Étiquette « Espace artisans » / « Espace élève » | fond `#FFF6E0`, bordure `#F4B13B`, texte `#0F3D3A` | 11,2:1 (AAA) |
-| Badge de crédits | `#F4B13B` sur `#0F3D3A` | 6,40:1 (AA) |
+| Badge de crédits | `#FAF7F2` sur `#0F3D3A` | 11,24:1 (AAA) |
+| Ancien prix barré du badge | coquille 70 % (`#B4BFBB`) sur `#0F3D3A` | 6,35:1 (AA) |
 | Puce de filtre active | `#FAF7F2` sur `#0F3D3A` | 11,24:1 (AAA) |
 | Message d'erreur | `#93000A` sur `#FFDAD6` | 7,24:1 (AAA) |
 | Erreur sous un champ | `#BA1A1A` sur `#FFFEFD` | 6,41:1 (AA) |
