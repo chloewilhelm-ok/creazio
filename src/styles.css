@@ -171,6 +171,14 @@
 
   button, input, select, textarea { letter-spacing: 0; }
   ::selection { background: color-mix(in oklab, var(--primary) 22%, transparent); }
+  /* Cible du lien d'évitement : reçoit le focus sans afficher de cadre autour de toute la page. */
+  main:focus { outline: none; }
+  /* Contour de focus par défaut (WCAG 2.4.7) pour les liens et commandes sans style de focus propre :
+     Deep Forest, contraste supérieur à 3:1 sur les fonds clairs. */
+  :where(a, button, summary, select, [role="button"], [tabindex]:not([tabindex="-1"])):focus-visible {
+    outline: 2px solid var(--deep-forest);
+    outline-offset: 2px;
+  }
 }
 
 @utility label-font { font-family: var(--font-label); }

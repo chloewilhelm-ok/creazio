@@ -86,7 +86,7 @@ export function SavoirFaireGrid({
                     <Icone className="size-5 md:size-6" />
                     {choisi && (
                       <span className="absolute -right-1 -top-1 grid size-5 place-items-center rounded-full bg-primary text-primary-foreground">
-                        <Check className="size-3.5" strokeWidth={3} />
+                        <Check className="size-3.5" strokeWidth={3} aria-hidden="true"/>
                       </span>
                     )}
                   </span>

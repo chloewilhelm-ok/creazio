@@ -91,14 +91,14 @@ export function WorkshopSlots({ workshopId, prixPublic }: { workshopId: string; 
                   aria-pressed={actif}
                   onClick={() => choisir(slot.id)}
                   className={cn(
-                    "w-full rounded-lg border p-4 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                    "w-full rounded-lg border p-4 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deep-forest focus-visible:ring-offset-2",
                     actif ? "border-primary bg-accent" : "hover:border-primary/50",
                     complet && "cursor-not-allowed opacity-60 hover:border-border",
                   )}
                 >
                   <span className="flex items-start justify-between gap-2 text-sm font-semibold">
                     <span className="flex items-start gap-2">
-                      <CalendarDays className="mt-0.5 size-4 shrink-0 text-primary" />
+                      <CalendarDays className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true"/>
                       {formatJour(slot.debut_le)}
                     </span>
                     {actif && <Check className="size-4 shrink-0 text-primary" aria-hidden />}

@@ -76,7 +76,7 @@ export function PageLegale({ markdown }: { markdown: string }) {
   return (
     <>
       <PublicHeader />
-      <main id="contenu-principal" className="mx-auto max-w-[860px] px-5 py-10 text-[15px] text-foreground md:px-8 md:py-14">
+      <main id="contenu-principal" tabIndex={-1} className="mx-auto max-w-[860px] px-5 py-10 text-[15px] text-foreground md:px-8 md:py-14">
         <article>{rendreMarkdown(markdown)}</article>
       </main>
       <Footer />

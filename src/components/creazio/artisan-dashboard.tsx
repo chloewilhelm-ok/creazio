@@ -88,10 +88,10 @@ export function ArtisanDashboard() {
           <section aria-labelledby="bloc-a-venir" className="grid gap-4">
             <TitreBloc id="bloc-a-venir" titre="À venir" detail="Séances qui n’ont pas encore commencé." />
             <div className="grid gap-4 sm:grid-cols-3">
-              <Indicateur icon={<CalendarDays />} libelle="Réservations à venir" valeur={String(calculs.kpi.reservationsAVenir)} detail="Élèves inscrits à vos prochaines séances" />
-              <Indicateur icon={<Euro />} libelle="Revenus prévus" valeur={formatEuros(calculs.kpi.revenusPrevus)} detail="Votre part (85 %) sur ces réservations" />
+              <Indicateur icon={<CalendarDays aria-hidden="true"/>} libelle="Réservations à venir" valeur={String(calculs.kpi.reservationsAVenir)} detail="Élèves inscrits à vos prochaines séances" />
+              <Indicateur icon={<Euro aria-hidden="true"/>} libelle="Revenus prévus" valeur={formatEuros(calculs.kpi.revenusPrevus)} detail="Votre part (85 %) sur ces réservations" />
               <Indicateur
-                icon={<Percent />}
+                icon={<Percent aria-hidden="true"/>}
                 libelle="Remplissage à venir"
                 valeur={calculs.kpi.tauxRemplissageAVenir === null ? "—" : formatPourcent(calculs.kpi.tauxRemplissageAVenir)}
                 detail={`Places Creazio réservées sur les ${SEMAINES_A_VENIR} prochaines semaines (${calculs.kpi.creneauxAVenir} créneaux)`}
@@ -285,7 +285,7 @@ function ListeReservationsPassees({ reservations }: { reservations: ReservationA
       ) : (
         <>
           <div className="mt-4 overflow-x-auto">
-            <table className="w-full min-w-[560px] text-left text-sm">
+            <table id="reservations-passees-table" className="w-full min-w-[560px] text-left text-sm">
               <thead className="text-xs text-muted-foreground">
                 <tr><th scope="col" className="py-2 font-semibold">Date</th><th scope="col" className="font-semibold">Atelier</th><th scope="col" className="font-semibold">Élève</th><th scope="col" className="font-semibold">Code</th><th scope="col" className="text-right font-semibold">Montant gagné</th></tr>
               </thead>
@@ -302,9 +302,15 @@ function ListeReservationsPassees({ reservations }: { reservations: ReservationA
               </tbody>
             </table>
           </div>
-          {nombre < reservations.length && (
-            <Button variant="outline" className="mt-4" onClick={() => setNombre((n) => n + PAR_PAGE)}>
-              Afficher plus ({reservations.length - nombre} restantes)
+          {reservations.length > PAR_PAGE && (
+            <Button
+              variant="outline"
+              className="mt-4"
+              aria-controls="reservations-passees-table"
+              aria-expanded={nombre >= reservations.length}
+              onClick={() => setNombre((n) => (n >= reservations.length ? PAR_PAGE : n + PAR_PAGE))}
+            >
+              {nombre >= reservations.length ? "Afficher moins" : `Afficher plus (${reservations.length - nombre} restantes)`}
             </Button>
           )}
         </>
