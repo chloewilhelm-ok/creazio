@@ -4,6 +4,17 @@ Export du projet Google Stitch, archivé le 25 octobre 2026 (livrable n° 4 du j
 
 Le premier projet Stitch (maquettes du 11 octobre) a disparu de Stitch, encore en version bêta. Il a été recréé le 25 octobre à partir de captures de l'application et du design system « Atelier Forest & Terracotta », puis exporté et archivé ici pour qu'il ne puisse plus être perdu.
 
+## Aperçu des écrans
+
+### Landing page élève
+![Maquette Stitch de la landing page élève](ecran-1-landing/capture.png)
+
+### Fiche atelier
+![Maquette Stitch de la fiche atelier](ecran-2-fiche-atelier/capture.png)
+
+### Dashboard artisan « Mes revenus »
+Voir `ecran-3-mes-revenus/code.html` (à ouvrir dans un navigateur).
+
 ## Contenu
 
 | Dossier ou fichier | Contenu |
