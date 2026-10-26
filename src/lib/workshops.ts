@@ -1,5 +1,6 @@
 import { queryOptions } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { FILTRES_PAR_DEFAUT, prixMinCorrespondant, type SessionChargee } from "./filtres-recherche";
 import { craftCategories, savoirFaireByCategory, type CraftCategory, type SavoirFaire } from "@/components/creazio/catalog";
 
 export const RAYON_RECOMMANDATION_KM = 5;
@@ -108,8 +109,39 @@ export const recommendationsQuery = queryOptions({
     if (profile?.latitude == null || !count) return { status: "incomplet" as const, items: [] };
     const { data, error } = await supabase.rpc("ateliers_recommandes", { rayon_km: RAYON_RECOMMANDATION_KM });
     if (error) throw error;
-    return { status: "ok" as const, items: data ?? [] };
+    const items = data ?? [];
+    if (!items.length) return { status: "ok" as const, items: ajouterPrix(items, []) };
+    // La RPC ne renvoie pas de prix : une seule requête sous RLS lit le prix public et les sessions des ateliers
+    // recommandés, pour afficher le même badge que « Rechercher ». En cas d'échec, les cartes restent, sans badge.
+    const { data: prix, error: erreurPrix } = await supabase.from("ateliers")
+      .select("id,prix_public_eur,sessions(prix_credits,places_restantes,debut_le,statut)")
+      .in("id", items.map((w) => w.id));
+    if (erreurPrix) console.warn("[recommandations] prix indisponibles :", erreurPrix.message);
+    return { status: "ok" as const, items: ajouterPrix(items, erreurPrix ? [] : prix ?? []) };
   },
 });
+
+export interface PrixAtelier {
+  id: string;
+  prix_public_eur: number | string | null;
+  sessions: SessionChargee[] | null;
+}
+
+/**
+ * Ajoute à chaque atelier recommandé son prix public et son prix minimum : le moins cher de ses créneaux futurs,
+ * ouverts et avec une place (même règle que « Rechercher », sans filtre de budget ni de créneau).
+ * L'ordre et la liste des recommandations ne changent pas ; un atelier sans prix connu garde une carte sans badge.
+ */
+export function ajouterPrix<T extends { id: string }>(items: T[], prix: PrixAtelier[], maintenant = Date.now()) {
+  const parId = new Map(prix.map((p) => [p.id, p]));
+  return items.map((w) => {
+    const p = parId.get(w.id);
+    return {
+      ...w,
+      prix_public_eur: p?.prix_public_eur ?? null,
+      prix_min: p ? prixMinCorrespondant(p.sessions, FILTRES_PAR_DEFAUT, maintenant) ?? undefined : undefined,
+    };
+  });
+}
 
 export function formatDuree(min: number) { const h = Math.floor(min / 60), m = min % 60; return h ? `${h}h${m ? String(m).padStart(2, "0") : ""}` : `${m} min`; }
