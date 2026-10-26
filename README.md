@@ -13,6 +13,11 @@ Creazio est une marketplace d'ateliers créatifs en Île-de-France : poterie, cu
 
 > Version de démonstration : l'achat de crédits est simulé, aucun paiement réel n'est demandé.
 
+## 🔗 Accès
+
+- **App en ligne :** [https://www.creazio.fr](https://www.creazio.fr)
+- **Comptes de test :** un compte élève et un compte artisan sont communiqués au jury avec le dossier de soutenance (les mots de passe ne sont pas publiés dans ce dépôt public).
+
 ## Liens
 
 - Site : [www.creazio.fr](https://www.creazio.fr)
@@ -21,6 +26,7 @@ Creazio est une marketplace d'ateliers créatifs en Île-de-France : poterie, cu
 - Design system : [`docs/design-system.md`](docs/design-system.md)
 - Audit de sécurité : [`docs/audit-securite.md`](docs/audit-securite.md)
 - Maquettes Stitch : [`docs/maquettes-stitch/`](docs/maquettes-stitch/)
+- Documentation technique (handover) : [`docs/documentation-technique.md`](docs/documentation-technique.md)
 
 ## Fonctionnalités
 
@@ -135,10 +141,15 @@ L'audit complet est dans [`docs/audit-securite.md`](docs/audit-securite.md) : po
 - [`docs/legal/`](docs/legal/) : CGU et politique de confidentialité (source des pages `/cgu` et `/confidentialite`).
 - [`docs/maquettes-stitch/`](docs/maquettes-stitch/) : maquettes Google Stitch exportées et audits d'accessibilité.
 - [`docs/audit-securite.md`](docs/audit-securite.md) : audit de sécurité.
+- [`docs/documentation-technique.md`](docs/documentation-technique.md) : documentation technique pour reprendre le projet.
 - [`AGENTS.md`](AGENTS.md) : règles d'architecture à respecter lors des modifications.
 
 ## Historique
 
 - **Jusqu'au 18/10/2026** : prototype construit avec **Lovable**, qui reste connecté au dépôt.
-- **Depuis le 18/10/2026** : développement avec **Claude Code**. Chaque commit est nommé par module du référentiel, par exemple « M4 - Email de confirmation automatique à la réservation » ou « M5 - Recherche : filtres lieu, budget et créneau ».
+- **Depuis le 21/10/2026** : développement avec **Claude Code**. Chaque commit est nommé par module du référentiel, par exemple « M4 - Email de confirmation automatique à la réservation » ou « M5 - Recherche : filtres lieu, budget et créneau ».
 - L'historique Git n'est jamais réécrit, pour préserver la synchronisation avec Lovable.
+
+## 👤 Auteur
+
+Chloé Wilhelm · Projet fil rouge Bootcamp Vibe Coding, Lion · [contact@creazio.fr](mailto:contact@creazio.fr)
