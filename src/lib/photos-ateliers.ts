@@ -22,6 +22,8 @@ const DESCRIPTIONS: Record<string, string> = {
   "/ateliers/bois.jpg": "Main gantée sculptant un morceau de bois à la gouge, entourée de copeaux",
   "/ateliers/terrarium.jpg":
     "Mains plantant une succulente dans un terrarium en verre géométrique, sur une table d'atelier",
+  "/ateliers/modelage.jpg":
+    "Céramiste souriante en tablier modelant l’argile à son établi, entourée de pots en grès",
   // Photos des ateliers « Lancement prochainement » (Unsplash, licence libre).
   "/ateliers/forge.jpg": "Couteau de cuisine à la lame d’acier poli, posé sur une planche en bois sombre",
   "/ateliers/broderie.jpg":
